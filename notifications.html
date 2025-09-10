@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Notifications - X-ORBIT</title>
+<script src="audioStop.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    height: 100%;
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, rgba(0, 234, 255, 0.08), rgba(112, 56, 255, 0.08)), #0e0f1a;
+    color: #d6e0ff;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: rgba(28, 53, 205, 0.5);
+    backdrop-filter: blur(18px);
+    z-index: 0;
+  }
+  .notifications-container {
+    position: relative;
+    z-index: 1;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 60px 20px;
+  }
+  h1 {
+    text-align: center;
+    font-size: 2.5rem;
+    background: linear-gradient(90deg, #7038ff, #00eaff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 40px;
+  }
+  .notification {
+    background: rgba(255, 0, 0, 0.1);
+    border: 1px solid rgba(176, 0, 32, 0.5);
+    border-radius: 18px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 6px 25px rgba(255, 50, 50, 0.3), 0 4px 20px rgba(176, 0, 32, 0.3);
+    animation: fadeIn 1.5s ease;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .notification .meta {
+    font-size: 0.85rem;
+    color: #ffcdd2;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .notification .title {
+    font-weight: 700;
+    font-size: 1.25rem;
+    margin-bottom: 8px;
+    color: #ffb3b3;
+  }
+  .notification .content {
+    color: #ffcccc;
+    font-size: 0.98rem;
+    line-height: 1.5;
+  }
+  .tag {
+    font-size: 0.7rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    display: inline-block;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 10px rgba(255,0,0,0.2);
+  }
+  .tag.system { background: rgba(176,0,32,0.3); color: #ffcdd2; border: 1px solid rgba(176,0,32,0.5); }
+  .tag.critical { background: rgba(255,0,0,0.3); color: #ff8080; border: 1px solid rgba(255,0,0,0.5); }
+
+  @media (max-width: 600px) {
+    h1 { font-size: 2rem; }
+    .notification { padding: 20px; }
+    .notification .title { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="notifications-container">
+    <h1>System Notifications</h1>
+
+    <div class="notification">
+      <div class="meta">
+        <span>Sep 9, 2025 - 10:57 PM PST</span>
+        <span class="tag system">System</span>
+        <span class="tag critical">Critical</span>
+      </div>
+      <div class="title">Welcome to X-ORBIT 3.0 Stable</div>
+      <div class="content">
+        X-ORBIT is powered by LumiCore UI 3.2.2 . Some pages may experience 503 or 404 errors — this is expected as we are actively switching domains. We should have this fixed in X-ORBIT 3.1.0 Stable
+      </div>
+      <span class="tag system">System Update</span>
+    </div>
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Login into X-ORBIT</title>
+ <style>
+/* Reset and body setup */
+body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Segoe UI', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at top left, #6a00f4, #2a0845);
+    overflow: hidden;
+    color: #fff;
+}
+
+/* Background image */
+.background {
+    position: absolute;
+    width: 120%;
+    height: 120%;
+    background: url('https://i.imgur.com/Id6OMsw.png') no-repeat center center/cover;
+    filter: brightness(0.25) blur(8px) saturate(1.2);
+    transform: scale(1.1);
+    z-index: -1;
+    animation: backgroundMove 30s linear infinite alternate;
+}
+
+@keyframes backgroundMove {
+    0% { transform: translate(0, 0) scale(1.1); }
+    50% { transform: translate(-20px, 15px) scale(1.12); }
+    100% { transform: translate(0, 0) scale(1.1); }
+}
+
+/* Login box */
+.login-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2.5rem 3rem;
+    border-radius: 20px;
+    backdrop-filter: blur(15px) saturate(1.5);
+    width: 400px;
+    text-align: center;
+    box-shadow: 0 0 40px rgba(160, 100, 255, 0.5), 0 0 80px rgba(0, 234, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+
+.login-box:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 0 50px rgba(160, 100, 255, 0.7), 0 0 100px rgba(0, 234, 255, 0.3);
+}
+
+/* Logo */
+.logo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1rem auto;
+    border-radius: 50%;
+    background: url('https://i.imgur.com/P4vRt3P.png') no-repeat center center/cover;
+    opacity: 0.7; /* transparency effect */
+    box-shadow: 0 0 20px rgba(160, 100, 255, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Heading */
+.login-box h1 {
+    margin-bottom: 2rem;
+    font-size: 2rem;
+    background: linear-gradient(90deg, #a44aff, #00f0ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    animation: glowText 2.5s ease-in-out infinite alternate;
+}
+
+/* Links */
+.login-links {
+    margin-top: 0.8rem;
+    font-size: 0.9rem;
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.login-links a {
+    color: #00f0ff;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.login-links a:hover {
+    color: #a44aff;
+    text-shadow: 0 0 8px #00f0ff, 0 0 12px #a44aff;
+}
+
+@keyframes glowText {
+    0% { text-shadow: 0 0 5px #a44aff, 0 0 10px #6a00f4; }
+    100% { text-shadow: 0 0 20px #00f0ff, 0 0 40px #6a00f4; }
+}
+
+/* Inputs */
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+input {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 1rem;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 10px rgba(160, 100, 255, 0.2) inset;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+input:focus {
+    border-color: #00f0ff;
+    box-shadow: 0 0 15px #00f0ff inset, 0 0 20px rgba(160, 100, 255, 0.3);
+}
+
+/* Button */
+button {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(90deg, #a44aff, #00f0ff);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 15px #a44aff, 0 0 30px #00f0ff;
+}
+
+button:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 0 25px #a44aff, 0 0 50px #00f0ff;
+}
+
+/* Status */
+#login-status {
+    margin-top: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #ff79c6;
+    text-shadow: 0 0 5px rgba(255, 121, 198, 0.6);
+    transition: all 0.3s ease;
+}
+</style>
+</head>
+<body>
+  <div class="background"></div>
+
+<div class="login-box">
+  <div class="logo"></div>
+  <h1>X-ORBIT Login</h1>
+  <div class="input-wrapper">
+    <input id="usernameOrEmail" type="text" placeholder="Name or Email" />
+    <input id="password" type="password" placeholder="Password" />
+    <button onclick="login()">Login</button>
+
+    <div class="login-links">
+      <a href="#" onclick="showRegister()">Register</a> | 
+      <a href="#" onclick="showForgot()">Forgot Password?</a>
+    </div>
+
+    <p id="login-status"></p>
+  </div>
+</div>
+
+<script type="module">
+  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+  const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  window.login = async function () {
+    const input = document.getElementById("usernameOrEmail").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const status = document.getElementById("login-status");
+
+    if (!input || !password) {
+      status.textContent = "❌ Please fill in both fields.";
+      return;
+    }
+
+    status.textContent = "🔐 Logging in...";
+
+    const { data, error } = await supabase
+      .from('clients')
+      .select('*')
+      .or(`email.eq.${input},name.eq.${input}`)
+      .eq('password', password)
+      .single();
+
+    if (error || !data) {
+      status.textContent = "❌ Invalid name/email or password.";
+      return;
+    }
+
+    status.textContent = "✅ Login successful!";
+
+    if (window.parent) {
+      window.parent.postMessage('auth-success', '*');
+    }
+  };
+
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") login();
+  });
+</script>
+</body>
+</html>

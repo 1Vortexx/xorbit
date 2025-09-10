@@ -31,7 +31,7 @@
       z-index: -2;
     }
 
-    /* Optional overlay tint */
+    /* Overlay tint */
     .overlay {
       position: fixed;
       top: 0;
@@ -48,6 +48,7 @@
       width: 100%;
       height: 100%;
       position: relative;
+      background: #ffffff; /* fallback background */
       display: flex;
       justify-content: center;
       align-items: center;
@@ -57,28 +58,8 @@
       width: 100%;
       height: 100%;
       border: none;
-      background: transparent !important; /* allows empty parts to show image */
+      background: transparent !important; /* if the inside page allows it */
       color-scheme: light;
-    }
-
-    /* Top bar */
-    .topbar {
-      height: 50px;
-      width: 100%;
-      display: flex;
-      align-items: center;
-      padding: 0 20px;
-      background: rgba(60, 80, 255, 0.25);
-      backdrop-filter: blur(10px);
-      color: #ffffff;
-      font-weight: 600;
-      z-index: 10;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    }
-
-    .topbar h1 {
-      font-size: 1rem;
-      margin: 0;
     }
   </style>
 </head>
@@ -87,14 +68,9 @@
   <div class="background"></div>
   <div class="overlay"></div>
 
-  <!-- Top bar -->
-  <div class="topbar">
-    <h1>X-ORBIT Fullscreen Browser</h1>
-  </div>
-
   <!-- Fullscreen iframe -->
   <div class="iframe-container">
-    <iframe src="https://corsproxy.io/?https://xorbit.rizzes.online" id="browserFrame"></iframe>
+    <iframe src="https://xorbit.rizzes.online"></iframe>
   </div>
 
 </body>

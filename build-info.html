@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>About LumiCore Neo | X-ORBIT</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body {
+      margin: 0;
+      padding: 40px 20px;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, rgba(0, 234, 255, 0.08), rgba(112, 56, 255, 0.08)), #0e0f1a;
+      backdrop-filter: blur(20px);
+      color: #d6e0ff;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+    .container {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(112, 56, 255, 0.15);
+      border-radius: 24px;
+      box-shadow: 0 8px 32px rgba(112, 56, 255, 0.3), 0 4px 16px rgba(0, 234, 255, 0.15);
+      padding: 36px 48px;
+      max-width: 680px;
+      width: 100%;
+      backdrop-filter: blur(18px);
+    }
+    h1 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      text-align: center;
+      background: linear-gradient(90deg, #7038ff, #00eaff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 28px;
+    }
+    .info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 28px 0;
+    }
+    .info-list li {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 0;
+      border-bottom: 1px solid rgba(156, 38, 217, 0.2);
+      font-weight: 600;
+      font-size: 1.05rem;
+    }
+    .info-label { color: #aab6ff; }
+    .info-value { color: #e0dfff; }
+    .description {
+      font-weight: 400;
+      font-size: 1.1rem;
+      color: #c4ccff;
+      line-height: 1.6;
+      padding-top: 10px;
+    }
+    .button-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+      flex-wrap: wrap;
+    }
+    .action-button {
+      background: linear-gradient(135deg, #7038ff, #00eaff);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.4rem;
+      font-size: 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+      text-align: center;
+      box-shadow: 0 0 12px rgba(112, 56, 255, 0.4);
+    }
+    .action-button:hover {
+      background: linear-gradient(135deg, #8447ff, #00cfff);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(112, 56, 255, 0.5), 0 4px 20px rgba(0, 234, 255, 0.3);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(10px);
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+    .modal-content {
+      background: rgba(20, 22, 37, 0.95);
+      padding: 28px;
+      border-radius: 18px;
+      box-shadow: 0 12px 36px rgba(112, 56, 255, 0.3);
+      max-width: 420px;
+      width: 90%;
+      text-align: center;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid #7038ff;
+      margin-top: 14px;
+      background: #121321;
+      color: #fff;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .modal-content button {
+      margin-top: 14px;
+      background: linear-gradient(135deg, #7038ff, #00eaff);
+      color: #fff;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 1rem;
+      font-weight: 600;
+      transition: background 0.3s ease;
+    }
+    .modal-content button:hover {
+      background: linear-gradient(135deg, #8b54ff, #00cfff);
+    }
+    .danger {
+      border: 2px solid #ff4d4d !important;
+    }
+    .danger h2 {
+      color: #ff4d4d;
+    }
+    .danger p {
+      color: #ffc4c4;
+      font-size: 1rem;
+    }
+    @media (max-width: 480px) {
+      body { padding: 20px 10px; }
+      .container { padding: 28px 20px; }
+      h1 { font-size: 2rem; }
+      .button-row { flex-direction: column; align-items: stretch; }
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1>About LumiCore Neo</h1>
+    <ul class="info-list">
+      <li><span class="info-label">OS Name:</span><span class="info-value">LumiCore Neo</span></li>
+      <li><span class="info-label">Version:</span><span class="info-value" id="osVersion">3.2.1 Beta</span></li>
+      <li><span class="info-label">Build Number:</span><span class="info-value" id="buildNumber">DS20250625-3:2:0</span></li>
+      <li><span class="info-label">Publisher:</span><span class="info-value">X-ORBIT Proxy Services & Co.</span></li>
+      <li><span class="info-label">Certificate Signer:</span><span class="info-value">XO-SecureVault WY</span></li>
+      <li><span class="info-label">Author(s):</span><span class="info-value">1Vortexx</span></li>
+      <li><span class="info-label">Session ID:</span><span class="info-value" id="sessionIdValue">Loading...</span></li>
+      <li><span class="info-label">Release Date:</span><span class="info-value" id="releaseDate">Sept 9, 2025</span></li>
+      <li><span class="info-label">Activation:</span><span class="info-value" id="activationStatus">Not Activated</span></li>
+      <li><span class="info-label">Registered Buyer:</span><span class="info-value" id="registeredBuyer">None</span></li>
+      <li><span class="info-label">Package:</span><span class="info-value" id="packageName">None</span></li>
+    </ul>
+    <section class="description">
+      LumiCore Neo by DevSolutions is a secure, intelligent, and cross-platform web-based operating system...
+    </section>
+    <div class="button-row">
+      <button class="action-button" id="activateBtn">Activate a key</button>
+      <button class="action-button" id="refreshBtn">Sync Key Database</button>
+      <button class="action-button" id="clearBtn">Clear Product Activation</button>
+    </div>
+  </main>
+
+  <div class="modal" id="activationModal">
+    <div class="modal-content">
+      <h2>Enter Activation Key</h2>
+      <input type="text" id="activationInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" autofocus />
+      <button id="submitActivationBtn">Submit</button>
+    </div>
+  </div>
+
+  <div class="modal" id="confirmClearModal">
+    <div class="modal-content danger">
+      <h2>⚠ Confirm Clear Activation</h2>
+      <p>
+        Are you <strong>certain</strong> you want to wipe all local product activation data?
+        <br>This action <strong>cannot be undone</strong> and all keys will have to be re-entered.
+      </p>
+      <button onclick="confirmClearActivation()" style="background:#ff4d4d;">Yes, Clear All</button>
+      <button onclick="cancelClear()" style="background:#444; margin-left:10px;">Cancel</button>
+    </div>
+  </div>
+
+  <div class="modal" id="syncStatusModal">
+    <div class="modal-content" id="syncStatusContent">
+      <h2 id="syncStatusTitle">Sync Status</h2>
+      <p id="syncStatusMessage">Checking...</p>
+      <button onclick="closeSyncModal()">OK</button>
+    </div>
+  </div>
+
+  <script>
+  let activationKeys = {};
+
+  async function fetchActivationKeys() {
+    try {
+      const base64Url = "aHR0cHM6Ly8xdm9ydGV4eC5naXRodWIuaW8vYXV0aC1rZXlzL2FjdGl2YXRpb25fa2V5c18zMDAwLmpzb24=";
+      const decodedUrl = atob(base64Url);
+
+      const response = await fetch(decodedUrl);
+      if (!response.ok) throw new Error(`Network error: ${response.status} ${response.statusText}`);
+      const data = await response.json();
+      activationKeys = {};
+      for (const key in data) {
+        const normalizedKey = key.toUpperCase().replace(/[-\s]/g, '');
+        activationKeys[normalizedKey] = {
+          buyer: data[key].buyer,
+          package: data[key].package
+        };
+      }
+      showSyncStatus(true);
+    } catch (error) {
+      console.error("❌ Failed to fetch activation keys:", error);
+      showSyncStatus(false);
+    }
+  }
+
+    function showSyncStatus(success) {
+      const modal = document.getElementById("syncStatusModal");
+      const title = document.getElementById("syncStatusTitle");
+      const message = document.getElementById("syncStatusMessage");
+
+      if (success) {
+        title.textContent = "✅ Keys Synced";
+        title.style.color = "#aaffcc";
+        message.textContent = "The key database was successfully refreshed.";
+      } else {
+        title.textContent = "❌ Sync Failed";
+        title.style.color = "#ff4d4d";
+        message.textContent = "Unable to sync the key database. Please check your connection or try again later.";
+      }
+
+      modal.style.display = "flex";
+    }
+
+    function closeSyncModal() {
+      document.getElementById("syncStatusModal").style.display = "none";
+    }
+
+    function displaySessionID() {
+      let id = localStorage.getItem("session_id");
+      if (!id) {
+        id = generateSessionID();
+        localStorage.setItem("session_id", id);
+      }
+      document.getElementById("sessionIdValue").textContent = id;
+    }
+
+    function generateSessionID(length = 24) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    function loadActivationData() {
+      const activated = localStorage.getItem("activated") === "true";
+      const buyer = localStorage.getItem("buyer");
+      const pack = localStorage.getItem("package");
+      document.getElementById("activationStatus").textContent = activated ? "Activated" : "Not Activated";
+      document.getElementById("activationStatus").style.color = activated ? "#aaffcc" : "#ff5577";
+      document.getElementById("registeredBuyer").textContent = activated ? buyer || "Unknown" : "None";
+      document.getElementById("packageName").textContent = activated ? pack || "Unknown" : "None";
+    }
+
+    async function processActivation() {
+      const input = document.getElementById("activationInput");
+      const rawKey = input.value.trim().toUpperCase().replace(/[-\s]/g, '');
+      const modal = document.getElementById("activationModal");
+
+      if (!Object.keys(activationKeys).length) {
+        alert("Activation keys not loaded. Please refresh keys.");
+        return;
+      }
+
+      const data = activationKeys[rawKey];
+      if (data) {
+        localStorage.setItem("activated", "true");
+        localStorage.setItem("buyer", data.buyer);
+        localStorage.setItem("package", data.package);
+        loadActivationData();
+        modal.style.display = "none";
+        input.value = "";
+      } else {
+        alert("❌ Invalid activation key.");
+      }
+    }
+
+    function confirmClearActivation() {
+      localStorage.clear();
+      loadActivationData();
+      displaySessionID();
+      document.getElementById("confirmClearModal").style.display = "none";
+    }
+
+    function cancelClear() {
+      document.getElementById("confirmClearModal").style.display = "none";
+    }
+
+    document.getElementById("activateBtn").onclick = () => {
+      document.getElementById("activationModal").style.display = "flex";
+      document.getElementById("activationInput").focus();
+    };
+
+    document.getElementById("submitActivationBtn").onclick = processActivation;
+
+    document.getElementById("refreshBtn").onclick = () => {
+  location.reload();
+};
+
+    document.getElementById("clearBtn").onclick = () => {
+      document.getElementById("confirmClearModal").style.display = "flex";
+    };
+
+    window.onclick = (e) => {
+      const activationModal = document.getElementById("activationModal");
+      const confirmModal = document.getElementById("confirmClearModal");
+      const syncModal = document.getElementById("syncStatusModal");
+      if (e.target === activationModal) activationModal.style.display = "none";
+      if (e.target === confirmModal) confirmModal.style.display = "none";
+      if (e.target === syncModal) syncModal.style.display = "none";
+    };
+
+    window.addEventListener("DOMContentLoaded", async () => {
+      await fetchActivationKeys();
+      displaySessionID();
+      loadActivationData();
+    });
+  </script>
+</body>
+</html>

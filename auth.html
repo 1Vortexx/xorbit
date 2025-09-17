@@ -1,10 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Login into X-ORBIT</title>
- <style>
-/* Reset and body setup */
+<meta charset="UTF-8" />
+<title>Login into X-ORBIT</title>
+<style>
 body {
     margin: 0;
     padding: 0;
@@ -17,8 +16,6 @@ body {
     overflow: hidden;
     color: #fff;
 }
-
-/* Background image */
 .background {
     position: absolute;
     width: 120%;
@@ -29,46 +26,40 @@ body {
     z-index: -1;
     animation: backgroundMove 30s linear infinite alternate;
 }
-
 @keyframes backgroundMove {
     0% { transform: translate(0, 0) scale(1.1); }
     50% { transform: translate(-20px, 15px) scale(1.12); }
     100% { transform: translate(0, 0) scale(1.1); }
 }
-
-/* Login box */
 .login-box {
-    background: rgba(255, 255, 255, 0.05);
-    padding: 2.5rem 3rem;
+    display: flex;
+    width: 800px;
     border-radius: 20px;
-    backdrop-filter: blur(15px) saturate(1.5);
-    width: 400px;
-    text-align: center;
+    overflow: hidden;
     box-shadow: 0 0 40px rgba(160, 100, 255, 0.5), 0 0 80px rgba(0, 234, 255, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+    backdrop-filter: blur(15px) saturate(1.5);
+    background: rgba(255,255,255,0.05);
 }
-
-.login-box:hover {
-    transform: translateY(-5px) scale(1.02);
-    box-shadow: 0 0 50px rgba(160, 100, 255, 0.7), 0 0 100px rgba(0, 234, 255, 0.3);
+.left-panel, .right-panel {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.5rem;
 }
-
-/* Logo */
+.left-panel { width: 50%; }
 .logo {
     width: 120px;
     height: 120px;
-    margin: 0 auto 1rem auto;
     border-radius: 50%;
     background: url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center/cover;
     opacity: 0.7;
     box-shadow: 0 0 20px rgba(160, 100, 255, 0.5);
     border: 2px solid rgba(255, 255, 255, 0.2);
 }
-
-/* Heading */
-.login-box h1 {
-    margin-bottom: 1.5rem;
+h1 {
     font-size: 2rem;
     background: linear-gradient(90deg, #a44aff, #00f0ff);
     -webkit-background-clip: text;
@@ -76,9 +67,48 @@ body {
     font-weight: 900;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin: 0;
 }
-
-/* Disabled Button */
+.glass-banner {
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px) saturate(1.5);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 1rem;
+    border-radius: 15px;
+    color: red;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    text-align: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+}
+.glass-banner a {
+    color:#ff79c6;
+    text-decoration: underline;
+}
+.right-panel {
+    width: 50%;
+    gap: 1rem;
+}
+.input-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+}
+input {
+    width: 100%;
+    padding: 0.85rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.05);
+    color: #fff;
+    font-size: 1rem;
+    transition: border 0.3s;
+}
+input.banned {
+    border: 2px solid #ff4d4d;
+}
 button {
     width: 100%;
     padding: 0.85rem;
@@ -86,52 +116,129 @@ button {
     border: none;
     font-weight: bold;
     font-size: 1rem;
-    color: #aaa;
-    background: linear-gradient(90deg, #444, #666);
-    cursor: not-allowed;
-    opacity: 0.6;
-    margin-top: 1.5rem;
-}
-
-/* Modal */
-.modal {
-    margin-top: 1.5rem;
-    background: rgba(255,0,0,0.15);
-    border: 2px solid #ff4d4d;
-    border-radius: 15px;
-    padding: 1.5rem;
-    text-align: center;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px #ff0000, 0 0 40px rgba(255,0,0,0.4);
-}
-.modal h2 {
-    color: #ff4d4d;
-    font-size: 1.5rem;
-    margin-bottom: 0.8rem;
-    text-shadow: 0 0 8px #ff0000, 0 0 15px #ff4d4d;
-}
-.modal p {
-    font-size: 1rem;
     color: #fff;
+    background: linear-gradient(90deg, #a44aff, #00f0ff);
+    cursor: pointer;
+    transition: all 0.3s;
+}
+button.banned {
+    background: #ff4d4d;
+    cursor: pointer;
+}
+#login-status {
+    margin-top: 0.8rem;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #ff79c6;
+    text-shadow: 0 0 5px rgba(255, 121, 198, 0.6);
+}
+.ban-modal {
+    margin-top: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 0, 0, 0.2);
+    color: #ff0000;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 0 15px rgba(255,0,0,0.3);
+}
+.ban-modal h2 {
+    margin: 0 0 0.5rem 0;
+}
+.ban-modal p {
+    margin: 0;
 }
 </style>
 </head>
 <body>
-  <div class="background"></div>
-
+<div class="background"></div>
 <div class="login-box">
-  <div class="logo"></div>
-  <h1>X-ORBIT Login</h1>
-
-  <div class="modal">
-    <h2>Downtime Notice</h2>
-    <p>X-ORBIT is currently offline for database updates.<br><br>
-    We expect to be back online by <strong>2:00 PM Moutain Daylight Time (MDT)</strong>.<br><br>
-    Thank you for your patience.</p>
-  </div>
-
-  <button disabled>Sign In Disabled</button>
+    <div class="left-panel">
+        <div class="logo"></div>
+        <h1>X-ORBIT Login</h1>
+        <div class="glass-banner">
+            <strong>Notice:</strong> X-ORBIT has just finished downtime and migrated our client database. Some accounts may not work. If your account does not work, please contact <a href="mailto:support@xorbit.org">support@xorbit.org</a>.
+        </div>
+    </div>
+    <div class="right-panel">
+        <div class="input-wrapper" id="loginForm">
+            <input id="usernameOrEmail" type="text" placeholder="Name or Email" />
+            <input id="password" type="password" placeholder="Password" />
+            <button id="loginButton" onclick="login()">Login</button>
+            <div id="banModal" class="ban-modal" style="display:none;">
+                <h2>Login Failed</h2>
+                <p id="banReason"></p>
+            </div>
+            <p id="login-status"></p>
+        </div>
+    </div>
 </div>
 
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY"; 
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+window.login = async function () {
+    const input = document.getElementById("usernameOrEmail");
+    const password = document.getElementById("password");
+    const loginBtn = document.getElementById("loginButton");
+    const banModal = document.getElementById("banModal");
+    const banReason = document.getElementById("banReason");
+    const status = document.getElementById("login-status");
+
+    status.textContent = "";
+    banModal.style.display = "none";
+    banReason.textContent = "";
+    input.classList.remove("banned");
+    password.classList.remove("banned");
+    loginBtn.classList.remove("banned");
+    loginBtn.textContent = "Login";
+
+    const emailOrName = input.value.trim();
+    const pwd = password.value.trim();
+    if (!emailOrName || !pwd) {
+        status.textContent = "❌ Please fill in both fields.";
+        return;
+    }
+
+    status.textContent = "🔐 Logging in...";
+
+    const { data, error } = await supabase
+        .from('clients')
+        .select('id, name, email, blocked, ban_reason')
+        .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
+        .eq('password', pwd)
+        .single();
+
+    if (error || !data) {
+        status.textContent = "❌ Invalid name/email or password.";
+        return;
+    }
+
+    if (data.blocked) {
+        input.classList.add("banned");
+        password.classList.add("banned");
+        loginBtn.classList.add("banned");
+        loginBtn.textContent = "Return to Login";
+        loginBtn.onclick = () => location.href = 'index.html';
+        banModal.style.display = "block";
+        banReason.textContent = data.ban_reason || "No reason provided.";
+        return;
+    }
+
+    status.textContent = "✅ Login successful!";
+    if (window.parent) {
+        window.parent.postMessage('auth-success', '*');
+    }
+};
+
+document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") login();
+});
+</script>
 </body>
 </html>

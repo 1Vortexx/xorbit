@@ -5,121 +5,3103 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>X-ORBIT</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Inter', sans-serif; background: linear-gradient(135deg, #10121d, #1a1c2c); color: #d3dcff; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
-    .topbar { height: 64px; background: rgba(60, 80, 255, 0.2); backdrop-filter: blur(12px); display: flex; align-items: center; padding: 0 30px; font-weight: 600; font-size: 1.2rem; color: #ffffff; border-bottom: 1px solid rgba(255,255,255,0.1); }
-    .topbar img { height: 40px; border-radius: 12px; margin-right: 20px; box-shadow: 0 2px 10px rgba(100, 150, 255, 0.5); }
-    .hamburger, .notifications { font-size: 1.8rem; cursor: pointer; color: #ffffff; display: flex; align-items: center; }
-    .notifications { margin-left: auto; }
-    .hamburger { margin-left: 10px; }
-    .container { display: flex; flex-grow: 1; overflow: hidden; }
-    .sidebar { width: 280px; background: linear-gradient(180deg, rgba(0, 170, 255, 0.2), rgba(112, 56, 255, 0.2)); backdrop-filter: blur(14px); padding: 30px 15px; display: flex; flex-direction: column; gap: 16px; color: #e3e7ff; font-weight: 600; user-select: none; overflow-y: auto; max-height: calc(100vh - 64px); border-right: 1px solid rgba(255,255,255,0.1); }
-    .sidebar a { color: #e0e5ff; text-decoration: none; padding: 14px 18px; border-radius: 28px; display: flex; align-items: center; gap: 14px; font-size: 1rem; transition: all 0.3s ease; }
-    .sidebar a:hover, .sidebar a.active { background: rgba(112, 56, 255, 0.3); color: #ffffff; box-shadow: 0 4px 10px rgba(112, 56, 255, 0.4), 0 4px 20px rgba(0, 234, 255, 0.4); }
-    .main-content { flex-grow: 1; background: linear-gradient(135deg, #12131d, #191b2e); overflow: hidden; display: flex; flex-direction: column; }
-    iframe { border: none; width: 100%; height: 100%; background-color: transparent; }
-    #welcomeOverlay { position: fixed; z-index: 9999; top: 0; left: 0; height: 100vh; width: 100vw; background: rgba(14, 15, 26, 0.9); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; }
-    #welcomeOverlay iframe { width: 100%; height: 100%; border: none; }
-    #loginBox { background: #1a1c2c; padding: 40px; border-radius: 12px; display: flex; flex-direction: column; gap: 16px; width: 320px; text-align: center; box-shadow: 0 0 20px rgba(0, 234, 255, 0.3); }
-    #loginBox input { padding: 12px; border-radius: 8px; border: none; background: #12131d; color: #d3dcff; font-size: 1rem; }
-    #loginBox button { padding: 12px; border-radius: 8px; border: none; background: #3860ff; color: #fff; cursor: pointer; font-size: 1rem; font-weight: 600; }
-    #loginError { color: #ff5959; display: none; font-size: 0.9rem; }
-    #pageNotification { position: fixed; top: 64px; left: 50%; transform: translateX(-50%); background: rgba(60, 80, 255, 0.85); backdrop-filter: blur(10px); color: white; padding: 12px 24px; border-radius: 12px; box-shadow: 0 0 15px rgba(60, 80, 255, 0.5); font-weight: 600; font-size: 1rem; z-index: 11000; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; display: flex; align-items: center; gap: 16px; max-width: 90vw; user-select: none; }
-    #pageNotification.show { opacity: 1; pointer-events: auto; }
-    #closeNotificationBtn { background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer; padding: 0; line-height: 1; font-weight: 900; }
-    @media (max-width: 768px) { .container { flex-direction: column; } .main-content { height: calc(100vh - 64px); } .sidebar { position: absolute; top: 64px; left: 0; height: calc(100vh - 64px); transform: translateX(-100%); z-index: 1000; } .sidebar.open { transform: translateX(0); } }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: radial-gradient(ellipse at top, #1a0033 0%, #0d001a 50%, #000014 100%);
+      background-attachment: fixed;
+      color: #f8faff;
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      cursor: default;
+      user-select: none;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 40, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(60, 130, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(180, 40, 255, 0.1) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .menu-bar {
+      height: 32px;
+      background: rgba(15, 15, 35, 0.6);
+      backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #e8f0ff;
+      border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+      box-shadow: 
+        0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+        0 4px 16px rgba(0, 0, 0, 0.4);
+      position: relative;
+      z-index: 1000;
+      justify-content: space-between;
+    }
+
+    .menu-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .menu-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.8rem;
+    }
+
+    .menu-item {
+      padding: 4px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .menu-item:hover {
+      background: rgba(120, 80, 255, 0.2);
+    }
+
+    .desktop {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      background: transparent;
+    }
+
+    .desktop-icons {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      z-index: 10;
+    }
+
+    .desktop-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 80px;
+      text-align: center;
+    }
+
+    .desktop-icon:hover {
+      background: rgba(120, 80, 255, 0.1);
+      transform: scale(1.05);
+    }
+
+    .desktop-icon i {
+      font-size: 2rem;
+      color: #d0d8ff;
+      filter: drop-shadow(0 2px 8px rgba(120, 80, 255, 0.3));
+    }
+
+    .desktop-icon span {
+      font-size: 0.75rem;
+      color: #e8f0ff;
+      font-weight: 500;
+      max-width: 100%;
+      word-wrap: break-word;
+    }
+
+    .window {
+      position: absolute;
+      min-width: 400px;
+      min-height: 300px;
+      background: rgba(20, 15, 40, 0.4);
+      backdrop-filter: blur(40px) saturate(1.8) brightness(1.1);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.1);
+      border-radius: 16px;
+      box-shadow: 
+        0 0 60px rgba(120, 80, 255, 0.2),
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 1px 0 rgba(255, 255, 255, 0.15) inset;
+      border: 1px solid rgba(120, 80, 255, 0.15);
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+      resize: both;
+      overflow: hidden;
+    }
+
+    .window.active {
+      z-index: 200;
+      box-shadow: 
+        0 0 80px rgba(120, 80, 255, 0.3),
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    }
+
+    .window-titlebar {
+      height: 44px;
+      background: rgba(30, 25, 50, 0.6);
+      backdrop-filter: blur(20px);
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      border-radius: 16px 16px 0 0;
+      border-bottom: 1px solid rgba(120, 80, 255, 0.1);
+      cursor: move;
+      user-select: none;
+    }
+
+    .window-controls {
+      display: flex;
+      gap: 8px;
+      margin-right: 16px;
+    }
+
+    .window-control {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .window-control.close {
+      background: #ff5f57;
+    }
+
+    .window-control.minimize {
+      background: #ffbd2e;
+    }
+
+    .window-control.maximize {
+      background: #28ca42;
+    }
+
+    .window-control:hover {
+      transform: scale(1.1);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    }
+
+    .window-title {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #e8f0ff;
+      flex: 1;
+    }
+
+    .window-content {
+      flex: 1;
+      background: rgba(10, 10, 25, 0.3);
+      border-radius: 0 0 16px 16px;
+      overflow: hidden;
+    }
+
+    .window-content iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      background: transparent;
+    }
+
+    .dock {
+      position: fixed;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(20, 15, 40, 0.5);
+      backdrop-filter: blur(60px) saturate(2) brightness(1.3);
+      -webkit-backdrop-filter: blur(60px) saturate(2) brightness(1.3);
+      border-radius: 24px;
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 
+        0 0 60px rgba(120, 80, 255, 0.3),
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 1px 0 rgba(255, 255, 255, 0.2) inset;
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      z-index: 1000;
+    }
+
+    .dock-item {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      background: rgba(120, 80, 255, 0.1);
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      overflow: hidden;
+    }
+
+    .dock-item:hover {
+      transform: translateY(-8px) scale(1.15);
+      box-shadow: 
+        0 0 30px rgba(120, 80, 255, 0.4),
+        0 12px 24px rgba(0, 0, 0, 0.4);
+      background: rgba(120, 80, 255, 0.2);
+    }
+
+    .dock-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: -6px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 6px;
+      height: 6px;
+      background: rgba(120, 80, 255, 0.8);
+      border-radius: 50%;
+      box-shadow: 0 0 12px rgba(120, 80, 255, 0.6);
+    }
+
+    .dock-item i {
+      font-size: 1.5rem;
+      color: #d0d8ff;
+      z-index: 1;
+      position: relative;
+    }
+
+    .tooltip {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: rgba(30, 25, 50, 0.9);
+      backdrop-filter: blur(20px);
+      color: #e8f0ff;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      z-index: 1001;
+    }
+
+    .dock-item:hover .tooltip {
+      opacity: 1;
+      transform: translateX(-50%) translateY(-16px);
+    }
+
+    #welcomeOverlay {
+      position: fixed;
+      z-index: 9999;
+      top: 0; 
+      left: 0;
+      height: 100vh; 
+      width: 100vw;
+      background: rgba(10, 5, 25, 0.9);
+      backdrop-filter: blur(60px) saturate(2);
+      -webkit-backdrop-filter: blur(60px) saturate(2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+      .desktop-icons {
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+        margin: 20px;
+        gap: 12px;
+      }
+      
+      .dock {
+        bottom: 8px;
+        padding: 8px 12px;
+        gap: 8px;
+      }
+      
+      .dock-item {
+        width: 48px;
+        height: 48px;
+      }
+      
+      .window {
+        min-width: 280px;
+        min-height: 200px;
+      }
+    }
+
+    @keyframes windowOpen {
+      0% {
+        opacity: 0;
+        transform: scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .window-opening {
+      animation: windowOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    /* Light mode styles */
+    body.light-mode {
+      background: linear-gradient(135deg, #f8faff 0%, #e8f0ff 100%);
+      color: #1a1a2e;
+    }
+
+    body.light-mode .menu-bar {
+      background: rgba(248, 250, 255, 0.8);
+      color: #1a1a2e;
+      border-bottom: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    body.light-mode .window {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      color: #1a1a2e;
+    }
+
+    body.light-mode .window-titlebar {
+      background: rgba(248, 250, 255, 0.9);
+      border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+    }
+
+    body.light-mode .window-title {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .dock {
+      background: rgba(255, 255, 255, 0.8);
+      border: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    body.light-mode .dock-item {
+      background: rgba(120, 80, 255, 0.08);
+      border: 1px solid rgba(120, 80, 255, 0.15);
+    }
+
+    body.light-mode .desktop-icon {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .desktop-icon i {
+      color: #3c4560;
+    }
+
+    /* No transparency mode */
+    body.no-transparency .window,
+    body.no-transparency .dock,
+    body.no-transparency .menu-bar {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    body.no-transparency .window {
+      background: rgba(20, 15, 40, 0.95) !important;
+    }
+
+    body.no-transparency.light-mode .window {
+      background: rgba(255, 255, 255, 0.95) !important;
+    }
+
+    /* No animations mode */
+    body.no-animations * {
+      transition: none !important;
+      animation: none !important;
+    }
+
+    /* Dock auto-hide styles */
+    .dock.dock-autohide {
+      transition: all 0.3s ease;
+    }
+
+    /* X-ORBIT Menu Dropdown */
+    .xorbit-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: rgba(20, 15, 40, 0.9);
+      backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      border-radius: 12px;
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      min-width: 220px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 10001;
+      margin-top: 8px;
+    }
+
+    .xorbit-menu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .xorbit-menu-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: 8px;
+      margin: 6px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #e8f0ff;
+    }
+
+    .xorbit-menu-item:first-child {
+      margin-top: 6px;
+    }
+
+    .xorbit-menu-item:last-child {
+      margin-bottom: 6px;
+    }
+
+    .xorbit-menu-item:hover {
+      background: rgba(120, 80, 255, 0.2);
+      color: #ffffff;
+      transform: translateX(2px);
+    }
+
+    .xorbit-menu-item i {
+      width: 16px;
+      text-align: center;
+      color: #a8b4d9;
+    }
+
+    .xorbit-menu-item:hover i {
+      color: #7d5cff;
+    }
+
+    .xorbit-menu-divider {
+      height: 1px;
+      background: rgba(120, 80, 255, 0.2);
+      margin: 6px 12px;
+    }
+
+    .xorbit-menu-item.danger {
+      color: #ff6b6b;
+    }
+
+    .xorbit-menu-item.danger:hover {
+      background: rgba(255, 107, 107, 0.2);
+      color: #ff8a8a;
+    }
+
+    .xorbit-menu-item.danger i {
+      color: #ff6b6b;
+    }
+
+    .menu-item.xorbit-title {
+      position: relative;
+    }
+
+    /* Light mode menu */
+    body.light-mode .xorbit-menu {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    body.light-mode .xorbit-menu-item {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .xorbit-menu-item:hover {
+      background: rgba(120, 80, 255, 0.15);
+      color: #000;
+    }
+
+    body.light-mode .xorbit-menu-item i {
+      color: #64748b;
+    }
+
+    body.light-mode .xorbit-menu-item:hover i {
+      color: #7d5cff;
+    }
+
+    body.light-mode .xorbit-menu-divider {
+      background: rgba(120, 80, 255, 0.3);
+    }
+
+    /* Time/Weather Dropdown */
+    .time-menu {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      background: rgba(20, 15, 40, 0.9);
+      backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.2);
+      border-radius: 16px;
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+      min-width: 320px;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      pointer-events: none;
+      z-index: 10001;
+      margin-top: 8px;
+      padding: 20px;
+    }
+
+    .time-menu.show {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .time-header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+    }
+
+    .time-display {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #e8f0ff;
+      margin-bottom: 4px;
+      font-family: 'Inter', monospace;
+    }
+
+    .date-display {
+      font-size: 1rem;
+      color: #a8b4d9;
+      margin-bottom: 8px;
+    }
+
+    .timezone-display {
+      font-size: 0.85rem;
+      color: #7d5cff;
+      font-weight: 500;
+    }
+
+    .weather-section {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      padding: 16px;
+      background: rgba(120, 80, 255, 0.1);
+      border-radius: 12px;
+      border: 1px solid rgba(120, 80, 255, 0.2);
+    }
+
+    .weather-icon {
+      font-size: 2.5rem;
+      width: 60px;
+      text-align: center;
+    }
+
+    .weather-info {
+      flex: 1;
+    }
+
+    .weather-temp {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #e8f0ff;
+      margin-bottom: 2px;
+    }
+
+    .weather-desc {
+      font-size: 0.9rem;
+      color: #a8b4d9;
+      margin-bottom: 4px;
+    }
+
+    .weather-location {
+      font-size: 0.8rem;
+      color: #7d5cff;
+      font-weight: 500;
+    }
+
+    .weather-details {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .weather-detail {
+      background: rgba(255, 255, 255, 0.03);
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid rgba(120, 80, 255, 0.1);
+      text-align: center;
+    }
+
+    .weather-detail-label {
+      font-size: 0.75rem;
+      color: #a8b4d9;
+      margin-bottom: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .weather-detail-value {
+      font-size: 0.95rem;
+      color: #e8f0ff;
+      font-weight: 600;
+    }
+
+    .location-section {
+      text-align: center;
+      padding-top: 12px;
+      border-top: 1px solid rgba(120, 80, 255, 0.2);
+    }
+
+    .location-text {
+      font-size: 0.85rem;
+      color: #a8b4d9;
+      margin-bottom: 8px;
+    }
+
+    .location-update {
+      font-size: 0.75rem;
+      color: #7d5cff;
+      cursor: pointer;
+      transition: color 0.2s ease;
+    }
+
+    .location-update:hover {
+      color: #9d7cff;
+    }
+
+    .menu-item.time-item {
+      position: relative;
+      cursor: pointer;
+    }
+
+    /* Light mode time menu */
+    body.light-mode .time-menu {
+      background: rgba(255, 255, 255, 0.9);
+      border: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    body.light-mode .time-display {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .weather-temp {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .weather-detail-value {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .weather-section {
+      background: rgba(120, 80, 255, 0.08);
+    }
+
+    body.light-mode .weather-detail {
+      background: rgba(120, 80, 255, 0.05);
+      border: 1px solid rgba(120, 80, 255, 0.15);
+    }
+
+    /* Tutorial/Guide Overlay - Simplified and Fixed */
+    .tutorial-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0, 0, 0, 0.9);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      z-index: 15000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+
+    .tutorial-overlay.show {
+      display: flex;
+      opacity: 1;
+    }
+
+    .tutorial-content {
+      background: rgba(20, 15, 40, 0.95);
+      backdrop-filter: blur(40px) saturate(1.8);
+      -webkit-backdrop-filter: blur(40px) saturate(1.8);
+      border-radius: 24px;
+      border: 2px solid rgba(120, 80, 255, 0.5);
+      box-shadow: 
+        0 0 80px rgba(120, 80, 255, 0.4),
+        0 30px 60px rgba(0, 0, 0, 0.8),
+        0 2px 0 rgba(255, 255, 255, 0.1) inset;
+      padding: 40px;
+      max-width: 500px;
+      width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      transform: scale(0.8) translateY(20px);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+    }
+
+    .tutorial-overlay.show .tutorial-content {
+      transform: scale(1) translateY(0);
+    }
+
+    .tutorial-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .tutorial-icon {
+      font-size: 3rem;
+      color: #7d5cff;
+      margin-bottom: 16px;
+      display: block;
+    }
+
+    .tutorial-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #e8f0ff;
+      margin-bottom: 8px;
+    }
+
+    .tutorial-step {
+      font-size: 0.9rem;
+      color: #a8b4d9;
+      margin-bottom: 16px;
+    }
+
+    .tutorial-description {
+      color: #e8f0ff;
+      line-height: 1.6;
+      margin-bottom: 24px;
+      font-size: 0.95rem;
+    }
+
+    .tutorial-highlight {
+      background: rgba(120, 80, 255, 0.2);
+      padding: 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(120, 80, 255, 0.3);
+      margin-bottom: 24px;
+    }
+
+    .tutorial-highlight-title {
+      color: #7d5cff;
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 0.9rem;
+    }
+
+    .tutorial-highlight-text {
+      color: #d0d8ff;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+
+    .tutorial-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 24px;
+    }
+
+    .tutorial-progress {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tutorial-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(120, 80, 255, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .tutorial-dot.active {
+      background: #7d5cff;
+      transform: scale(1.2);
+    }
+
+    .tutorial-buttons {
+      display: flex;
+      gap: 12px;
+    }
+
+    .tutorial-btn {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .tutorial-btn.secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: #a8b4d9;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .tutorial-btn.secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #e8f0ff;
+    }
+
+    .tutorial-btn.primary {
+      background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+      color: white;
+      border: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    .tutorial-btn.primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 15px rgba(120, 80, 255, 0.4);
+    }
+
+    /* Tutorial highlighting effects */
+    .tutorial-highlight-element {
+      position: relative;
+      z-index: 14000;
+    }
+
+    .tutorial-highlight-element::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      left: -4px;
+      right: -4px;
+      bottom: -4px;
+      border: 2px solid #7d5cff;
+      border-radius: inherit;
+      box-shadow: 
+        0 0 20px rgba(120, 80, 255, 0.6),
+        0 0 40px rgba(120, 80, 255, 0.3);
+      animation: tutorialPulse 2s infinite;
+      pointer-events: none;
+    }
+
+    @keyframes tutorialPulse {
+      0%, 100% { 
+        opacity: 1; 
+        transform: scale(1); 
+      }
+      50% { 
+        opacity: 0.7; 
+        transform: scale(1.02); 
+      }
+    }
+
+    /* Light mode tutorial */
+    body.light-mode .tutorial-overlay {
+      background: rgba(255, 255, 255, 0.9);
+    }
+
+    body.light-mode .tutorial-content {
+      background: rgba(255, 255, 255, 0.98);
+      border: 2px solid rgba(120, 80, 255, 0.5);
+      box-shadow: 
+        0 0 80px rgba(120, 80, 255, 0.3),
+        0 30px 60px rgba(0, 0, 0, 0.2),
+        0 2px 0 rgba(120, 80, 255, 0.1) inset;
+    }
+
+    body.light-mode .tutorial-title {
+      color: #1a1a2e;
+    }
+
+    body.light-mode .tutorial-description {
+      color: #3c4560;
+    }
+
+    body.light-mode .tutorial-highlight {
+      background: rgba(120, 80, 255, 0.1);
+      border: 1px solid rgba(120, 80, 255, 0.3);
+    }
+
+    body.light-mode .tutorial-highlight-text {
+      color: #1a1a2e;
+    }
+
+    /* Mobile tutorial adjustments */
+    @media (max-width: 768px) {
+      .tutorial-content {
+        width: 95vw;
+        padding: 30px 20px;
+        max-height: 85vh;
+      }
+      
+      .tutorial-icon {
+        font-size: 2.5rem;
+        margin-bottom: 16px;
+      }
+      
+      .tutorial-title {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+      }
+      
+      .tutorial-description {
+        font-size: 0.95rem;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+      
+      .tutorial-highlight {
+        padding: 16px;
+        margin-bottom: 20px;
+      }
+      
+      .tutorial-highlight-text {
+        text-align: left;
+      }
+      
+      .tutorial-controls {
+        margin-top: 20px;
+      }
+      
+      .tutorial-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      
+      .tutorial-btn {
+        min-width: 100px;
+        padding: 12px 16px;
+      }
+      
+      .tutorial-btn span {
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
 
-<!-- 🔒 Login Overlay -->
 <div id="welcomeOverlay">
-  <iframe id="authFrame" src="auth.html"></iframe>
+  <iframe id="authFrame" src="auth.html" style="width: 100%; height: 100%; border: none;"></iframe>
 </div>
 
-<!-- Notification popup -->
-<div id="pageNotification" role="alert" aria-live="assertive">
-  <span>🚨 Important: By using this webpage, and our services, you agree to our <a href="tos.html">Terms Of Service</a>, and our <a href="privacy-policy.html">Privacy Policy</a>.</span>
-  <button id="closeNotificationBtn" aria-label="Close notification">&times;</button>
+<div class="menu-bar">
+  <div class="menu-left">
+    <div class="menu-item xorbit-title" style="font-weight: 600;" id="xorbitMenu">
+      X-ORBIT
+      <div class="xorbit-menu" id="xorbitDropdown">
+        <div class="xorbit-menu-item" onclick="showAboutDialog()">
+          <i class="fas fa-info-circle"></i>
+          <span>About X-ORBIT</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="openSettingsWindow()">
+          <i class="fas fa-cog"></i>
+          <span>Preferences...</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
+        <div class="xorbit-menu-item" onclick="showSystemInfo()">
+          <i class="fas fa-desktop"></i>
+          <span>System Information</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="checkForUpdates()">
+          <i class="fas fa-download"></i>
+          <span>Check for Updates</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="openWindow('Help & Support', 'support.html', 'fas fa-question-circle')">
+          <i class="fas fa-question-circle"></i>
+          <span>Help & Support</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="restartTutorial()">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Desktop Tour</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
+        <div class="xorbit-menu-item" onclick="restartDesktop()">
+          <i class="fas fa-sync"></i>
+          <span>Restart Desktop</span>
+        </div>
+        <div class="xorbit-menu-item danger" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+    <div class="menu-item">File</div>
+    <div class="menu-item">Edit</div>
+    <div class="menu-item">View</div>
+    <div class="menu-item">Window</div>
+    <div class="menu-item">Help</div>
+  </div>
+  <div class="menu-right">
+    <div class="menu-item time-item" id="timeMenu">
+      <span id="currentTime"></span>
+      <div class="time-menu" id="timeDropdown">
+        <div class="time-header">
+          <div class="time-display" id="fullTime"></div>
+          <div class="date-display" id="fullDate"></div>
+          <div class="timezone-display" id="timezone"></div>
+        </div>
+        
+        <div class="weather-section">
+          <div class="weather-icon" id="weatherIcon">🌤️</div>
+          <div class="weather-info">
+            <div class="weather-temp" id="weatherTemp">22°C</div>
+            <div class="weather-desc" id="weatherDesc">Partly Cloudy</div>
+            <div class="weather-location" id="weatherLocation">Casper, Wyoming</div>
+          </div>
+        </div>
+        
+        <div class="weather-details">
+          <div class="weather-detail">
+            <div class="weather-detail-label">Humidity</div>
+            <div class="weather-detail-value" id="humidity">65%</div>
+          </div>
+          <div class="weather-detail">
+            <div class="weather-detail-label">Wind</div>
+            <div class="weather-detail-value" id="wind">12 mph</div>
+          </div>
+          <div class="weather-detail">
+            <div class="weather-detail-label">Pressure</div>
+            <div class="weather-detail-value" id="pressure">1013 mb</div>
+          </div>
+          <div class="weather-detail">
+            <div class="weather-detail-label">UV Index</div>
+            <div class="weather-detail-value" id="uvIndex">3</div>
+          </div>
+        </div>
+        
+        <div class="location-section">
+          <div class="location-text">Location services enabled</div>
+          <div class="location-update" onclick="updateLocation()">📍 Update location</div>
+        </div>
+      </div>
+    </div>
+    <div class="menu-item"><i class="fas fa-wifi"></i></div>
+    <div class="menu-item"><i class="fas fa-battery-three-quarters"></i></div>
+  </div>
 </div>
 
-<div class="topbar">
-  <img src="https://codehs.com/uploads/7a0d6dd135184f5ac5937226a64294c0" alt="DevSolutions Logo" />
-  X-ORBIT Browser
-  <div class="notifications"><i class="fas fa-bell"></i></div>
-  <div class="hamburger"><i class="fas fa-bars"></i></div>
+<div class="desktop" id="desktop">
+  <div class="desktop-icons">
+    <div class="desktop-icon" data-app="Browser" data-src="browser.html" data-icon="fas fa-globe">
+      <i class="fas fa-globe"></i>
+      <span>Browser</span>
+    </div>
+    <div class="desktop-icon" data-app="Settings" data-src="settings.html" data-icon="fas fa-cog">
+      <i class="fas fa-cog"></i>
+      <span>Settings</span>
+    </div>
+    <div class="desktop-icon" data-app="Terminal" data-src="terminal.html" data-icon="fas fa-terminal">
+      <i class="fas fa-terminal"></i>
+      <span>Terminal</span>
+    </div>
+  </div>
 </div>
 
-<div class="container">
-  <nav id="sidebarMenu" class="sidebar">
-    <a href="#" class="active" onclick="loadPage('render.html', this)"><i class="fas fa-play"></i><span>Home</span></a>
-    <a href="#" onclick="loadPage('browser.html', this)"><i class="fas fa-globe"></i><span>Browser</span></a>
-    <a href="#" onclick="loadPage('privacy-policy.html', this)"><i class="fas fa-shield-alt"></i><span>Privacy Policy</span></a>
-    <a href="#" onclick="loadPage('tos.html', this)"><i class="fas fa-file-contract"></i><span>Terms of Service</span></a>
-    <a href="#" onclick="loadPage('pricing.html', this)"><i class="fas fa-tags"></i><span>Pricing</span></a>
-    <a href="#" onclick="loadPage('team.html', this)"><i class="fas fa-users"></i><span>Team</span></a>
-    <a href="#" onclick="loadPage('support.html', this)"><i class="fas fa-headset"></i><span>Support</span></a>
-    <a href="#" onclick="loadPage('changelogs.html', this)"><i class="fas fa-list-alt"></i><span>Changelog</span></a>
-    <a href="#" onclick="loadPage('settings.html', this)"><i class="fas fa-cog"></i><span>Settings</span></a>
-    <a href="#" onclick="loadPage('credits.html', this)"><i class="fas fa-heart"></i><span>Credits</span></a>
-    <a href="index.html" onclick="window.location.href='index.html'; location.reload(); return false;">
-  <i class="fa-solid fa-right-from-bracket"></i>
-  <span>Logout</span>
-</a>
-  </nav>
-  <main class="main-content">
-    <iframe id="contentFrame" src="render.html"></iframe>
-  </main>
+<div class="dock">
+  <div class="dock-item" data-app="Home" data-src="render.html" data-icon="fas fa-home">
+    <i class="fas fa-home"></i>
+    <div class="tooltip">Home</div>
+  </div>
+  <div class="dock-item" data-app="Browser" data-src="browser.html" data-icon="fas fa-globe">
+    <i class="fas fa-globe"></i>
+    <div class="tooltip">Browser</div>
+  </div>
+  <div class="dock-item" data-app="Privacy Policy" data-src="privacy-policy.html" data-icon="fas fa-shield-alt">
+    <i class="fas fa-shield-alt"></i>
+    <div class="tooltip">Privacy</div>
+  </div>
+  <div class="dock-item" data-app="Terms of Service" data-src="tos.html" data-icon="fas fa-file-contract">
+    <i class="fas fa-file-contract"></i>
+    <div class="tooltip">Terms</div>
+  </div>
+  <div class="dock-item" data-app="Pricing" data-src="pricing.html" data-icon="fas fa-tags">
+    <i class="fas fa-tags"></i>
+    <div class="tooltip">Pricing</div>
+  </div>
+  <div class="dock-item" data-app="Team" data-src="team.html" data-icon="fas fa-users">
+    <i class="fas fa-users"></i>
+    <div class="tooltip">Team</div>
+  </div>
+  <div class="dock-item" data-app="Support" data-src="support.html" data-icon="fas fa-headset">
+    <i class="fas fa-headset"></i>
+    <div class="tooltip">Support</div>
+  </div>
+  <div class="dock-item" data-app="Changelog" data-src="changelogs.html" data-icon="fas fa-list-alt">
+    <i class="fas fa-list-alt"></i>
+    <div class="tooltip">Changes</div>
+  </div>
+  <div class="dock-item" data-app="Settings" data-src="settings.html" data-icon="fas fa-cog">
+    <i class="fas fa-cog"></i>
+    <div class="tooltip">Settings</div>
+  </div>
+  <div class="dock-item" data-app="Credits" data-src="credits.html" data-icon="fas fa-heart">
+    <i class="fas fa-heart"></i>
+    <div class="tooltip">Credits</div>
+  </div>
+</div>
+
+<!-- Tutorial Overlay -->
+<div class="tutorial-overlay" id="tutorialOverlay">
+  <div class="tutorial-content" id="tutorialContent">
+    <div class="tutorial-header">
+      <i class="tutorial-icon" id="tutorialIcon">🚀</i>
+      <div class="tutorial-title" id="tutorialTitle">Welcome to X-ORBIT!</div>
+      <div class="tutorial-step" id="tutorialStep">Step 1 of 6</div>
+    </div>
+    
+    <div class="tutorial-description" id="tutorialDescription">
+      Welcome to your new desktop environment! Let's take a quick tour to help you get started with X-ORBIT's features.
+    </div>
+    
+    <div class="tutorial-highlight" id="tutorialHighlight">
+      <div class="tutorial-highlight-title" id="tutorialHighlightTitle">💡 Quick Tip</div>
+      <div class="tutorial-highlight-text" id="tutorialHighlightText">
+        This tour will only show once. You can skip it anytime or restart it from the Help menu.
+      </div>
+    </div>
+    
+    <div class="tutorial-controls">
+      <div class="tutorial-progress" id="tutorialProgress">
+        <div class="tutorial-dot active"></div>
+        <div class="tutorial-dot"></div>
+        <div class="tutorial-dot"></div>
+        <div class="tutorial-dot"></div>
+        <div class="tutorial-dot"></div>
+        <div class="tutorial-dot"></div>
+      </div>
+      
+      <div class="tutorial-buttons">
+        <button class="tutorial-btn secondary" id="tutorialSkip">
+          <i class="fas fa-times"></i>
+          <span>Skip Tour</span>
+        </button>
+        <button class="tutorial-btn secondary" id="tutorialPrev" style="display: none;">
+          <i class="fas fa-arrow-left"></i>
+          <span>Previous</span>
+        </button>
+        <button class="tutorial-btn primary" id="tutorialNext">
+          <span>Next</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
-  const overlay = document.getElementById("welcomeOverlay");
-  const iframe = document.getElementById('contentFrame');
-  const hamburger = document.querySelector('.hamburger');
-  const sidebar = document.getElementById('sidebarMenu');
-  const notificationBtn = document.querySelector('.notifications');
+// Global variables
+let windowCounter = 0;
+let activeWindows = new Map();
+let isAuthenticated = false;
+let zIndexCounter = 100;
+let userLocation = {
+  city: 'Casper',
+  state: 'Wyoming',
+  country: 'US',
+  lat: 42.8666,
+  lon: -106.3130,
+  timezone: 'America/Denver'
+};
+let weatherData = {
+  temp: 22,
+  description: 'Partly Cloudy',
+  icon: '🌤️',
+  humidity: 65,
+  wind: 12,
+  pressure: 1013,
+  uvIndex: 3
+};
+let settings = {
+  theme: 'dark',
+  transparency: true,
+  animations: true,
+  backgroundOpacity: 80,
+  dockAutohide: false,
+  dockPosition: 'bottom',
+  dockSize: 56,
+  dockMagnification: true,
+  dockTooltips: true,
+  windowSnapping: true,
+  windowShadows: true
+};
 
-  // Sidebar toggle
-  hamburger.addEventListener('click', () => sidebar.classList.toggle('open'));
+// Tutorial system
+let currentTutorialStep = 0;
+let tutorialSteps = [
+  {
+    icon: '🚀',
+    title: 'Welcome to X-ORBIT!',
+    description: 'Welcome to your new desktop environment! Let\'s take a quick tour to help you get started with X-ORBIT\'s powerful features.',
+    highlightTitle: '💡 Quick Tip',
+    highlightText: 'Use arrow keys or spacebar to navigate this tour. Press Escape to skip anytime.',
+    highlightElement: null
+  },
+  {
+    icon: '🖱️',
+    title: 'Desktop & Windows',
+    description: 'This is your desktop workspace. You can open multiple windows, move them around, resize them, and organize your workspace however you like.',
+    highlightTitle: '✨ Try This',
+    highlightText: 'Click and drag window titlebars to move them. Use the colored buttons to close, minimize, or maximize windows.',
+    highlightElement: '.desktop'
+  },
+  {
+    icon: '⚙️',
+    title: 'Menu Bar & Controls',
+    description: 'The top menu bar gives you access to system controls. Click "X-ORBIT" for system options like logout and settings, or click the time for weather info.',
+    highlightTitle: '🕐 Time & Weather',
+    highlightText: 'Click the time to see detailed weather information and timezone data for your location.',
+    highlightElement: '.menu-bar'
+  },
+  {
+    icon: '🚢',
+    title: 'The Dock',
+    description: 'Your dock at the bottom provides quick access to applications. Hover over icons to see names, and click to launch apps instantly.',
+    highlightTitle: '🎯 Pro Tips',
+    highlightText: 'Icons show a dot when apps are running. You can customize dock position and size in Settings.',
+    highlightElement: '.dock'
+  },
+  {
+    icon: '⚙️',
+    title: 'Settings & Customization',
+    description: 'Customize your desktop experience! Access settings from the dock or desktop icons to change themes, dock position, animations, and more.',
+    highlightTitle: '🎨 Personalize',
+    highlightText: 'Try switching between light and dark themes, or move your dock to different screen edges.',
+    highlightElement: '.dock-item[data-app="Settings"]'
+  },
+  {
+    icon: '🎉',
+    title: 'You\'re All Set!',
+    description: 'Congratulations! You now know the basics of X-ORBIT. Explore the applications, customize your settings, and make this desktop your own.',
+    highlightTitle: '🚀 Ready to Explore',
+    highlightText: 'Your desktop is ready! Open some apps, try the settings, and enjoy your new workspace.',
+    highlightElement: null
+  }
+];
 
-  // Page loading function
-  function loadPage(page, linkElement) {
-    iframe.src = page;
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    if (linkElement) linkElement.classList.add('active');
-    sidebar.classList.remove('open');
+// Load settings from localStorage
+function loadSettings() {
+  const saved = localStorage.getItem('xorbit-settings');
+  if (saved) {
+    try {
+      settings = { ...settings, ...JSON.parse(saved) };
+    } catch (e) {
+      console.warn('Failed to load settings');
+    }
+  }
+  applySettings();
+}
+
+// Apply settings to the desktop
+function applySettings() {
+  // Apply theme
+  document.body.className = '';
+  if (settings.theme === 'light') {
+    document.body.classList.add('light-mode');
+  } else if (settings.theme === 'auto') {
+    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+      document.body.classList.add('light-mode');
+    }
   }
 
-  // Notifications toggle
-  let notificationVisible = false;
-  notificationBtn.addEventListener('click', () => {
-    iframe.src = notificationVisible ? 'render.html' : 'notifications.html';
-    document.querySelectorAll('.sidebar a').forEach(a => a.classList.remove('active'));
-    notificationVisible = !notificationVisible;
-  });
+  // Apply dock settings
+  const dock = document.querySelector('.dock');
+  if (dock) {
+    // Reset dock positioning
+    dock.style.cssText = '';
+    dock.className = 'dock';
 
-  // Listen for auth success from iframe
-  window.addEventListener('message', (event) => {
-    if (event.data === 'auth-success') {
-      overlay.style.display = 'none';
+    switch (settings.dockPosition) {
+      case 'bottom':
+        dock.style.bottom = '16px';
+        dock.style.left = '50%';
+        dock.style.transform = 'translateX(-50%)';
+        dock.style.flexDirection = 'row';
+        break;
+      case 'top':
+        dock.style.top = '48px';
+        dock.style.left = '50%';
+        dock.style.transform = 'translateX(-50%)';
+        dock.style.flexDirection = 'row';
+        break;
+      case 'left':
+        dock.style.left = '16px';
+        dock.style.top = '50%';
+        dock.style.transform = 'translateY(-50%)';
+        dock.style.flexDirection = 'column';
+        break;
+      case 'right':
+        dock.style.right = '16px';
+        dock.style.top = '50%';
+        dock.style.transform = 'translateY(-50%)';
+        dock.style.flexDirection = 'column';
+        break;
+    }
+
+    // Apply dock size
+    const dockItems = document.querySelectorAll('.dock-item');
+    dockItems.forEach(item => {
+      if (item) {
+        item.style.width = settings.dockSize + 'px';
+        item.style.height = settings.dockSize + 'px';
+      }
+    });
+
+    // Auto-hide functionality
+    if (settings.dockAutohide) {
+      dock.classList.add('dock-autohide');
+      setupDockAutohide();
+    }
+  }
+
+  // Apply other settings
+  if (!settings.transparency) {
+    document.body.classList.add('no-transparency');
+  } else {
+    document.body.classList.remove('no-transparency');
+  }
+
+  if (!settings.animations) {
+    document.body.classList.add('no-animations');
+  } else {
+    document.body.classList.remove('no-animations');
+  }
+}
+
+// Setup dock auto-hide
+function setupDockAutohide() {
+  const dock = document.querySelector('.dock');
+  if (!dock) return;
+  
+  let hideTimeout;
+  
+  function showDock() {
+    clearTimeout(hideTimeout);
+    dock.style.opacity = '1';
+  }
+  
+  function hideDock() {
+    hideTimeout = setTimeout(() => {
+      dock.style.opacity = '0.3';
+    }, 2000);
+  }
+  
+  dock.addEventListener('mouseenter', showDock);
+  dock.addEventListener('mouseleave', hideDock);
+  
+  hideDock();
+}
+
+// Listen for messages
+window.addEventListener('message', function(event) {
+  if (event.data === 'auth-success') {
+    isAuthenticated = true;
+    const welcomeOverlay = document.getElementById('welcomeOverlay');
+    if (welcomeOverlay) {
+      welcomeOverlay.style.display = 'none';
+    }
+    initDesktop();
+  } else if (event.data && event.data.type === 'settings-updated') {
+    settings = { ...settings, ...event.data.settings };
+    applySettings();
+  }
+});
+
+// Initialize desktop
+function initDesktop() {
+  loadSettings();
+  updateTime();
+  setInterval(updateTime, 1000);
+  
+  // Update detailed time every second when menu is open
+  setInterval(() => {
+    const timeDropdown = document.getElementById('timeDropdown');
+    if (timeDropdown && timeDropdown.classList.contains('show')) {
+      updateDetailedTime();
+    }
+  }, 1000);
+  
+  const dockItems = document.querySelectorAll('.dock-item');
+  dockItems.forEach(function(item, index) {
+    if (item) {
+      item.style.opacity = '0';
+      item.style.transform = 'translateY(20px)';
+      setTimeout(function() {
+        item.style.transition = 'all 0.4s ease';
+        item.style.opacity = '1';
+        item.style.transform = 'translateY(0)';
+      }, index * 100);
     }
   });
+  
+  // Check if this is first time and show tutorial
+  setTimeout(function() {
+    console.log('Checking if first time user...');
+    if (isFirstTimeUser()) {
+      console.log('First time user detected, showing tutorial');
+      showTutorial();
+    } else {
+      console.log('Returning user, opening welcome window');
+      openWindow('Welcome to X-ORBIT', 'render.html', 'fas fa-rocket');
+    }
+  }, 1500);
+}
 
-  // Show notification on first load
-  window.addEventListener('load', () => {
-    const notification = document.getElementById('pageNotification');
-    const closeBtn = document.getElementById('closeNotificationBtn');
-    const storageKey = 'notificationShown';
-    if (!localStorage.getItem(storageKey)) {
-      if (notification) notification.classList.add('show');
-      if (closeBtn) closeBtn.addEventListener('click', () => notification.classList.remove('show'));
-      localStorage.setItem(storageKey, 'true');
+// Tutorial System Functions
+function isFirstTimeUser() {
+  const completed = localStorage.getItem('xorbit-tutorial-completed');
+  console.log('Tutorial completed status:', completed);
+  return !completed;
+}
+
+function markTutorialCompleted() {
+  localStorage.setItem('xorbit-tutorial-completed', 'true');
+  console.log('Tutorial marked as completed');
+}
+
+function showTutorial() {
+  console.log('Attempting to show tutorial...');
+  const tutorialOverlay = document.getElementById('tutorialOverlay');
+  
+  if (!tutorialOverlay) {
+    console.error('Tutorial overlay not found!');
+    return;
+  }
+  
+  // Close any open menus
+  document.querySelectorAll('.xorbit-menu.show, .time-menu.show').forEach(menu => {
+    menu.classList.remove('show');
+  });
+  
+  currentTutorialStep = 0;
+  console.log('Starting tutorial at step:', currentTutorialStep);
+  
+  // Show overlay first
+  tutorialOverlay.style.display = 'flex';
+  
+  // Then update content and show with animation
+  setTimeout(() => {
+    updateTutorialStep();
+    tutorialOverlay.classList.add('show');
+    setupTutorialEventListeners();
+    console.log('Tutorial should now be visible');
+  }, 50);
+}
+
+function hideTutorial() {
+  console.log('Hiding tutorial...');
+  const tutorialOverlay = document.getElementById('tutorialOverlay');
+  if (tutorialOverlay) {
+    tutorialOverlay.classList.remove('show');
+    clearTutorialHighlight();
+    markTutorialCompleted();
+    
+    // Hide overlay after animation
+    setTimeout(() => {
+      tutorialOverlay.style.display = 'none';
+      // Open welcome window after tutorial
+      openWindow('Welcome to X-ORBIT', 'render.html', 'fas fa-rocket');
+    }, 500);
+  }
+}
+
+function setupTutorialEventListeners() {
+  const nextBtn = document.getElementById('tutorialNext');
+  const prevBtn = document.getElementById('tutorialPrev');
+  const skipBtn = document.getElementById('tutorialSkip');
+  
+  if (nextBtn) {
+    nextBtn.onclick = function() {
+      if (currentTutorialStep < tutorialSteps.length - 1) {
+        currentTutorialStep++;
+        updateTutorialStep();
+      } else {
+        hideTutorial();
+      }
+    };
+  }
+  
+  if (prevBtn) {
+    prevBtn.onclick = function() {
+      if (currentTutorialStep > 0) {
+        currentTutorialStep--;
+        updateTutorialStep();
+      }
+    };
+  }
+  
+  if (skipBtn) {
+    skipBtn.onclick = function() {
+      if (confirm('Skip the tour? You can restart it from X-ORBIT → Desktop Tour later.')) {
+        hideTutorial();
+      }
+    };
+  }
+  
+  // Prevent clicks outside tutorial from closing it
+  const tutorialOverlay = document.getElementById('tutorialOverlay');
+  if (tutorialOverlay) {
+    tutorialOverlay.addEventListener('click', function(e) {
+      if (e.target === tutorialOverlay) {
+        // Don't close on background click - user should use skip or complete
+        return;
+      }
+    });
+  }
+  
+  // Add keyboard navigation for tutorial
+  document.addEventListener('keydown', function(e) {
+    const tutorialOverlay = document.getElementById('tutorialOverlay');
+    if (tutorialOverlay && tutorialOverlay.classList.contains('show')) {
+      if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
+        e.preventDefault();
+        const nextBtn = document.getElementById('tutorialNext');
+        if (nextBtn) nextBtn.click();
+      } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        if (currentTutorialStep > 0) {
+          currentTutorialStep--;
+          updateTutorialStep();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        const skipBtn = document.getElementById('tutorialSkip');
+        if (skipBtn) skipBtn.click();
+      }
     }
   });
+}
+
+function updateTutorialStep() {
+  const step = tutorialSteps[currentTutorialStep];
+  const tutorialContent = document.getElementById('tutorialContent');
+  
+  if (!step || !tutorialContent) return;
+  
+  // Update content
+  const iconEl = document.getElementById('tutorialIcon');
+  const titleEl = document.getElementById('tutorialTitle');
+  const stepEl = document.getElementById('tutorialStep');
+  const descEl = document.getElementById('tutorialDescription');
+  const highlightTitleEl = document.getElementById('tutorialHighlightTitle');
+  const highlightTextEl = document.getElementById('tutorialHighlightText');
+  const nextBtn = document.getElementById('tutorialNext');
+  const prevBtn = document.getElementById('tutorialPrev');
+  
+  if (iconEl) iconEl.textContent = step.icon;
+  if (titleEl) titleEl.textContent = step.title;
+  if (stepEl) stepEl.textContent = `Step ${currentTutorialStep + 1} of ${tutorialSteps.length}`;
+  if (descEl) descEl.textContent = step.description;
+  if (highlightTitleEl) highlightTitleEl.textContent = step.highlightTitle;
+  if (highlightTextEl) highlightTextEl.textContent = step.highlightText;
+  
+  // Update button text for last step
+  if (nextBtn) {
+    const nextSpan = nextBtn.querySelector('span');
+    const nextIcon = nextBtn.querySelector('i');
+    if (currentTutorialStep === tutorialSteps.length - 1) {
+      if (nextSpan) nextSpan.textContent = 'Get Started!';
+      if (nextIcon) nextIcon.className = 'fas fa-rocket';
+    } else {
+      if (nextSpan) nextSpan.textContent = 'Next';
+      if (nextIcon) nextIcon.className = 'fas fa-arrow-right';
+    }
+  }
+  
+  // Show/hide previous button
+  if (prevBtn) {
+    prevBtn.style.display = currentTutorialStep > 0 ? 'flex' : 'none';
+  }
+  
+  // Update progress dots
+  const dots = document.querySelectorAll('.tutorial-dot');
+  dots.forEach((dot, index) => {
+    dot.classList.toggle('active', index === currentTutorialStep);
+  });
+  
+  // Highlight element if specified
+  clearTutorialHighlight();
+  if (step.highlightElement) {
+    highlightTutorialElement(step.highlightElement);
+  }
+}
+
+function highlightTutorialElement(selector) {
+  try {
+    const element = document.querySelector(selector);
+    if (element) {
+      element.classList.add('tutorial-highlight-element');
+    }
+  } catch (e) {
+    console.warn('Could not highlight element:', selector);
+  }
+}
+
+function clearTutorialHighlight() {
+  try {
+    document.querySelectorAll('.tutorial-highlight-element').forEach(el => {
+      el.classList.remove('tutorial-highlight-element');
+    });
+  } catch (e) {
+    console.warn('Error clearing highlights');
+  }
+}
+
+// Add restart tutorial function to help menu
+function restartTutorial() {
+  document.getElementById('xorbitDropdown').classList.remove('show');
+  
+  if (confirm('Restart the desktop tour? This will show you how to use X-ORBIT.')) {
+    console.log('Restarting tutorial...');
+    // Clear completion flag temporarily
+    localStorage.removeItem('xorbit-tutorial-completed');
+    showTutorial();
+  }
+}
+
+// Temporary function for testing - remove in production
+function forceShowTutorial() {
+  console.log('Force showing tutorial for testing...');
+  localStorage.removeItem('xorbit-tutorial-completed');
+  showTutorial();
+}
+
+// Make forceShowTutorial available globally for testing
+window.forceShowTutorial = forceShowTutorial;
+
+// Update time
+function updateTime() {
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  const timeEl = document.getElementById('currentTime');
+  if (timeEl) timeEl.textContent = timeStr;
+  
+  // Update detailed time info
+  updateDetailedTime(now);
+}
+
+// Update detailed time information
+function updateDetailedTime(now = new Date()) {
+  const fullTimeEl = document.getElementById('fullTime');
+  const fullDateEl = document.getElementById('fullDate');
+  const timezoneEl = document.getElementById('timezone');
+  
+  if (fullTimeEl) {
+    const timeStr = now.toLocaleTimeString([], { 
+      hour: '2-digit', 
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    fullTimeEl.textContent = timeStr;
+  }
+  
+  if (fullDateEl) {
+    const dateStr = now.toLocaleDateString([], {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+    fullDateEl.textContent = dateStr;
+  }
+  
+  if (timezoneEl) {
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const offset = now.getTimezoneOffset();
+    const offsetHours = Math.floor(Math.abs(offset) / 60);
+    const offsetMins = Math.abs(offset) % 60;
+    const offsetSign = offset <= 0 ? '+' : '-';
+    const offsetStr = `${offsetSign}${offsetHours.toString().padStart(2, '0')}:${offsetMins.toString().padStart(2, '0')}`;
+    timezoneEl.textContent = `${timezone} (UTC${offsetStr})`;
+  }
+}
+
+// Open window
+function openWindow(title, src, icon) {
+  if (!isAuthenticated) return;
+  
+  if (activeWindows.has(title)) {
+    focusWindow(activeWindows.get(title));
+    return;
+  }
+  
+  windowCounter++;
+  const windowId = 'win' + windowCounter;
+  
+  const windowEl = document.createElement('div');
+  windowEl.className = 'window';
+  if (settings.animations) {
+    windowEl.classList.add('window-opening');
+  }
+  windowEl.id = windowId;
+  
+  const x = Math.random() * (window.innerWidth - 600) + 50;
+  const y = Math.random() * (window.innerHeight - 500) + 80;
+  
+  windowEl.style.left = x + 'px';
+  windowEl.style.top = y + 'px';
+  windowEl.style.width = '600px';
+  windowEl.style.height = '450px';
+  
+  windowEl.innerHTML = 
+    '<div class="window-titlebar">' +
+      '<div class="window-controls">' +
+        '<div class="window-control close"></div>' +
+        '<div class="window-control minimize"></div>' +
+        '<div class="window-control maximize"></div>' +
+      '</div>' +
+      '<div class="window-title">' +
+        '<i class="' + icon + '" style="margin-right: 8px;"></i>' +
+        title +
+      '</div>' +
+    '</div>' +
+    '<div class="window-content">' +
+      '<iframe src="' + src + '"></iframe>' +
+    '</div>';
+  
+  const desktop = document.getElementById('desktop');
+  if (desktop) {
+    desktop.appendChild(windowEl);
+  }
+  activeWindows.set(title, windowId);
+  focusWindow(windowId);
+  
+  setupWindowEvents(windowEl, windowId, title);
+}
+
+// Setup window events
+function setupWindowEvents(windowEl, windowId, title) {
+  const titlebar = windowEl.querySelector('.window-titlebar');
+  const closeBtn = windowEl.querySelector('.window-control.close');
+  const minBtn = windowEl.querySelector('.window-control.minimize');
+  const maxBtn = windowEl.querySelector('.window-control.maximize');
+  
+  if (closeBtn) {
+    closeBtn.onclick = function() {
+      if (settings.animations) {
+        windowEl.style.animation = 'windowOpen 0.2s reverse';
+        setTimeout(function() {
+          windowEl.remove();
+          activeWindows.delete(title);
+        }, 200);
+      } else {
+        windowEl.remove();
+        activeWindows.delete(title);
+      }
+    };
+  }
+  
+  if (minBtn) {
+    minBtn.onclick = function() {
+      windowEl.style.display = 'none';
+    };
+  }
+  
+  if (maxBtn) {
+    maxBtn.onclick = function() {
+      if (windowEl.style.width === '100vw') {
+        windowEl.style.left = '100px';
+        windowEl.style.top = '100px';
+        windowEl.style.width = '600px';
+        windowEl.style.height = '450px';
+      } else {
+        windowEl.style.left = '0';
+        windowEl.style.top = '32px';
+        windowEl.style.width = '100vw';
+        windowEl.style.height = 'calc(100vh - 32px)';
+      }
+    };
+  }
+  
+  // Window dragging
+  let isDragging = false;
+  let dragOffset = { x: 0, y: 0 };
+  
+  if (titlebar) {
+    titlebar.onmousedown = function(e) {
+      if (e.target.closest('.window-control')) return;
+      isDragging = true;
+      focusWindow(windowId);
+      
+      const rect = windowEl.getBoundingClientRect();
+      dragOffset.x = e.clientX - rect.left;
+      dragOffset.y = e.clientY - rect.top;
+      
+      document.onmousemove = function(e) {
+        if (!isDragging) return;
+        const newX = e.clientX - dragOffset.x;
+        const newY = Math.max(32, e.clientY - dragOffset.y);
+        
+        windowEl.style.left = newX + 'px';
+        windowEl.style.top = newY + 'px';
+      };
+      
+      document.onmouseup = function() {
+        isDragging = false;
+        document.onmousemove = null;
+        document.onmouseup = null;
+      };
+    };
+  }
+}
+
+// Focus window
+function focusWindow(windowId) {
+  const windows = document.querySelectorAll('.window');
+  windows.forEach(function(w) {
+    w.classList.remove('active');
+  });
+  
+  const windowEl = document.getElementById(windowId);
+  if (windowEl) {
+    windowEl.classList.add('active');
+    windowEl.style.zIndex = ++zIndexCounter;
+  }
+}
+
+// Click event handlers
+document.addEventListener('click', function(e) {
+  const dockItem = e.target.closest('.dock-item');
+  const desktopIcon = e.target.closest('.desktop-icon');
+  
+  if (dockItem) {
+    const title = dockItem.dataset.app;
+    const src = dockItem.dataset.src;
+    const icon = dockItem.dataset.icon;
+    
+    if (title === 'Settings') {
+      openSettingsWindow();
+    } else {
+      openWindow(title, src, icon);
+    }
+  }
+  
+  if (desktopIcon) {
+    const title = desktopIcon.dataset.app;
+    const src = desktopIcon.dataset.src;
+    const icon = desktopIcon.dataset.icon;
+    
+    if (title === 'Settings') {
+      openSettingsWindow();
+    } else {
+      openWindow(title, src, icon);
+    }
+  }
+});
+
+// Open settings window with embedded content
+function openSettingsWindow() {
+  if (!isAuthenticated) return;
+  
+  const title = 'Settings';
+  if (activeWindows.has(title)) {
+    focusWindow(activeWindows.get(title));
+    return;
+  }
+  
+  windowCounter++;
+  const windowId = 'win' + windowCounter;
+  
+  const windowEl = document.createElement('div');
+  windowEl.className = 'window';
+  if (settings.animations) {
+    windowEl.classList.add('window-opening');
+  }
+  windowEl.id = windowId;
+  
+  const x = Math.random() * (window.innerWidth - 700) + 50;
+  const y = Math.random() * (window.innerHeight - 600) + 80;
+  
+  windowEl.style.left = x + 'px';
+  windowEl.style.top = y + 'px';
+  windowEl.style.width = '700px';
+  windowEl.style.height = '600px';
+  
+  windowEl.innerHTML = 
+    '<div class="window-titlebar">' +
+      '<div class="window-controls">' +
+        '<div class="window-control close"></div>' +
+        '<div class="window-control minimize"></div>' +
+        '<div class="window-control maximize"></div>' +
+      '</div>' +
+      '<div class="window-title">' +
+        '<i class="fas fa-cog" style="margin-right: 8px;"></i>' +
+        'Settings' +
+      '</div>' +
+    '</div>' +
+    '<div class="window-content" style="padding: 0; background: transparent;">' +
+      createSettingsContent() +
+    '</div>';
+  
+  const desktop = document.getElementById('desktop');
+  if (desktop) {
+    desktop.appendChild(windowEl);
+  }
+  activeWindows.set(title, windowId);
+  focusWindow(windowId);
+  
+  setupWindowEvents(windowEl, windowId, title);
+  setupSettingsEvents(windowEl);
+}
+
+// Create settings content
+function createSettingsContent() {
+  return `
+    <div style="
+      height: 100%; 
+      overflow-y: auto; 
+      padding: 24px;
+      background: rgba(10, 10, 25, 0.3);
+      border-radius: 0 0 16px 16px;
+    ">
+      <style>
+        .settings-section {
+          margin-bottom: 32px;
+        }
+        
+        .section-title {
+          font-size: 1.3rem;
+          font-weight: 600;
+          margin-bottom: 20px;
+          color: #e8f0ff;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+          padding-bottom: 12px;
+        }
+        
+        .section-title i {
+          color: #7d5cff;
+          font-size: 1.1rem;
+        }
+        
+        .setting-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 16px 20px;
+          margin-bottom: 12px;
+          background: rgba(255, 255, 255, 0.03);
+          border: 1px solid rgba(120, 80, 255, 0.1);
+          border-radius: 12px;
+          transition: all 0.3s ease;
+        }
+        
+        .setting-item:hover {
+          background: rgba(120, 80, 255, 0.08);
+          border-color: rgba(120, 80, 255, 0.2);
+          transform: translateY(-1px);
+        }
+        
+        .setting-info {
+          flex: 1;
+        }
+        
+        .setting-label {
+          font-size: 1rem;
+          font-weight: 500;
+          color: #e8f0ff;
+          margin-bottom: 4px;
+        }
+        
+        .setting-description {
+          font-size: 0.85rem;
+          color: #a8b4d9;
+          line-height: 1.3;
+        }
+        
+        .setting-control {
+          margin-left: 20px;
+        }
+        
+        .toggle-switch {
+          position: relative;
+          width: 50px;
+          height: 26px;
+          background: rgba(255, 255, 255, 0.1);
+          border-radius: 13px;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          border: 1px solid rgba(120, 80, 255, 0.3);
+        }
+        
+        .toggle-switch.active {
+          background: linear-gradient(135deg, rgba(120, 80, 255, 0.8) 0%, rgba(60, 130, 255, 0.8) 100%);
+          box-shadow: 0 0 15px rgba(120, 80, 255, 0.4);
+        }
+        
+        .toggle-switch::before {
+          content: '';
+          position: absolute;
+          top: 2px;
+          left: 2px;
+          width: 20px;
+          height: 20px;
+          background: #ffffff;
+          border-radius: 50%;
+          transition: all 0.3s ease;
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .toggle-switch.active::before {
+          transform: translateX(24px);
+        }
+        
+        .select-control {
+          position: relative;
+          min-width: 140px;
+        }
+        
+        .select-dropdown {
+          width: 100%;
+          padding: 10px 14px;
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(120, 80, 255, 0.3);
+          border-radius: 10px;
+          color: #e8f0ff;
+          font-size: 0.9rem;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          appearance: none;
+          -webkit-appearance: none;
+        }
+        
+        .select-dropdown:focus {
+          outline: none;
+          border-color: rgba(120, 80, 255, 0.6);
+          box-shadow: 0 0 15px rgba(120, 80, 255, 0.3);
+        }
+        
+        .select-control::after {
+          content: '▼';
+          position: absolute;
+          right: 12px;
+          top: 50%;
+          transform: translateY(-50%);
+          color: #a8b4d9;
+          pointer-events: none;
+          font-size: 0.8rem;
+        }
+        
+        .range-control {
+          width: 140px;
+        }
+        
+        .range-slider {
+          width: 100%;
+          height: 5px;
+          border-radius: 3px;
+          background: rgba(255, 255, 255, 0.1);
+          outline: none;
+          appearance: none;
+          -webkit-appearance: none;
+          cursor: pointer;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+          appearance: none;
+          -webkit-appearance: none;
+          width: 18px;
+          height: 18px;
+          border-radius: 50%;
+          background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+          cursor: pointer;
+          box-shadow: 0 0 10px rgba(120, 80, 255, 0.5), 0 3px 6px rgba(0, 0, 0, 0.3);
+          transition: all 0.2s ease;
+        }
+        
+        .range-slider::-webkit-slider-thumb:hover {
+          transform: scale(1.1);
+          box-shadow: 0 0 15px rgba(120, 80, 255, 0.7), 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        .range-value {
+          font-size: 0.85rem;
+          color: #d0d8ff;
+          margin-top: 6px;
+          text-align: center;
+          font-weight: 500;
+        }
+        
+        .save-indicator {
+          position: fixed;
+          top: 20px;
+          right: 20px;
+          background: rgba(40, 202, 66, 0.9);
+          color: white;
+          padding: 10px 16px;
+          border-radius: 10px;
+          font-size: 0.85rem;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          opacity: 0;
+          transform: translateX(100px);
+          transition: all 0.3s ease;
+          z-index: 10000;
+          pointer-events: none;
+        }
+        
+        .save-indicator.show {
+          opacity: 1;
+          transform: translateX(0);
+        }
+        
+        .reset-button {
+          width: 100%;
+          padding: 14px 20px;
+          background: rgba(255, 87, 87, 0.1);
+          border: 1px solid rgba(255, 87, 87, 0.4);
+          border-radius: 12px;
+          color: #ff6b6b;
+          font-size: 0.95rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 24px;
+        }
+        
+        .reset-button:hover {
+          background: rgba(255, 87, 87, 0.2);
+          border-color: rgba(255, 87, 87, 0.6);
+          transform: translateY(-1px);
+        }
+      </style>
+      
+      <!-- Display Settings -->
+      <div class="settings-section">
+        <h2 class="section-title">
+          <i class="fas fa-palette"></i>
+          Display Settings
+        </h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Theme</div>
+            <div class="setting-description">Choose between light and dark mode</div>
+          </div>
+          <div class="setting-control">
+            <div class="select-control">
+              <select class="select-dropdown" id="themeSelect">
+                <option value="dark">Dark Mode</option>
+                <option value="light">Light Mode</option>
+                <option value="auto">Auto (System)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Transparency Effects</div>
+            <div class="setting-description">Enable glass morphism and backdrop blur</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="transparencyToggle"></div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Animations</div>
+            <div class="setting-description">Enable smooth animations and transitions</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="animationsToggle"></div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Background Opacity</div>
+            <div class="setting-description">Adjust window background transparency</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-control">
+              <input type="range" class="range-slider" id="opacityRange" min="20" max="100" value="80">
+              <div class="range-value" id="opacityValue">80%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Dock Settings -->
+      <div class="settings-section">
+        <h2 class="section-title">
+          <i class="fas fa-grip-horizontal"></i>
+          Dock Settings
+        </h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Auto-hide Dock</div>
+            <div class="setting-description">Hide dock when not in use</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch" id="autohideToggle"></div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Dock Position</div>
+            <div class="setting-description">Choose dock placement on screen</div>
+          </div>
+          <div class="setting-control">
+            <div class="select-control">
+              <select class="select-dropdown" id="dockPositionSelect">
+                <option value="bottom">Bottom</option>
+                <option value="top">Top</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Dock Size</div>
+            <div class="setting-description">Adjust dock icon size</div>
+          </div>
+          <div class="setting-control">
+            <div class="range-control">
+              <input type="range" class="range-slider" id="dockSizeRange" min="40" max="80" value="56">
+              <div class="range-value" id="dockSizeValue">56px</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Magnification</div>
+            <div class="setting-description">Enable hover zoom effect</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="magnificationToggle"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Window Settings -->
+      <div class="settings-section">
+        <h2 class="section-title">
+          <i class="fas fa-window-restore"></i>
+          Window Settings
+        </h2>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Window Snapping</div>
+            <div class="setting-description">Snap windows to screen edges</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="snappingToggle"></div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Window Shadows</div>
+            <div class="setting-description">Enable drop shadows</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="shadowsToggle"></div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Minimize Animation</div>
+            <div class="setting-description">Animate window minimize/restore</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch active" id="minimizeAnimToggle"></div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="reset-button" id="resetButton">
+        <i class="fas fa-undo"></i>
+        Reset All Settings to Default
+      </button>
+      
+      <div class="save-indicator" id="saveIndicator">
+        <i class="fas fa-check"></i>
+        Settings saved!
+      </div>
+    </div>
+  `;
+}
+
+// Setup settings event handlers
+function setupSettingsEvents(windowEl) {
+  const settingsContent = windowEl.querySelector('.window-content');
+  
+  // Load current settings into UI
+  function loadSettingsUI() {
+    const themeSelect = settingsContent.querySelector('#themeSelect');
+    const transparencyToggle = settingsContent.querySelector('#transparencyToggle');
+    const animationsToggle = settingsContent.querySelector('#animationsToggle');
+    const opacityRange = settingsContent.querySelector('#opacityRange');
+    const opacityValue = settingsContent.querySelector('#opacityValue');
+    const autohideToggle = settingsContent.querySelector('#autohideToggle');
+    const dockPositionSelect = settingsContent.querySelector('#dockPositionSelect');
+    const dockSizeRange = settingsContent.querySelector('#dockSizeRange');
+    const dockSizeValue = settingsContent.querySelector('#dockSizeValue');
+    const magnificationToggle = settingsContent.querySelector('#magnificationToggle');
+    const snappingToggle = settingsContent.querySelector('#snappingToggle');
+    const shadowsToggle = settingsContent.querySelector('#shadowsToggle');
+    const minimizeAnimToggle = settingsContent.querySelector('#minimizeAnimToggle');
+    
+    if (themeSelect) themeSelect.value = settings.theme;
+    if (transparencyToggle) transparencyToggle.classList.toggle('active', settings.transparency);
+    if (animationsToggle) animationsToggle.classList.toggle('active', settings.animations);
+    if (opacityRange) {
+      opacityRange.value = settings.backgroundOpacity;
+      if (opacityValue) opacityValue.textContent = settings.backgroundOpacity + '%';
+    }
+    if (autohideToggle) autohideToggle.classList.toggle('active', settings.dockAutohide);
+    if (dockPositionSelect) dockPositionSelect.value = settings.dockPosition;
+    if (dockSizeRange) {
+      dockSizeRange.value = settings.dockSize;
+      if (dockSizeValue) dockSizeValue.textContent = settings.dockSize + 'px';
+    }
+    if (magnificationToggle) magnificationToggle.classList.toggle('active', settings.dockMagnification);
+    if (snappingToggle) snappingToggle.classList.toggle('active', settings.windowSnapping);
+    if (shadowsToggle) shadowsToggle.classList.toggle('active', settings.windowShadows);
+    if (minimizeAnimToggle) minimizeAnimToggle.classList.toggle('active', settings.minimizeAnimation !== false);
+  }
+  
+  // Save settings
+  function saveSettings() {
+    localStorage.setItem('xorbit-settings', JSON.stringify(settings));
+    applySettings();
+    showSaveIndicator();
+  }
+  
+  // Show save indicator
+  function showSaveIndicator() {
+    const indicator = settingsContent.querySelector('#saveIndicator');
+    if (indicator) {
+      indicator.classList.add('show');
+      setTimeout(() => {
+        indicator.classList.remove('show');
+      }, 2000);
+    }
+  }
+  
+  // Load initial settings
+  loadSettingsUI();
+  
+  // Theme select
+  const themeSelect = settingsContent.querySelector('#themeSelect');
+  if (themeSelect) {
+    themeSelect.addEventListener('change', function() {
+      settings.theme = this.value;
+      saveSettings();
+    });
+  }
+  
+  // Toggle switches
+  settingsContent.querySelectorAll('.toggle-switch').forEach(toggle => {
+    toggle.addEventListener('click', function() {
+      const isActive = this.classList.contains('active');
+      this.classList.toggle('active', !isActive);
+      
+      const setting = this.id.replace('Toggle', '');
+      switch (setting) {
+        case 'transparency':
+          settings.transparency = !isActive;
+          break;
+        case 'animations':
+          settings.animations = !isActive;
+          break;
+        case 'autohide':
+          settings.dockAutohide = !isActive;
+          break;
+        case 'magnification':
+          settings.dockMagnification = !isActive;
+          break;
+        case 'snapping':
+          settings.windowSnapping = !isActive;
+          break;
+        case 'shadows':
+          settings.windowShadows = !isActive;
+          break;
+        case 'minimizeAnim':
+          settings.minimizeAnimation = !isActive;
+          break;
+      }
+      
+      saveSettings();
+    });
+  });
+  
+  // Dock position select
+  const dockPositionSelect = settingsContent.querySelector('#dockPositionSelect');
+  if (dockPositionSelect) {
+    dockPositionSelect.addEventListener('change', function() {
+      settings.dockPosition = this.value;
+      saveSettings();
+    });
+  }
+  
+  // Range sliders
+  const opacityRange = settingsContent.querySelector('#opacityRange');
+  const opacityValue = settingsContent.querySelector('#opacityValue');
+  if (opacityRange && opacityValue) {
+    opacityRange.addEventListener('input', function() {
+      settings.backgroundOpacity = parseInt(this.value);
+      opacityValue.textContent = this.value + '%';
+      saveSettings();
+    });
+  }
+  
+  const dockSizeRange = settingsContent.querySelector('#dockSizeRange');
+  const dockSizeValue = settingsContent.querySelector('#dockSizeValue');
+  if (dockSizeRange && dockSizeValue) {
+    dockSizeRange.addEventListener('input', function() {
+      settings.dockSize = parseInt(this.value);
+      dockSizeValue.textContent = this.value + 'px';
+      saveSettings();
+    });
+  }
+  
+  // Reset button
+  const resetButton = settingsContent.querySelector('#resetButton');
+  if (resetButton) {
+    resetButton.addEventListener('click', function() {
+      if (confirm('Reset all settings to default? This cannot be undone.')) {
+        settings = {
+          theme: 'dark',
+          transparency: true,
+          animations: true,
+          backgroundOpacity: 80,
+          dockAutohide: false,
+          dockPosition: 'bottom',
+          dockSize: 56,
+          dockMagnification: true,
+          dockTooltips: true,
+          windowSnapping: true,
+          windowShadows: true,
+          minimizeAnimation: true
+        };
+        loadSettingsUI();
+        saveSettings();
+      }
+    });
+  }
+}
+
+// DOM Content Loaded
+document.addEventListener('DOMContentLoaded', function() {
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  if (welcomeOverlay) {
+    welcomeOverlay.style.display = 'flex';
+  }
+  
+  loadSettings();
+  setupXORBITMenu();
+  setupTimeMenu();
+  getUserLocation();
+  
+  // Setup dock hover effects
+  const dockItems = document.querySelectorAll('.dock-item');
+  dockItems.forEach(function(item) {
+    if (item) {
+      item.addEventListener('mouseenter', function() {
+        if (settings.dockMagnification) {
+          this.style.transform = 'translateY(-8px) scale(1.15)';
+        }
+      });
+      
+      item.addEventListener('mouseleave', function() {
+        if (!this.classList.contains('active')) {
+          this.style.transform = 'translateY(0) scale(1)';
+        }
+      });
+    }
+  });
+});
+
+// Setup time menu functionality
+function setupTimeMenu() {
+  const timeMenuButton = document.getElementById('timeMenu');
+  const timeDropdown = document.getElementById('timeDropdown');
+  
+  if (timeMenuButton && timeDropdown) {
+    timeMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = timeDropdown.classList.contains('show');
+      
+      // Hide all other menus first
+      document.querySelectorAll('.xorbit-menu.show, .time-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      
+      if (!isVisible) {
+        timeDropdown.classList.add('show');
+        updateWeatherDisplay();
+      }
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function() {
+      timeDropdown.classList.remove('show');
+      // Also close X-ORBIT menu if open
+      const xorbitDropdown = document.getElementById('xorbitDropdown');
+      if (xorbitDropdown) {
+        xorbitDropdown.classList.remove('show');
+      }
+    });
+    
+    // Prevent menu from closing when clicking inside
+    timeDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+}
+
+// Get user location
+function getUserLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(
+      function(position) {
+        userLocation.lat = position.coords.latitude;
+        userLocation.lon = position.coords.longitude;
+        
+        // Reverse geocoding to get city name (simplified)
+        reverseGeocode(userLocation.lat, userLocation.lon);
+        
+        // Get weather for the location
+        getWeatherData();
+      },
+      function(error) {
+        console.log('Location access denied, using default location');
+        // Use default Casper, Wyoming location
+        getWeatherData();
+      }
+    );
+  } else {
+    console.log('Geolocation not supported');
+    getWeatherData();
+  }
+}
+
+// Simplified reverse geocoding (you would use a real service)
+function reverseGeocode(lat, lon) {
+  // This is a simplified example. In production, use a real geocoding service
+  const locations = [
+    { lat: 42.8666, lon: -106.3130, city: 'Casper', state: 'Wyoming' },
+    { lat: 40.7128, lon: -74.0060, city: 'New York', state: 'New York' },
+    { lat: 34.0522, lon: -118.2437, city: 'Los Angeles', state: 'California' },
+    { lat: 41.8781, lon: -87.6298, city: 'Chicago', state: 'Illinois' },
+    { lat: 29.7604, lon: -95.3698, city: 'Houston', state: 'Texas' }
+  ];
+  
+  // Find closest location (simplified)
+  let closestLocation = locations[0];
+  let minDistance = getDistance(lat, lon, closestLocation.lat, closestLocation.lon);
+  
+  locations.forEach(location => {
+    const distance = getDistance(lat, lon, location.lat, location.lon);
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestLocation = location;
+    }
+  });
+  
+  userLocation.city = closestLocation.city;
+  userLocation.state = closestLocation.state;
+}
+
+// Calculate distance between two coordinates
+function getDistance(lat1, lon1, lat2, lon2) {
+  const R = 6371; // Radius of the Earth in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+}
+
+// Get weather data (simulated - you would use a real weather API)
+function getWeatherData() {
+  // Simulate weather data based on location and time
+  const hour = new Date().getHours();
+  const season = getCurrentSeason();
+  const weatherConditions = getWeatherForLocation(userLocation.city, season, hour);
+  
+  weatherData = {
+    ...weatherData,
+    ...weatherConditions
+  };
+  
+  updateWeatherDisplay();
+}
+
+// Get current season
+function getCurrentSeason() {
+  const month = new Date().getMonth() + 1;
+  if (month >= 3 && month <= 5) return 'spring';
+  if (month >= 6 && month <= 8) return 'summer';
+  if (month >= 9 && month <= 11) return 'autumn';
+  return 'winter';
+}
+
+// Get weather based on location, season, and time
+function getWeatherForLocation(city, season, hour) {
+  const weatherPatterns = {
+    'Casper': {
+      winter: { temp: -2, desc: 'Snow Showers', icon: '🌨️', humidity: 78 },
+      spring: { temp: 12, desc: 'Partly Cloudy', icon: '⛅', humidity: 65 },
+      summer: { temp: 26, desc: 'Sunny', icon: '☀️', humidity: 45 },
+      autumn: { temp: 8, desc: 'Cloudy', icon: '☁️', humidity: 70 }
+    },
+    'New York': {
+      winter: { temp: 2, desc: 'Overcast', icon: '☁️', humidity: 72 },
+      spring: { temp: 18, desc: 'Partly Cloudy', icon: '⛅', humidity: 68 },
+      summer: { temp: 28, desc: 'Sunny', icon: '☀️', humidity: 65 },
+      autumn: { temp: 15, desc: 'Rainy', icon: '🌧️', humidity: 80 }
+    },
+    'Los Angeles': {
+      winter: { temp: 18, desc: 'Sunny', icon: '☀️', humidity: 55 },
+      spring: { temp: 22, desc: 'Clear', icon: '☀️', humidity: 60 },
+      summer: { temp: 32, desc: 'Hot', icon: '🌞', humidity: 50 },
+      autumn: { temp: 25, desc: 'Partly Cloudy', icon: '⛅', humidity: 58 }
+    }
+  };
+  
+  const baseWeather = weatherPatterns[city] || weatherPatterns['Casper'];
+  const seasonWeather = baseWeather[season];
+  
+  // Add some randomization and time-based variations
+  const tempVariation = Math.floor(Math.random() * 6) - 3; // ±3 degrees
+  const isNight = hour < 6 || hour > 20;
+  
+  return {
+    temp: seasonWeather.temp + tempVariation + (isNight ? -3 : 0),
+    description: seasonWeather.desc,
+    icon: isNight && seasonWeather.icon === '☀️' ? '🌙' : seasonWeather.icon,
+    humidity: seasonWeather.humidity + Math.floor(Math.random() * 10) - 5,
+    wind: Math.floor(Math.random() * 20) + 5,
+    pressure: 1013 + Math.floor(Math.random() * 40) - 20,
+    uvIndex: isNight ? 0 : Math.floor(Math.random() * 8) + 1
+  };
+}
+
+// Update weather display
+function updateWeatherDisplay() {
+  const elements = {
+    weatherIcon: document.getElementById('weatherIcon'),
+    weatherTemp: document.getElementById('weatherTemp'),
+    weatherDesc: document.getElementById('weatherDesc'),
+    weatherLocation: document.getElementById('weatherLocation'),
+    humidity: document.getElementById('humidity'),
+    wind: document.getElementById('wind'),
+    pressure: document.getElementById('pressure'),
+    uvIndex: document.getElementById('uvIndex')
+  };
+  
+  if (elements.weatherIcon) elements.weatherIcon.textContent = weatherData.icon;
+  if (elements.weatherTemp) elements.weatherTemp.textContent = `${weatherData.temp}°C`;
+  if (elements.weatherDesc) elements.weatherDesc.textContent = weatherData.description;
+  if (elements.weatherLocation) elements.weatherLocation.textContent = `${userLocation.city}, ${userLocation.state}`;
+  if (elements.humidity) elements.humidity.textContent = `${weatherData.humidity}%`;
+  if (elements.wind) elements.wind.textContent = `${weatherData.wind} mph`;
+  if (elements.pressure) elements.pressure.textContent = `${weatherData.pressure} mb`;
+  if (elements.uvIndex) elements.uvIndex.textContent = weatherData.uvIndex;
+}
+
+// Update location function
+function updateLocation() {
+  const locationUpdate = document.querySelector('.location-update');
+  if (locationUpdate) {
+    locationUpdate.innerHTML = '🔄 Updating...';
+    locationUpdate.style.pointerEvents = 'none';
+  }
+  
+  setTimeout(() => {
+    getUserLocation();
+    if (locationUpdate) {
+      locationUpdate.innerHTML = '📍 Update location';
+      locationUpdate.style.pointerEvents = 'auto';
+    }
+  }, 1500);
+}
+
+// Setup X-ORBIT menu functionality
+function setupXORBITMenu() {
+  const xorbitMenuButton = document.getElementById('xorbitMenu');
+  const xorbitDropdown = document.getElementById('xorbitDropdown');
+  
+  if (xorbitMenuButton && xorbitDropdown) {
+    xorbitMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = xorbitDropdown.classList.contains('show');
+      
+      // Hide all other menus first
+      document.querySelectorAll('.xorbit-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      
+      if (!isVisible) {
+        xorbitDropdown.classList.add('show');
+      }
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function() {
+      xorbitDropdown.classList.remove('show');
+      // Also close time menu if open
+      const timeDropdown = document.getElementById('timeDropdown');
+      if (timeDropdown) {
+        timeDropdown.classList.remove('show');
+      }
+    });
+    
+    // Prevent menu from closing when clicking inside
+    xorbitDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+}
+
+// X-ORBIT Menu Functions
+function showAboutDialog() {
+  const aboutContent = `
+    <div style="text-align: center; padding: 40px 30px;">
+      <div style="margin-bottom: 24px;">
+        <i class="fas fa-rocket" style="font-size: 3rem; color: #7d5cff; margin-bottom: 16px;"></i>
+        <h1 style="font-size: 2rem; font-weight: 600; margin-bottom: 8px; background: linear-gradient(135deg, #ffffff 0%, #d0d8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">X-ORBIT Desktop</h1>
+        <p style="color: #a8b4d9; font-size: 1rem; margin-bottom: 24px;">Version 4.2.0</p>
+      </div>
+      
+      <div style="background: rgba(120, 80, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(120, 80, 255, 0.2);">
+        <p style="color: #e8f0ff; line-height: 1.6; margin-bottom: 16px;">
+          X-ORBIT is a modern web-based desktop environment featuring glass morphism design, 
+          customizable themes, and a powerful window management system.
+        </p>
+        <p style="color: #a8b4d9; font-size: 0.9rem;">
+          Built with modern web technologies for the future of desktop computing.
+        </p>
+      </div>
+      
+      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+        <div style="text-align: center;">
+          <div style="color: #7d5cff; font-weight: 600;">🚀 Features</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Window Management</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="color: #7d5cff; font-weight: 600;">🎨 Themes</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Light & Dark Mode</div>
+        </div>
+        <div style="text-align: center;">
+          <div style="color: #7d5cff; font-weight: 600;">⚙️ Settings</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Fully Customizable</div>
+        </div>
+      </div>
+      
+      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(120, 80, 255, 0.2);">
+        <p style="color: #a8b4d9; font-size: 0.85rem;">
+          © 2024 X-ORBIT Desktop. All rights reserved.
+        </p>
+      </div>
+    </div>
+  `;
+  
+  openCustomWindow('About X-ORBIT', aboutContent, 'fas fa-info-circle', 500, 600);
+  document.getElementById('xorbitDropdown').classList.remove('show');
+}
+
+function showSystemInfo() {
+  const systemContent = `
+    <div style="padding: 24px;">
+      <h2 style="color: #e8f0ff; margin-bottom: 24px; font-size: 1.4rem;">
+        <i class="fas fa-desktop" style="margin-right: 12px; color: #7d5cff;"></i>
+        System Information
+      </h2>
+      
+      <div style="display: grid; gap: 16px;">
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">Browser Information</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">User Agent: ${navigator.userAgent}</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Platform: ${navigator.platform}</div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">Display Information</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">Resolution: ${window.screen.width} × ${window.screen.height}</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Available: ${window.screen.availWidth} × ${window.screen.availHeight}</div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">X-ORBIT Status</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">Authentication: ${isAuthenticated ? '✅ Active' : '❌ Inactive'}</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Active Windows: ${activeWindows.size}</div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">Current Settings</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">Theme: ${settings.theme}</div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">Dock Position: ${settings.dockPosition}</div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  openCustomWindow('System Information', systemContent, 'fas fa-desktop', 600, 500);
+  document.getElementById('xorbitDropdown').classList.remove('show');
+}
+
+function checkForUpdates() {
+  const updateContent = `
+    <div style="text-align: center; padding: 40px 30px;">
+      <div style="margin-bottom: 24px;">
+        <i class="fas fa-download" style="font-size: 2.5rem; color: #7d5cff; margin-bottom: 16px;"></i>
+        <h2 style="color: #e8f0ff; margin-bottom: 16px;">Check for Updates</h2>
+      </div>
+      
+      <div id="updateStatus" style="background: rgba(120, 80, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(120, 80, 255, 0.2);">
+        <div style="color: #a8b4d9; margin-bottom: 16px;">
+          <i class="fas fa-spinner fa-spin" style="margin-right: 8px;"></i>
+          Checking for updates...
+        </div>
+        <div style="width: 100%; height: 4px; background: rgba(120, 80, 255, 0.2); border-radius: 2px; overflow: hidden;">
+          <div style="width: 0%; height: 100%; background: linear-gradient(90deg, #7d5cff, #3c82ff); border-radius: 2px; transition: width 2s ease;" id="updateProgress"></div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  const windowEl = openCustomWindow('Software Update', updateContent, 'fas fa-download', 450, 300);
+  
+  // Simulate update check
+  setTimeout(() => {
+    const progressBar = windowEl.querySelector('#updateProgress');
+    const statusDiv = windowEl.querySelector('#updateStatus');
+    
+    if (progressBar) progressBar.style.width = '100%';
+    
+    setTimeout(() => {
+      if (statusDiv) {
+        statusDiv.innerHTML = `
+          <div style="color: #28ca42; margin-bottom: 8px;">
+            <i class="fas fa-check-circle" style="margin-right: 8px;"></i>
+            You're up to date!
+          </div>
+          <div style="color: #a8b4d9; font-size: 0.9rem;">
+            X-ORBIT Desktop v1.0.0 is the latest version.
+          </div>
+        `;
+      }
+    }, 2000);
+  }, 1000);
+  
+  document.getElementById('xorbitDropdown').classList.remove('show');
+}
+
+function restartDesktop() {
+  if (confirm('Restart the desktop environment? All open windows will be closed.')) {
+    // Close all windows
+    activeWindows.forEach((windowId) => {
+      const windowEl = document.getElementById(windowId);
+      if (windowEl) windowEl.remove();
+    });
+    activeWindows.clear();
+    
+    // Show restart animation
+    const restartDiv = document.createElement('div');
+    restartDiv.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(10, 5, 25, 0.9);
+        backdrop-filter: blur(60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        color: #e8f0ff;
+        flex-direction: column;
+        gap: 20px;
+      ">
+        <i class="fas fa-sync fa-spin" style="font-size: 3rem; color: #7d5cff;"></i>
+        <div style="font-size: 1.2rem; font-weight: 500;">Restarting Desktop...</div>
+      </div>
+    `;
+    document.body.appendChild(restartDiv);
+    
+    setTimeout(() => {
+      restartDiv.remove();
+      initDesktop();
+    }, 2000);
+  }
+  
+  document.getElementById('xorbitDropdown').classList.remove('show');
+}
+
+function logout() {
+  if (confirm('Are you sure you want to logout? All unsaved work will be lost.')) {
+    // Clear all windows
+    activeWindows.forEach((windowId) => {
+      const windowEl = document.getElementById(windowId);
+      if (windowEl) windowEl.remove();
+    });
+    activeWindows.clear();
+    
+    // Reset authentication
+    isAuthenticated = false;
+    
+    // Show logout animation and return to auth screen
+    const logoutDiv = document.createElement('div');
+    logoutDiv.innerHTML = `
+      <div style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(10, 5, 25, 0.9);
+        backdrop-filter: blur(60px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        color: #e8f0ff;
+        flex-direction: column;
+        gap: 20px;
+      ">
+        <i class="fas fa-sign-out-alt" style="font-size: 3rem; color: #ff6b6b;"></i>
+        <div style="font-size: 1.2rem; font-weight: 500;">Logging out...</div>
+      </div>
+    `;
+    document.body.appendChild(logoutDiv);
+    
+    setTimeout(() => {
+      logoutDiv.remove();
+      const welcomeOverlay = document.getElementById('welcomeOverlay');
+      if (welcomeOverlay) {
+        welcomeOverlay.style.display = 'flex';
+      }
+    }, 1500);
+  }
+  
+  document.getElementById('xorbitDropdown').classList.remove('show');
+}
+
+// Helper function to create custom content windows
+function openCustomWindow(title, content, icon, width = 600, height = 450) {
+  if (!isAuthenticated) return null;
+  
+  if (activeWindows.has(title)) {
+    focusWindow(activeWindows.get(title));
+    return document.getElementById(activeWindows.get(title));
+  }
+  
+  windowCounter++;
+  const windowId = 'win' + windowCounter;
+  
+  const windowEl = document.createElement('div');
+  windowEl.className = 'window';
+  if (settings.animations) {
+    windowEl.classList.add('window-opening');
+  }
+  windowEl.id = windowId;
+  
+  const x = Math.random() * (window.innerWidth - width) + 50;
+  const y = Math.random() * (window.innerHeight - height) + 80;
+  
+  windowEl.style.left = x + 'px';
+  windowEl.style.top = y + 'px';
+  windowEl.style.width = width + 'px';
+  windowEl.style.height = height + 'px';
+  
+  windowEl.innerHTML = 
+    '<div class="window-titlebar">' +
+      '<div class="window-controls">' +
+        '<div class="window-control close"></div>' +
+        '<div class="window-control minimize"></div>' +
+        '<div class="window-control maximize"></div>' +
+      '</div>' +
+      '<div class="window-title">' +
+        '<i class="' + icon + '" style="margin-right: 8px;"></i>' +
+        title +
+      '</div>' +
+    '</div>' +
+    '<div class="window-content" style="padding: 0; background: rgba(10, 10, 25, 0.3); border-radius: 0 0 16px 16px; overflow: auto;">' +
+      content +
+    '</div>';
+  
+  const desktop = document.getElementById('desktop');
+  if (desktop) {
+    desktop.appendChild(windowEl);
+  }
+  activeWindows.set(title, windowId);
+  focusWindow(windowId);
+  
+  setupWindowEvents(windowEl, windowId, title);
+  
+  return windowEl;
+}
 </script>
 </body>
 </html>

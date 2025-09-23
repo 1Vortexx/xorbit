@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>X-ORBIT Terminal</title>
+    <style>
+        :root {
+            --terminal-bg: #1e1e1e;
+            --terminal-text: #b5bd68;
+            --terminal-selection: rgba(181, 189, 104, 0.3);
+            --terminal-cursor: #b5bd68;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            background-color: var(--terminal-bg);
+            color: var(--terminal-text);
+            overflow: hidden;
+        }
+        #xorbit-terminal-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: var(--terminal-bg);
+        }
+        #xorbit-terminal-output {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            line-height: 1.4;
+            font-size: 12px;
+        }
+        #xorbit-terminal-input-area {
+            display: flex;
+            background-color: #121212;
+            padding: 5px 10px;
+            border-top: 1px solid #333;
+        }
+        #xorbit-terminal-prompt {
+            margin-right: 10px;
+            user-select: none;
+            color: #8abeb7;
+        }
+        #xorbit-terminal-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: var(--terminal-text);
+            outline: none;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 12px;
+        }
+        .terminal-output-line {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .output-default { color: var(--terminal-text); }
+        .output-error { color: #cc6666; }
+        .output-command { color: #81a2be; }
+        .output-success { color: #b5bd68; }
+        ::selection {
+            background: var(--terminal-selection);
+        }
+    </style>
+</head>
+<body>
+    <div id="xorbit-terminal-container">
+        <div id="xorbit-terminal-output"></div>
+        <div id="xorbit-terminal-input-area">
+            <span id="xorbit-terminal-prompt">➜</span>
+            <input type="text" id="xorbit-terminal-input" autocomplete="off">
+        </div>
+    </div>
+
+    <script>
+    // Use a self-executing function to create a unique scope
+    (function() {
+        // Unique initialization wrapper
+        function initXOrbitTerm() {
+            // Prevent multiple initializations with a unique flag
+            if (window.xOrbitTermInitialized) return;
+            window.xOrbitTermInitialized = true;
+
+            // Use unique identifiers for all elements
+            const xOrbitTermOutput = document.getElementById('xorbit-terminal-output');
+            const xOrbitTermInput = document.getElementById('xorbit-terminal-input');
+
+            // Terminal state
+            const xOrbitTermState = {
+                currentDirectory: '~',
+                commandHistory: [],
+                historyIndex: -1
+            };
+
+            // Simulated file system
+            const xOrbitFileSystem = {
+                '~': {
+                    type: 'directory',
+                    contents: ['documents', 'desktop', 'downloads']
+                },
+                '~/documents': {
+                    type: 'directory',
+                    contents: ['readme.txt', 'notes.md']
+                },
+                '~/desktop': {
+                    type: 'directory',
+                    contents: ['terminal.app', 'browser.app']
+                },
+                '~/downloads': {
+                    type: 'directory',
+                    contents: []
+                },
+                '~/documents/readme.txt': {
+                    type: 'file',
+                    content: 'Welcome to X-ORBIT Desktop\n\nThis is a sample text file.'
+                },
+                '~/documents/notes.md': {
+                    type: 'file',
+                    content: '# X-ORBIT Notes\n\nPersonal notes and thoughts.'
+                }
+            };
+
+            // Output function
+            function xOrbitPrint(message, className = 'output-default') {
+                const line = document.createElement('div');
+                line.textContent = message;
+                line.className = `terminal-output-line ${className}`;
+                xOrbitTermOutput.appendChild(line);
+                xOrbitTermOutput.scrollTop = xOrbitTermOutput.scrollHeight;
+            }
+
+            // Path resolution
+            function xOrbitResolvePath(path) {
+                // Handle relative paths
+                if (path.startsWith('./')) {
+                    path = `${xOrbitTermState.currentDirectory}/${path.slice(2)}`;
+                } else if (!path.startsWith('/') && !path.startsWith('~')) {
+                    path = `${xOrbitTermState.currentDirectory}/${path}`;
+                }
+                
+                // Normalize path
+                const parts = path.split('/').filter(p => p && p !== '.');
+                const resolvedParts = [];
+                
+                parts.forEach(part => {
+                    if (part === '..') {
+                        resolvedParts.pop();
+                    } else {
+                        resolvedParts.push(part);
+                    }
+                });
+                
+                return resolvedParts.length > 0 ? `/${resolvedParts.join('/')}` : '/';
+            }
+
+            // Command definitions
+            const xOrbitCommands = {
+                help: {
+                    description: 'Show available commands',
+                    execute: () => {
+                        xOrbitPrint('Available commands:');
+                        Object.keys(xOrbitCommands).forEach(cmd => {
+                            xOrbitPrint(`  ${cmd.padEnd(10)} ${xOrbitCommands[cmd].description}`);
+                        });
+                    }
+                },
+                clear: {
+                    description: 'Clear the terminal screen',
+                    execute: () => {
+                        xOrbitTermOutput.innerHTML = '';
+                    }
+                },
+                pwd: {
+                    description: 'Print working directory',
+                    execute: () => {
+                        xOrbitPrint(xOrbitTermState.currentDirectory);
+                    }
+                },
+                ls: {
+                    description: 'List directory contents',
+                    execute: (args) => {
+                        const path = args[0] ? xOrbitResolvePath(args[0]) : xOrbitTermState.currentDirectory;
+                        const dir = xOrbitFileSystem[path];
+                        
+                        if (!dir || dir.type !== 'directory') {
+                            xOrbitPrint(`ls: cannot access '${path}': No such directory`, 'output-error');
+                            return;
+                        }
+
+                        dir.contents.forEach(item => xOrbitPrint(item));
+                    }
+                },
+                cat: {
+                    description: 'Display file contents',
+                    execute: (args) => {
+                        if (!args[0]) {
+                            xOrbitPrint('cat: missing file operand', 'output-error');
+                            return;
+                        }
+
+                        const path = xOrbitResolvePath(args[0]);
+                        const file = xOrbitFileSystem[path];
+
+                        if (!file || file.type !== 'file') {
+                            xOrbitPrint(`cat: ${args[0]}: No such file`, 'output-error');
+                            return;
+                        }
+
+                        xOrbitPrint(file.content);
+                    }
+                },
+                cd: {
+                    description: 'Change current directory',
+                    execute: (args) => {
+                        if (!args[0]) {
+                            xOrbitTermState.currentDirectory = '~';
+                            return;
+                        }
+
+                        const newPath = xOrbitResolvePath(args[0]);
+                        const dir = xOrbitFileSystem[newPath];
+
+                        if (!dir || dir.type !== 'directory') {
+                            xOrbitPrint(`cd: ${args[0]}: No such directory`, 'output-error');
+                            return;
+                        }
+
+                        xOrbitTermState.currentDirectory = newPath;
+                    }
+                },
+                theme: {
+                    description: 'Change desktop theme (dark/light/auto)',
+                    execute: (args) => {
+                        if (!args[0]) {
+                            xOrbitPrint('Usage: theme [dark|light|auto]', 'output-error');
+                            return;
+                        }
+                        window.parent.postMessage({ 
+                            type: 'terminal-request', 
+                            command: 'theme', 
+                            value: args[0] 
+                        }, '*');
+                        xOrbitPrint(`Changing theme to ${args[0]}...`, 'output-success');
+                    }
+                },
+                dock: {
+                    description: 'Modify dock settings',
+                    execute: (args) => {
+                        if (!args[0]) {
+                            xOrbitPrint('Usage: dock [position|size|autohide] [value]', 'output-error');
+                            return;
+                        }
+                        window.parent.postMessage({ 
+                            type: 'terminal-request', 
+                            command: 'dock', 
+                            setting: args[0],
+                            value: args[1] 
+                        }, '*');
+                        xOrbitPrint(`Modifying dock ${args[0]} to ${args[1]}...`, 'output-success');
+                    }
+                },
+                'close-windows': {
+    description: 'Close all open windows',
+    execute: () => {
+        window.parent.postMessage({ 
+            type: 'terminal-request', 
+            command: 'close-windows' 
+        }, '*');
+        xOrbitPrint('Closing all windows...', 'output-success');
+    }
+},
+'refresh': {
+    description: 'Refresh the current webpage',
+    execute: () => {
+        window.parent.postMessage({ 
+            type: 'terminal-request', 
+            command: 'refresh' 
+        }, '*');
+        xOrbitPrint('Refreshing webpage...', 'output-success');
+    }
+},
+'browser-refresh': {
+    description: 'Refresh the entire browser window',
+    execute: () => {
+        window.parent.postMessage({ 
+            type: 'terminal-request', 
+            command: 'browser-refresh' 
+        }, '*');
+        xOrbitPrint('Refreshing browser window...', 'output-success');
+    }
+}
+            };
+
+            // Command execution
+            function xOrbitExecuteCommand(commandLine) {
+                // Add to history
+                xOrbitTermState.commandHistory.unshift(commandLine);
+                xOrbitTermState.historyIndex = -1;
+
+                // Display command
+                xOrbitPrint(`user@x-orbit ${xOrbitTermState.currentDirectory} $ ${commandLine}`, 'output-command');
+
+                // Parse and execute
+                const [cmd, ...args] = commandLine.trim().split(/\s+/);
+                
+                if (xOrbitCommands[cmd]) {
+                    try {
+                        xOrbitCommands[cmd].execute(args);
+                    } catch (error) {
+                        xOrbitPrint(`Error: ${error.message}`, 'output-error');
+                    }
+                } else if (cmd) {
+                    xOrbitPrint(`${cmd}: command not found`, 'output-error');
+                }
+            }
+
+            // Input handling
+            xOrbitTermInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const commandLine = xOrbitTermInput.value.trim();
+                    xOrbitExecuteCommand(commandLine);
+                    xOrbitTermInput.value = '';
+                } else if (e.key === 'ArrowUp') {
+                    if (xOrbitTermState.historyIndex < xOrbitTermState.commandHistory.length - 1) {
+                        xOrbitTermState.historyIndex++;
+                        xOrbitTermInput.value = xOrbitTermState.commandHistory[xOrbitTermState.historyIndex];
+                    }
+                } else if (e.key === 'ArrowDown') {
+                    if (xOrbitTermState.historyIndex > -1) {
+                        xOrbitTermState.historyIndex--;
+                        xOrbitTermInput.value = xOrbitTermState.historyIndex === -1 ? '' : 
+                            xOrbitTermState.commandHistory[xOrbitTermState.historyIndex];
+                    }
+                }
+            });
+
+            // Initial welcome
+            xOrbitPrint('Welcome to X-ORBIT Terminal', 'output-success');
+            xOrbitPrint('Type "help" to see available commands', 'output-default');
+        }
+
+        // Initialization strategy
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initXOrbitTerm);
+        } else {
+            initXOrbitTerm();
+        }
+    })();
+    
+    </script>
+</body>
+</html>

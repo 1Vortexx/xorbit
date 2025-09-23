@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="https://i.imgur.com/qHvnYKc.png" type="image/png">
+  <link rel="icon" href="https://codehs.com/uploads/7f204d91a682cb833441eb2fc59228b6" type="image/png">
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>X-ORBIT</title>
+  <title>X-ORBIT Desktop</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
@@ -2829,7 +2829,7 @@ function showAboutDialog() {
       <div style="margin-bottom: 24px;">
         <i class="fas fa-rocket" style="font-size: 3rem; color: #7d5cff; margin-bottom: 16px;"></i>
         <h1 style="font-size: 2rem; font-weight: 600; margin-bottom: 8px; background: linear-gradient(135deg, #ffffff 0%, #d0d8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">X-ORBIT Desktop</h1>
-        <p style="color: #a8b4d9; font-size: 1rem; margin-bottom: 24px;">Version 4.2.0</p>
+        <p style="color: #a8b4d9; font-size: 1rem; margin-bottom: 24px;">Version 1.0.0</p>
       </div>
       
       <div style="background: rgba(120, 80, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(120, 80, 255, 0.2);">
@@ -3102,6 +3102,57 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   
   return windowEl;
 }
+
+// Terminal communication handler
+// Terminal communication handler
+window.addEventListener('message', function(event) {
+    if (event.data.type === 'terminal-request') {
+        switch(event.data.command) {
+            case 'theme':
+                settings.theme = event.data.value;
+                applySettings();
+                break;
+            case 'dock':
+                switch(event.data.setting) {
+                    case 'position':
+                        settings.dockPosition = event.data.value;
+                        break;
+                    case 'size':
+                        settings.dockSize = parseInt(event.data.value);
+                        break;
+                    case 'autohide':
+                        settings.dockAutohide = event.data.value === 'on';
+                        break;
+                }
+                applySettings();
+                break;
+            case 'close-windows':
+                // Close all open windows
+                activeWindows.forEach((windowId) => {
+                    const windowEl = document.getElementById(windowId);
+                    if (windowEl) windowEl.remove();
+                });
+                activeWindows.clear();
+                break;
+            case 'restart':
+                restartDesktop();
+                break;
+            case 'logout':
+                logout();
+                break;
+            case 'refresh':
+                // Refresh the current webpage
+                location.reload();
+                break;
+            case 'browser-refresh':
+                // Attempt to refresh the browser window
+                if (window.parent) {
+                    window.parent.location.reload();
+                }
+                break;
+        }
+    }
+});
 </script>
 </body>
 </html>

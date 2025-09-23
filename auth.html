@@ -2,243 +2,1392 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login into X-ORBIT</title>
 <style>
-body {
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
+}
+
+body {
     height: 100vh;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Inter', sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    background: radial-gradient(circle at top left, #6a00f4, #2a0845);
+    background: #0a0a0f;
     overflow: hidden;
     color: #fff;
+    position: relative;
 }
-.background {
-    position: absolute;
-    width: 120%;
-    height: 120%;
-    background: url('https://codehs.com/uploads/0353a7777731bb3039fd7518fa9cbb65') no-repeat center center/cover;
-    filter: brightness(0.25) blur(8px) saturate(1.2);
-    transform: scale(1.1);
+
+/* Animated Background */
+.cosmic-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -2;
+    background: 
+        radial-gradient(circle at 20% 80%, #1a0d2e 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, #2d1b69 0%, transparent 50%),
+        radial-gradient(circle at 40% 40%, #0f0f23 0%, transparent 50%),
+        linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+.stars {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     z-index: -1;
-    animation: backgroundMove 30s linear infinite alternate;
 }
-@keyframes backgroundMove {
-    0% { transform: translate(0, 0) scale(1.1); }
-    50% { transform: translate(-20px, 15px) scale(1.12); }
-    100% { transform: translate(0, 0) scale(1.1); }
+
+.star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: twinkle 3s infinite ease-in-out;
 }
-.login-box {
-    display: flex;
-    width: 800px;
-    border-radius: 20px;
+
+.star:nth-child(odd) {
+    animation-delay: 1.5s;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.2); }
+}
+
+/* Floating particles */
+.particle {
+    position: absolute;
+    background: linear-gradient(45deg, #00d4ff, #9333ea);
+    border-radius: 50%;
+    filter: blur(1px);
+    animation: float 20s infinite linear;
+}
+
+@keyframes float {
+    0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Main container */
+.login-container {
+    position: relative;
+    width: 90%;
+    max-width: 900px;
+    height: auto;
+    background: rgba(15, 15, 35, 0.4);
+    backdrop-filter: blur(25px) saturate(1.8);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(147, 51, 234, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
     overflow: hidden;
-    box-shadow: 0 0 40px rgba(160, 100, 255, 0.5), 0 0 80px rgba(0, 234, 255, 0.2);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(15px) saturate(1.5);
-    background: rgba(255,255,255,0.05);
+    animation: containerFloat 6s ease-in-out infinite;
+    transition: all 0.5s ease;
 }
-.left-panel, .right-panel {
-    padding: 2rem;
+
+.login-container.os-mode {
+    max-width: 450px;
+}
+
+@keyframes containerFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Regular Login View */
+.regular-view {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    transition: all 0.5s ease;
+}
+
+.regular-view.hidden {
+    display: none;
+}
+
+/* Left Panel */
+.brand-panel {
+    padding: 3rem;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1.5rem;
+    gap: 2rem;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    position: relative;
 }
-.left-panel { width: 50%; }
+
+.brand-panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.5;
+}
+
+.logo-container {
+    position: relative;
+    z-index: 2;
+}
+
 .logo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: 
+        linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%),
+        url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center;
+    background-size: 100% 100%;
+    background-blend-mode: overlay;
+    box-shadow: 
+        0 0 40px rgba(147, 51, 234, 0.6),
+        0 0 80px rgba(0, 212, 255, 0.3),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    animation: logoGlow 4s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center;
+    background-size: cover;
+    border-radius: 50%;
+    z-index: 1;
+}
+
+.logo::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.3), transparent, rgba(0, 212, 255, 0.3), transparent);
+    border-radius: 50%;
+    animation: rotate 3s linear infinite;
+    z-index: 0;
+}
+
+.logo::after {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.3), transparent, rgba(0, 212, 255, 0.3), transparent);
+    border-radius: 50%;
+    animation: rotate 3s linear infinite;
+    z-index: -1;
+}
+
+@keyframes logoGlow {
+    0%, 100% { box-shadow: 0 0 40px rgba(147, 51, 234, 0.6), 0 0 80px rgba(0, 212, 255, 0.3); }
+    50% { box-shadow: 0 0 60px rgba(147, 51, 234, 0.8), 0 0 120px rgba(0, 212, 255, 0.5); }
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.brand-title {
+    font-size: 2.5rem;
+    font-weight: 900;
+    background: linear-gradient(135deg, #9333ea 0%, #00d4ff 50%, #9333ea 100%);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    animation: gradientShift 3s ease-in-out infinite;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.notice-card {
+    background: rgba(15, 15, 35, 0.6);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 16px;
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 2;
+    border-left: 3px solid #f59e0b;
+}
+
+.notice-card strong {
+    color: #fbbf24;
+}
+
+.notice-card a {
+    color: #00d4ff;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+.notice-card a:hover {
+    color: #38bdf8;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+}
+
+/* Right Panel */
+.login-panel {
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1.5rem;
+    position: relative;
+}
+
+.login-header {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.login-title {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 0.5rem;
+}
+
+.login-subtitle {
+    color: #94a3b8;
+    font-weight: 400;
+}
+
+.form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.form-input {
+    width: 100%;
+    padding: 1rem 1.5rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(15, 15, 35, 0.5);
+    color: #f8fafc;
+    font-size: 1rem;
+    font-weight: 400;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.form-input::placeholder {
+    color: #64748b;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: #9333ea;
+    box-shadow: 
+        0 0 20px rgba(147, 51, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-input.error {
+    border-color: #ef4444;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+    animation: shake 0.5s ease-in-out;
+}
+
+.form-input.banned {
+    border-color: #dc2626;
+    background: rgba(239, 68, 68, 0.1);
+    animation: shake 0.5s ease-in-out;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+.remember-section {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: -0.5rem 0 1rem 0;
+    font-size: 0.9rem;
+}
+
+.remember-checkbox {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 4px;
+    background: rgba(15, 15, 35, 0.5);
+    cursor: pointer;
+    position: relative;
+}
+
+.remember-checkbox:checked {
+    background: linear-gradient(135deg, #9333ea, #00d4ff);
+    border-color: #9333ea;
+}
+
+.remember-checkbox:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.remember-label {
+    color: #94a3b8;
+    cursor: pointer;
+    user-select: none;
+}
+
+.login-btn {
+    width: 100%;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #00d4ff 100%);
+    background-size: 200% 200%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    animation: buttonGradient 3s ease-in-out infinite;
+    box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+}
+
+.login-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.login-btn:hover::before {
+    left: 100%;
+}
+
+.login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(147, 51, 234, 0.4);
+}
+
+.login-btn:active {
+    transform: translateY(0);
+}
+
+.login-btn.banned {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+    animation: none;
+}
+
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+@keyframes buttonGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* OS Mode Panel */
+.os-view {
+    padding: 3rem;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    background: linear-gradient(135deg, rgba(147, 51, 234, 0.1) 0%, rgba(0, 212, 255, 0.05) 100%);
+    position: relative;
+}
+
+.os-view.active {
+    display: flex;
+}
+
+.os-view::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.5;
+}
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    z-index: 2;
+}
+
+.user-avatar {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    background: url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center/cover;
-    opacity: 0.7;
-    box-shadow: 0 0 20px rgba(160, 100, 255, 0.5);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: 
+        linear-gradient(135deg, rgba(147, 51, 234, 0.2) 0%, rgba(0, 212, 255, 0.2) 100%),
+        url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center;
+    background-size: 100% 100%;
+    background-blend-mode: overlay;
+    box-shadow: 
+        0 0 40px rgba(147, 51, 234, 0.6),
+        0 0 80px rgba(0, 212, 255, 0.3),
+        inset 0 0 20px rgba(255, 255, 255, 0.1);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    animation: logoGlow 4s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
 }
-h1 {
-    font-size: 2rem;
-    background: linear-gradient(90deg, #a44aff, #00f0ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    font-weight: 900;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin: 0;
+
+.user-avatar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('https://codehs.com/uploads/84eccb0a50661c90139403365e8efd48') no-repeat center center;
+    background-size: cover;
+    border-radius: 50%;
+    z-index: 1;
 }
-.glass-banner {
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px) saturate(1.5);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    padding: 1rem;
-    border-radius: 15px;
-    color: red;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    text-align: center;
-    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.3), transparent, rgba(0, 212, 255, 0.3), transparent);
+    border-radius: 50%;
+    animation: rotate 3s linear infinite;
+    z-index: 0;
 }
-.glass-banner a {
-    color:#ff79c6;
-    text-decoration: underline;
-}
-.right-panel {
-    width: 50%;
-    gap: 1rem;
-}
-.input-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-}
-input {
-    width: 100%;
-    padding: 0.85rem;
-    border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    background: rgba(255, 255, 255, 0.05);
-    color: #fff;
-    font-size: 1rem;
-    transition: border 0.3s;
-}
-input.banned {
-    border: 2px solid #ff4d4d;
-}
-button {
-    width: 100%;
-    padding: 0.85rem;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
-    font-size: 1rem;
-    color: #fff;
-    background: linear-gradient(90deg, #a44aff, #00f0ff);
-    cursor: pointer;
-    transition: all 0.3s;
-}
-button.banned {
-    background: #ff4d4d;
-    cursor: pointer;
-}
-#login-status {
-    margin-top: 0.8rem;
-    font-size: 1rem;
+
+.username-display {
+    font-size: 1.5rem;
     font-weight: 600;
-    color: #ff79c6;
-    text-shadow: 0 0 5px rgba(255, 121, 198, 0.6);
-}
-.ban-modal {
-    margin-top: 1rem;
-    padding: 1rem;
-    border-radius: 12px;
-    background: rgba(255, 0, 0, 0.2);
-    color: #ff0000;
-    font-weight: bold;
+    color: #f8fafc;
     text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.user-email {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    text-align: center;
+}
+
+.switch-user-btn {
     width: 100%;
-    box-shadow: 0 0 15px rgba(255,0,0,0.3);
+    padding: 0.75rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 0.5rem;
 }
+
+.switch-user-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.status-message {
+    margin-top: 1rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #00d4ff;
+    text-align: center;
+    min-height: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.ban-modal {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    backdrop-filter: blur(10px);
+    display: none;
+    animation: fadeInUp 0.3s ease;
+}
+
+.ban-modal.show {
+    display: block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .ban-modal h2 {
-    margin: 0 0 0.5rem 0;
+    color: #fca5a5;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-align: center;
 }
+
 .ban-modal p {
-    margin: 0;
+    color: #fecaca;
+    text-align: center;
+    line-height: 1.5;
+}
+
+/* Back navigation */
+.back-nav {
+    position: absolute;
+    top: 2rem;
+    left: 2rem;
+    z-index: 10;
+    display: none;
+    align-items: center;
+    gap: 0.5rem;
+    color: #94a3b8;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding: 0.5rem 1rem;
+    border-radius: 12px;
+    background: rgba(15, 15, 35, 0.5);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.back-nav.show {
+    display: flex;
+    animation: slideInLeft 0.3s ease;
+}
+
+.back-nav:hover {
+    color: #f8fafc;
+    background: rgba(15, 15, 35, 0.8);
+    transform: translateX(-2px);
+}
+
+.back-arrow {
+    font-size: 1.2rem;
+    transition: transform 0.3s ease;
+}
+
+.back-nav:hover .back-arrow {
+    transform: translateX(-2px);
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.loading {
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Loading animation */
+@media (max-width: 768px) {
+    .login-container {
+        width: 95%;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+    
+    .regular-view {
+        grid-template-columns: 1fr;
+    }
+    
+    .brand-panel {
+        padding: 2rem;
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .brand-title {
+        font-size: 2rem;
+    }
+    
+    .logo {
+        width: 100px;
+        height: 100px;
+    }
+
+    .login-panel, .os-view {
+        padding: 2rem;
+    }
 }
 </style>
 </head>
 <body>
-<div class="background"></div>
-<div class="login-box">
-    <div class="left-panel">
-        <div class="logo"></div>
-        <h1>X-ORBIT Login</h1>
-        <div class="glass-banner">
-            <strong>Notice:</strong> X-ORBIT has just finished downtime and migrated our client database. Some accounts may not work. If your account does not work, please contact <a href="mailto:support@xorbit.org">support@xorbit.org</a>.
-        </div>
+<div class="cosmic-bg"></div>
+<div class="stars"></div>
+
+<div class="login-container" id="loginContainer">
+    <!-- Back Navigation -->
+    <div class="back-nav" id="backNav">
+        <span class="back-arrow">←</span>
+        <span>Back to saved login</span>
     </div>
-    <div class="right-panel">
-        <div class="input-wrapper" id="loginForm">
-            <input id="usernameOrEmail" type="text" placeholder="Name or Email" />
-            <input id="password" type="password" placeholder="Password" />
-            <button id="loginButton" onclick="login()">Login</button>
-            <div id="banModal" class="ban-modal" style="display:none;">
-                <h2>Login Failed</h2>
+
+    <!-- Regular Login View -->
+    <div class="regular-view" id="regularView">
+        <div class="brand-panel">
+            <div class="logo-container">
+                <div class="logo"></div>
+            </div>
+            <h1 class="brand-title">X-ORBIT</h1>
+            <div class="notice-card">
+                <strong>System Notice:</strong> X-ORBIT has completed infrastructure migration. Some accounts may require verification. Contact <a href="mailto:support@xorbit.org">support@xorbit.org</a> if you experience access issues.
+            </div>
+        </div>
+        
+        <div class="login-panel">
+            <div class="login-header">
+                <h2 class="login-title">Welcome Back</h2>
+                <p class="login-subtitle">Access your X-ORBIT dashboard</p>
+            </div>
+            
+            <div class="form-group">
+                <input 
+                    id="usernameOrEmail" 
+                    type="text" 
+                    class="form-input"
+                    placeholder="Username or Email" 
+                    autocomplete="username"
+                />
+            </div>
+            <div class="form-group">
+                <input 
+                    id="password" 
+                    type="password" 
+                    class="form-input"
+                    placeholder="Password" 
+                    autocomplete="current-password"
+                />
+            </div>
+            
+            <div class="remember-section">
+                <input type="checkbox" id="rememberMe" class="remember-checkbox">
+                <label for="rememberMe" class="remember-label">Remember this account</label>
+            </div>
+            
+            <button type="button" id="loginButton" class="login-btn">
+                Authenticate
+            </button>
+            
+            <div id="banModal" class="ban-modal">
+                <h2>Access Denied</h2>
                 <p id="banReason"></p>
             </div>
-            <p id="login-status"></p>
+            
+            <div id="loginStatus" class="status-message"></div>
+        </div>
+    </div>
+
+    <!-- OS Mode View -->
+    <div class="os-view" id="osView">
+        <div class="user-profile">
+            <div class="user-avatar"></div>
+            <div class="username-display" id="savedUsername"></div>
+            <div class="user-email" id="savedEmail"></div>
+        </div>
+        
+        <div style="width: 100%; z-index: 2;">
+            <div class="form-group">
+                <input 
+                    id="osPassword" 
+                    type="password" 
+                    class="form-input"
+                    placeholder="Enter your password" 
+                    autocomplete="current-password"
+                />
+            </div>
+            
+            <button type="button" id="osLoginButton" class="login-btn">
+                Sign In
+            </button>
+            
+            <button type="button" id="switchUserButton" class="switch-user-btn">
+                Sign in as different user
+            </button>
+            
+            <div id="osBanModal" class="ban-modal">
+                <h2>Access Denied</h2>
+                <p id="osBanReason"></p>
+            </div>
+            
+            <div id="osLoginStatus" class="status-message"></div>
         </div>
     </div>
 </div>
 
-<script type="module">
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+<script>
+console.log('🚀 X-ORBIT Login System Starting...');
 
-const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY"; 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Global state
+let rememberedUser = null;
+let supabase = null;
 
-window.login = async function () {
-    const input = document.getElementById("usernameOrEmail");
-    const password = document.getElementById("password");
-    const loginBtn = document.getElementById("loginButton");
-    const banModal = document.getElementById("banModal");
-    const banReason = document.getElementById("banReason");
-    const status = document.getElementById("login-status");
+// localStorage functions
+function saveRememberedUser(userData) {
+    try {
+        const userToSave = {
+            username: userData.username,
+            email: userData.email,
+            id: userData.id,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('xorbit_remembered_user', JSON.stringify(userToSave));
+        console.log('💾 User saved to localStorage:', userData.username);
+        return true;
+    } catch (error) {
+        console.warn('⚠️ Could not save to localStorage:', error);
+        return false;
+    }
+}
 
-    status.textContent = "";
-    banModal.style.display = "none";
+function loadRememberedUser() {
+    try {
+        const saved = localStorage.getItem('xorbit_remembered_user');
+        if (saved) {
+            const userData = JSON.parse(saved);
+            console.log('📂 Loaded remembered user from localStorage:', userData.username);
+            return userData;
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not load from localStorage:', error);
+    }
+    return null;
+}
+
+function clearRememberedUser() {
+    try {
+        localStorage.removeItem('xorbit_remembered_user');
+        console.log('🗑️ Cleared remembered user from localStorage');
+    } catch (error) {
+        console.warn('⚠️ Could not clear localStorage:', error);
+    }
+}
+
+// Initialize Supabase
+async function initSupabase() {
+    console.log('📡 Loading Supabase client...');
+    try {
+        const { createClient } = await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm');
+        
+        const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
+        
+        supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('✅ Supabase client initialized');
+        return true;
+    } catch (error) {
+        console.error('❌ Failed to initialize Supabase:', error);
+        return false;
+    }
+}
+
+// Create visual effects
+function createStars() {
+    console.log('⭐ Creating stars...');
+    const starsContainer = document.querySelector('.stars');
+    if (!starsContainer) return;
+    
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+    }
+}
+
+function createParticles() {
+    console.log('🌌 Creating particles...');
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = Math.random() * 4 + 2 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        document.body.appendChild(particle);
+    }
+}
+
+// Show/Hide views
+function showOSMode(userData) {
+    console.log('🖥️ Switching to macOS-style login for user:', userData.username);
+    
+    const container = document.getElementById('loginContainer');
+    const regularView = document.getElementById('regularView');
+    const osView = document.getElementById('osView');
+    const backNav = document.getElementById('backNav');
+    const savedUsername = document.getElementById('savedUsername');
+    const savedEmail = document.getElementById('savedEmail');
+    
+    // Update user info display
+    savedUsername.textContent = userData.username;
+    savedEmail.textContent = userData.email;
+    
+    // Store user data in memory
+    rememberedUser = userData;
+    
+    // Switch to macOS-style view
+    regularView.classList.add('hidden');
+    osView.classList.add('active');
+    container.classList.add('os-mode');
+    backNav.classList.remove('show'); // Hide back button in OS mode
+    
+    // Focus password input after transition
+    setTimeout(() => {
+        const passwordInput = document.getElementById('osPassword');
+        if (passwordInput) {
+            passwordInput.focus();
+        }
+    }, 300);
+    
+    console.log('✅ Successfully switched to macOS login mode');
+}
+
+function showRegularMode(showBackButton = false) {
+    console.log('📝 Switching back to regular login mode');
+    
+    const container = document.getElementById('loginContainer');
+    const regularView = document.getElementById('regularView');
+    const osView = document.getElementById('osView');
+    const backNav = document.getElementById('backNav');
+    
+    // Don't clear remembered user if we're just temporarily switching
+    if (!showBackButton) {
+        // Full logout - clear everything
+        rememberedUser = null;
+        clearRememberedUser();
+    }
+    
+    // Reset all form fields
+    const inputs = ['usernameOrEmail', 'password', 'osPassword'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+    });
+    
+    const rememberCheckbox = document.getElementById('rememberMe');
+    if (rememberCheckbox) rememberCheckbox.checked = false;
+    
+    // Clear all status messages
+    const statusElements = ['loginStatus', 'osLoginStatus'];
+    statusElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.innerHTML = '';
+    });
+    
+    // Hide all ban modals
+    const banModals = ['banModal', 'osBanModal'];
+    banModals.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove('show');
+    });
+    
+    // Reset button states
+    const buttons = ['loginButton', 'osLoginButton'];
+    buttons.forEach(id => {
+        const button = document.getElementById(id);
+        if (button) {
+            button.disabled = false;
+            button.classList.remove('banned');
+            if (id === 'loginButton') button.innerHTML = 'Authenticate';
+            if (id === 'osLoginButton') button.innerHTML = 'Sign In';
+        }
+    });
+    
+    // Switch back to regular view
+    osView.classList.remove('active');
+    regularView.classList.remove('hidden');
+    container.classList.remove('os-mode');
+    
+    // Show/hide back button based on parameter
+    if (showBackButton && rememberedUser) {
+        backNav.classList.add('show');
+        console.log('🔙 Back button shown');
+    } else {
+        backNav.classList.remove('show');
+        console.log('🔙 Back button hidden');
+    }
+    
+    // Focus username input after transition
+    setTimeout(() => {
+        const usernameInput = document.getElementById('usernameOrEmail');
+        if (usernameInput) {
+            usernameInput.focus();
+        }
+    }, 300);
+    
+    console.log('✅ Successfully switched back to regular login mode');
+}
+
+function goBackToOSMode() {
+    console.log('🔙 Returning to macOS login mode');
+    if (rememberedUser) {
+        showOSMode(rememberedUser);
+    } else {
+        console.warn('⚠️ No remembered user to go back to');
+        showRegularMode(false);
+    }
+}
+
+// Login function
+async function login() {
+    console.log('🚀 Login function called');
+    
+    if (!supabase) {
+        console.error('❌ Supabase not initialized');
+        document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
+        return;
+    }
+    
+    const usernameInput = document.getElementById('usernameOrEmail');
+    const passwordInput = document.getElementById('password');
+    const rememberCheckbox = document.getElementById('rememberMe');
+    const loginButton = document.getElementById('loginButton');
+    const banModal = document.getElementById('banModal');
+    const banReason = document.getElementById('banReason');
+    const status = document.getElementById('loginStatus');
+    
+    // Get values
+    const emailOrName = usernameInput.value.trim();
+    const pwd = passwordInput.value.trim();
+    const rememberMe = rememberCheckbox.checked;
+    
+    console.log('📝 Login attempt:', { emailOrName: !!emailOrName, password: !!pwd, rememberMe });
+    
+    // Reset states
+    status.innerHTML = "";
+    banModal.classList.remove('show');
     banReason.textContent = "";
-    input.classList.remove("banned");
-    password.classList.remove("banned");
-    loginBtn.classList.remove("banned");
-    loginBtn.textContent = "Login";
-
-    const emailOrName = input.value.trim();
-    const pwd = password.value.trim();
+    usernameInput.classList.remove('error', 'banned');
+    passwordInput.classList.remove('error', 'banned');
+    loginButton.classList.remove('banned');
+    loginButton.innerHTML = "Authenticate";
+    loginButton.disabled = false;
+    
+    // Validation
     if (!emailOrName || !pwd) {
-        status.textContent = "❌ Please fill in both fields.";
+        console.log('❌ Empty fields');
+        status.innerHTML = "❌ Please fill in both fields.";
+        if (!emailOrName) usernameInput.classList.add('error');
+        if (!pwd) passwordInput.classList.add('error');
         return;
     }
+    
+    // Set loading state
+    status.innerHTML = '<span class="loading"></span> Authenticating...';
+    loginButton.innerHTML = '<span class="loading"></span> Authenticating...';
+    loginButton.disabled = true;
+    
+    try {
+        console.log('📡 Making Supabase query...');
+        
+        const { data, error } = await supabase
+            .from('clients')
+            .select('id, name, email, blocked, ban_reason')
+            .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
+            .eq('password', pwd)
+            .single();
+        
+        console.log('📨 Supabase response:', { hasData: !!data, hasError: !!error });
+        
+        if (error || !data) {
+            console.log('❌ Authentication failed:', error?.message || 'No data returned');
+            status.innerHTML = "❌ Invalid credentials. Please try again.";
+            usernameInput.classList.add('error');
+            passwordInput.classList.add('error');
+            loginButton.innerHTML = "Authenticate";
+            loginButton.disabled = false;
+            return;
+        }
+        
+        console.log('✅ User authenticated:', { name: data.name, email: data.email, blocked: data.blocked });
+        
+        // Check if user is blocked
+        if (data.blocked) {
+            console.log('🚫 User is blocked:', data.ban_reason);
+            usernameInput.classList.add('banned');
+            passwordInput.classList.add('banned');
+            loginButton.classList.add('banned');
+            loginButton.innerHTML = "Return to Login";
+            loginButton.onclick = () => location.href = 'index.html';
+            banModal.classList.add('show');
+            banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
+            status.innerHTML = "";
+            return;
+        }
+        
+        // Save user if remember me is checked
+        if (rememberMe) {
+            console.log('💾 Saving user to localStorage for future logins');
+            const userDataToSave = {
+                username: data.name,
+                email: data.email,
+                id: data.id
+            };
+            
+            const saved = saveRememberedUser(userDataToSave);
+            if (saved) {
+                console.log('✅ User successfully saved to localStorage');
+                rememberedUser = userDataToSave;
+            } else {
+                console.warn('⚠️ Failed to save user to localStorage, using memory only');
+                rememberedUser = userDataToSave;
+            }
+        } else {
+            console.log('📝 Remember me not checked, not saving user');
+        }
+        
+        // Success
+        console.log('✅ Login successful! Redirecting...');
+        status.innerHTML = "✅ Authentication successful! Redirecting...";
+        loginButton.innerHTML = "✅ Success";
+        
+        setTimeout(() => {
+            console.log('📤 Sending postMessage to parent window...');
+            if (window.parent && window.parent !== window) {
+                console.log('🎯 Parent window detected, sending auth-success message');
+                window.parent.postMessage('auth-success', '*');
+                console.log('📬 Message sent successfully');
+            } else {
+                console.log('⚠️ No parent window detected');
+                // For testing purposes, you could redirect to a success page
+                // window.location.href = 'dashboard.html';
+            }
+        }, 1000);
+        
+    } catch (err) {
+        console.error('💥 Critical error during login:', err);
+        status.innerHTML = "❌ Connection error. Please try again.";
+        loginButton.innerHTML = "Authenticate";
+        loginButton.disabled = false;
+    }
+}
 
-    status.textContent = "🔐 Logging in...";
-
-    const { data, error } = await supabase
-        .from('clients')
-        .select('id, name, email, blocked, ban_reason')
-        .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
-        .eq('password', pwd)
-        .single();
-
-    if (error || !data) {
-        status.textContent = "❌ Invalid name/email or password.";
+// OS Mode login function
+async function osLogin() {
+    console.log('🖥️ OS login function called');
+    
+    if (!supabase || !rememberedUser) {
+        console.error('❌ Supabase or remembered user not available');
+        document.getElementById('osLoginStatus').innerHTML = "❌ Session expired. Please sign in again.";
+        showRegularMode();
         return;
     }
-
-    if (data.blocked) {
-        input.classList.add("banned");
-        password.classList.add("banned");
-        loginBtn.classList.add("banned");
-        loginBtn.textContent = "Return to Login";
-        loginBtn.onclick = () => location.href = 'index.html';
-        banModal.style.display = "block";
-        banReason.textContent = data.ban_reason || "No reason provided.";
+    
+    const passwordInput = document.getElementById('osPassword');
+    const loginButton = document.getElementById('osLoginButton');
+    const banModal = document.getElementById('osBanModal');
+    const banReason = document.getElementById('osBanReason');
+    const status = document.getElementById('osLoginStatus');
+    
+    // Get password
+    const pwd = passwordInput.value.trim();
+    
+    console.log('📝 OS login attempt for user:', rememberedUser.username);
+    
+    // Reset states
+    status.innerHTML = "";
+    banModal.classList.remove('show');
+    banReason.textContent = "";
+    passwordInput.classList.remove('error', 'banned');
+    loginButton.classList.remove('banned');
+    loginButton.innerHTML = "Sign In";
+    loginButton.disabled = false;
+    
+    // Validation
+    if (!pwd) {
+        console.log('❌ Empty password');
+        status.innerHTML = "❌ Please enter your password.";
+        passwordInput.classList.add('error');
         return;
     }
-
-    status.textContent = "✅ Login successful!";
-    if (window.parent) {
-        window.parent.postMessage('auth-success', '*');
+    
+    // Set loading state
+    status.innerHTML = '<span class="loading"></span> Signing in...';
+    loginButton.innerHTML = '<span class="loading"></span> Signing in...';
+    loginButton.disabled = true;
+    
+    try {
+        console.log('📡 Making OS mode Supabase query...');
+        
+        const { data, error } = await supabase
+            .from('clients')
+            .select('id, name, email, blocked, ban_reason')
+            .or(`email.eq.${rememberedUser.email},name.eq.${rememberedUser.username}`)
+            .eq('password', pwd)
+            .single();
+        
+        console.log('📨 OS mode Supabase response:', { hasData: !!data, hasError: !!error });
+        
+        if (error || !data) {
+            console.log('❌ OS mode authentication failed:', error?.message || 'No data returned');
+            status.innerHTML = "❌ Incorrect password. Please try again.";
+            passwordInput.classList.add('error');
+            loginButton.innerHTML = "Sign In";
+            loginButton.disabled = false;
+            return;
+        }
+        
+        console.log('✅ OS mode user authenticated');
+        
+        // Check if user is blocked
+        if (data.blocked) {
+            console.log('🚫 OS mode user is blocked:', data.ban_reason);
+            passwordInput.classList.add('banned');
+            loginButton.classList.add('banned');
+            loginButton.innerHTML = "Return to Login";
+            loginButton.onclick = () => {
+                showRegularMode();
+                location.href = 'index.html';
+            };
+            banModal.classList.add('show');
+            banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
+            status.innerHTML = "";
+            return;
+        }
+        
+        // Success
+        console.log('✅ OS mode login successful! Redirecting...');
+        status.innerHTML = "✅ Welcome back! Redirecting...";
+        loginButton.innerHTML = "✅ Success";
+        
+        setTimeout(() => {
+            console.log('📤 OS mode sending postMessage to parent window...');
+            if (window.parent && window.parent !== window) {
+                console.log('🎯 Parent window detected, sending auth-success message');
+                window.parent.postMessage('auth-success', '*');
+                console.log('📬 OS mode message sent successfully');
+            } else {
+                console.log('⚠️ No parent window detected');
+            }
+        }, 1000);
+        
+    } catch (err) {
+        console.error('💥 Critical error during OS login:', err);
+        status.innerHTML = "❌ Connection error. Please try again.";
+        loginButton.innerHTML = "Sign In";
+        loginButton.disabled = false;
     }
-};
+}
 
-document.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") login();
-});
+// Event handlers
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        console.log('⌨️ Enter key pressed');
+        event.preventDefault();
+        
+        const osView = document.getElementById('osView');
+        if (osView.classList.contains('active')) {
+            console.log('🔄 Calling OS login');
+            osLogin();
+        } else {
+            console.log('🔄 Calling regular login');
+            login();
+        }
+    }
+}
+
+// Initialize application
+async function initApp() {
+    console.log('🔧 Initializing X-ORBIT Login System...');
+    
+    // Create visual effects
+    createStars();
+    createParticles();
+    
+    // Initialize Supabase
+    const supabaseReady = await initSupabase();
+    if (!supabaseReady) {
+        document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
+        return;
+    }
+    
+    // Check for remembered user from localStorage
+    const savedUser = loadRememberedUser();
+    if (savedUser) {
+        console.log('👤 Found remembered user in localStorage:', savedUser.username);
+        console.log('🖥️ Automatically switching to macOS-style login');
+        rememberedUser = savedUser;
+        showOSMode(savedUser);
+    } else {
+        console.log('ℹ️ No remembered user found, showing regular login');
+    }
+    
+    // Get DOM elements
+    const loginButton = document.getElementById('loginButton');
+    const osLoginButton = document.getElementById('osLoginButton');
+    const switchUserButton = document.getElementById('switchUserButton');
+    const backNav = document.getElementById('backNav');
+    
+    // Add event listeners
+    if (loginButton) {
+        console.log('✅ Adding login button event listener');
+        loginButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            login();
+        });
+    }
+    
+    if (osLoginButton) {
+        console.log('✅ Adding OS login button event listener');
+        osLoginButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            osLogin();
+        });
+    }
+    
+    if (switchUserButton) {
+        console.log('✅ Adding switch user button event listener');
+        switchUserButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegularMode(true); // Show back button when switching users
+        });
+    }
+    
+    if (backNav) {
+        console.log('✅ Adding back navigation event listener');
+        backNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            goBackToOSMode();
+        });
+    }
+    
+    // Add keyboard event listener
+    document.addEventListener('keydown', handleKeyPress);
+    console.log('⌨️ Keyboard event listener added');
+    
+    // Add input focus effects
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (this.parentElement) {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.parentElement) {
+                this.parentElement.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    console.log('✅ X-ORBIT Login System initialized successfully');
+    console.log(`🎯 Mode: ${savedUser ? 'macOS Login' : 'Regular Login'}`);
+}
+
+// Start the application
+document.addEventListener('DOMContentLoaded', initApp);
+
+// Also try immediate initialization in case DOM is already loaded
+if (document.readyState === 'loading') {
+    console.log('⏳ DOM still loading, waiting for DOMContentLoaded...');
+} else {
+    console.log('⚡ DOM already loaded, initializing immediately...');
+    initApp();
+}
 </script>
 </body>
 </html>

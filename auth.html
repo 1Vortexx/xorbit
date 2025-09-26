@@ -82,6 +82,156 @@ body {
     100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
 }
 
+/* Solaris Browser Alert */
+.solaris-alert {
+    position: fixed;
+    top: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 500px;
+    background: rgba(0, 212, 255, 0.1);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.4),
+        0 0 60px rgba(0, 212, 255, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: alertSlideIn 0.8s ease-out;
+    transition: all 0.3s ease;
+}
+
+.solaris-alert.hidden {
+    transform: translateX(-50%) translateY(-120%);
+    opacity: 0;
+    pointer-events: none;
+}
+
+@keyframes alertSlideIn {
+    from {
+        transform: translateX(-50%) translateY(-120%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+.alert-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.alert-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #00d4ff, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: bold;
+    animation: iconPulse 2s ease-in-out infinite;
+}
+
+@keyframes iconPulse {
+    0%, 100% { 
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        transform: scale(1.05);
+    }
+}
+
+.alert-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #00d4ff;
+    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+}
+
+.alert-content {
+    color: #e2e8f0;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.alert-content strong {
+    color: #38bdf8;
+    font-weight: 600;
+}
+
+.beta-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, #f59e0b, #f97316);
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 0.5rem;
+    box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+    animation: badgeGlow 3s ease-in-out infinite;
+}
+
+@keyframes badgeGlow {
+    0%, 100% { box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3); }
+    50% { box-shadow: 0 4px 20px rgba(249, 115, 22, 0.5); }
+}
+
+.alert-actions {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+.alert-link {
+    color: #00d4ff;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.5rem 1rem;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(0, 212, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.alert-link:hover {
+    background: rgba(0, 212, 255, 0.15);
+    border-color: rgba(0, 212, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+}
+
+.alert-dismiss {
+    background: none;
+    border: none;
+    color: #64748b;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.alert-dismiss:hover {
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.05);
+}
+
 /* Main container */
 .login-container {
     position: relative;
@@ -706,12 +856,47 @@ body {
     .login-panel, .os-view {
         padding: 2rem;
     }
+
+    .solaris-alert {
+        width: 95%;
+        padding: 1rem;
+        font-size: 0.85rem;
+    }
+
+    .alert-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .alert-link {
+        text-align: center;
+        width: 100%;
+    }
 }
 </style>
 </head>
 <body>
 <div class="cosmic-bg"></div>
 <div class="stars"></div>
+
+<!-- Solaris Browser Alert -->
+<div class="solaris-alert" id="solarisAlert">
+    <div class="alert-header">
+        <div class="alert-icon">🚀</div>
+        <div class="alert-title">Introducing Solaris Browser</div>
+    </div>
+    <div class="alert-content">
+        <strong>X-ORBIT</strong> is transitioning to our own custom-designed browser experience called <strong>Solaris</strong>. This experimental browser will provide enhanced security and performance features tailored specifically for X-ORBIT users.
+        <span class="beta-badge">Beta</span>
+    </div>
+    <div class="alert-content">
+        Solaris Browser is currently in experimental phase and will only be available at <strong>beta.xorbit.org</strong>. The browser is designed to optimize your X-ORBIT experience with advanced features and improved security protocols.
+    </div>
+    <div class="alert-actions">
+        <a href="#" class="alert-link" onclick="window.open('https://beta.xorbit.org', '_blank')">Visit Beta Portal</a>
+        <button class="alert-dismiss" onclick="dismissSolarisAlert()">Dismiss</button>
+    </div>
+</div>
 
 <div class="login-container" id="loginContainer">
     <!-- Back Navigation -->
@@ -818,6 +1003,37 @@ console.log('🚀 X-ORBIT Login System Starting...');
 // Global state
 let rememberedUser = null;
 let supabase = null;
+
+// Solaris Alert functions
+function dismissSolarisAlert() {
+    console.log('👋 Dismissing Solaris alert');
+    const alert = document.getElementById('solarisAlert');
+    if (alert) {
+        alert.classList.add('hidden');
+        // Save dismissal state to localStorage
+        try {
+            localStorage.setItem('xorbit_solaris_alert_dismissed', 'true');
+            console.log('💾 Alert dismissal saved to localStorage');
+        } catch (error) {
+            console.warn('⚠️ Could not save alert dismissal state:', error);
+        }
+    }
+}
+
+function checkSolarisAlertState() {
+    try {
+        const dismissed = localStorage.getItem('xorbit_solaris_alert_dismissed');
+        if (dismissed === 'true') {
+            console.log('📂 Alert previously dismissed, hiding automatically');
+            const alert = document.getElementById('solarisAlert');
+            if (alert) {
+                alert.classList.add('hidden');
+            }
+        }
+    } catch (error) {
+        console.warn('⚠️ Could not check alert dismissal state:', error);
+    }
+}
 
 // localStorage functions
 function saveRememberedUser(userData) {
@@ -1292,6 +1508,9 @@ function handleKeyPress(event) {
 // Initialize application
 async function initApp() {
     console.log('🔧 Initializing X-ORBIT Login System...');
+    
+    // Check Solaris alert state
+    checkSolarisAlertState();
     
     // Create visual effects
     createStars();

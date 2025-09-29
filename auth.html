@@ -1148,7 +1148,7 @@ function showOSMode(userData) {
     regularView.classList.add('hidden');
     osView.classList.add('active');
     container.classList.add('os-mode');
-    backNav.classList.remove('show'); // Hide back button in OS mode
+    backNav.classList.remove('show');
     
     // Focus password input after transition
     setTimeout(() => {
@@ -1169,14 +1169,11 @@ function showRegularMode(showBackButton = false) {
     const osView = document.getElementById('osView');
     const backNav = document.getElementById('backNav');
     
-    // Don't clear remembered user if we're just temporarily switching
     if (!showBackButton) {
-        // Full logout - clear everything
         rememberedUser = null;
         clearRememberedUser();
     }
     
-    // Reset all form fields
     const inputs = ['usernameOrEmail', 'password', 'osPassword'];
     inputs.forEach(id => {
         const input = document.getElementById(id);
@@ -1186,21 +1183,18 @@ function showRegularMode(showBackButton = false) {
     const rememberCheckbox = document.getElementById('rememberMe');
     if (rememberCheckbox) rememberCheckbox.checked = false;
     
-    // Clear all status messages
     const statusElements = ['loginStatus', 'osLoginStatus'];
     statusElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) element.innerHTML = '';
     });
     
-    // Hide all ban modals
     const banModals = ['banModal', 'osBanModal'];
     banModals.forEach(id => {
         const modal = document.getElementById(id);
         if (modal) modal.classList.remove('show');
     });
     
-    // Reset button states
     const buttons = ['loginButton', 'osLoginButton'];
     buttons.forEach(id => {
         const button = document.getElementById(id);
@@ -1212,12 +1206,10 @@ function showRegularMode(showBackButton = false) {
         }
     });
     
-    // Switch back to regular view
     osView.classList.remove('active');
     regularView.classList.remove('hidden');
     container.classList.remove('os-mode');
     
-    // Show/hide back button based on parameter
     if (showBackButton && rememberedUser) {
         backNav.classList.add('show');
         console.log('🔙 Back button shown');
@@ -1226,7 +1218,6 @@ function showRegularMode(showBackButton = false) {
         console.log('🔙 Back button hidden');
     }
     
-    // Focus username input after transition
     setTimeout(() => {
         const usernameInput = document.getElementById('usernameOrEmail');
         if (usernameInput) {
@@ -1247,6 +1238,36 @@ function goBackToOSMode() {
     }
 }
 
+// Platform detection helpers
+function detectPlatform() {
+    const ua = navigator.userAgent.toLowerCase();
+    if (/android/i.test(ua)) return 'Android';
+    if (/ipad|iphone|ipod/.test(ua)) return 'iOS';
+    if (/mac os x/.test(ua)) return 'macOS';
+    if (/windows/.test(ua)) return 'Windows';
+    if (/linux/.test(ua)) return 'Linux';
+    return 'Web';
+}
+
+function detectBrowser() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Firefox')) return 'Firefox';
+    if (ua.includes('Edg')) return 'Edge';
+    if (ua.includes('Chrome')) return 'Chrome';
+    if (ua.includes('Safari')) return 'Safari';
+    return 'Unknown';
+}
+
+function detectOS() {
+    const ua = navigator.userAgent;
+    if (ua.includes('Win')) return 'Windows';
+    if (ua.includes('Mac')) return 'macOS';
+    if (ua.includes('Linux')) return 'Linux';
+    if (ua.includes('Android')) return 'Android';
+    if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
+    return 'Unknown';
+}
+
 // Login function
 async function login() {
     console.log('🚀 Login function called');
@@ -1265,14 +1286,12 @@ async function login() {
     const banReason = document.getElementById('banReason');
     const status = document.getElementById('loginStatus');
     
-    // Get values
     const emailOrName = usernameInput.value.trim();
     const pwd = passwordInput.value.trim();
     const rememberMe = rememberCheckbox.checked;
     
     console.log('📝 Login attempt:', { emailOrName: !!emailOrName, password: !!pwd, rememberMe });
     
-    // Reset states
     status.innerHTML = "";
     banModal.classList.remove('show');
     banReason.textContent = "";
@@ -1282,7 +1301,6 @@ async function login() {
     loginButton.innerHTML = "Authenticate";
     loginButton.disabled = false;
     
-    // Validation
     if (!emailOrName || !pwd) {
         console.log('❌ Empty fields');
         status.innerHTML = "❌ Please fill in both fields.";
@@ -1291,7 +1309,6 @@ async function login() {
         return;
     }
     
-    // Set loading state
     status.innerHTML = '<span class="loading"></span> Authenticating...';
     loginButton.innerHTML = '<span class="loading"></span> Authenticating...';
     loginButton.disabled = true;
@@ -1308,6 +1325,43 @@ async function login() {
         
         console.log('📨 Supabase response:', { hasData: !!data, hasError: !!error });
         
+        // Log the login attempt
+        console.log('📝 Logging login attempt to login_attempts...');
+        const attemptLog = {
+            attempted_username: emailOrName,
+            attempted_email: emailOrName.includes('@') ? emailOrName : null,
+            success: !!(data && !error && !data.blocked),
+            attempt_timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        };
+        
+        if (data && !error) {
+            attemptLog.client_id = data.id;
+            attemptLog.client_name = data.name;
+            attemptLog.client_email = data.email;
+            
+            if (data.blocked) {
+                attemptLog.success = false;
+                attemptLog.failure_reason = 'Account blocked';
+            }
+        } else {
+            attemptLog.failure_reason = 'Invalid credentials';
+        }
+        
+        try {
+            const { error: logError } = await supabase
+                .from('login_attempts')
+                .insert(attemptLog);
+            
+            if (logError) {
+                console.warn('⚠️ Failed to log login attempt:', logError);
+            } else {
+                console.log('✅ Login attempt logged successfully');
+            }
+        } catch (logErr) {
+            console.warn('⚠️ Error logging login attempt:', logErr);
+        }
+        
         if (error || !data) {
             console.log('❌ Authentication failed:', error?.message || 'No data returned');
             status.innerHTML = "❌ Invalid credentials. Please try again.";
@@ -1320,7 +1374,6 @@ async function login() {
         
         console.log('✅ User authenticated:', { name: data.name, email: data.email, blocked: data.blocked });
         
-        // Check if user is blocked
         if (data.blocked) {
             console.log('🚫 User is blocked:', data.ban_reason);
             usernameInput.classList.add('banned');
@@ -1334,7 +1387,6 @@ async function login() {
             return;
         }
         
-        // Save user if remember me is checked
         if (rememberMe) {
             console.log('💾 Saving user to localStorage for future logins');
             const userDataToSave = {
@@ -1355,7 +1407,6 @@ async function login() {
             console.log('📝 Remember me not checked, not saving user');
         }
         
-        // Success
         console.log('✅ Login successful! Redirecting...');
         status.innerHTML = "✅ Authentication successful! Redirecting...";
         loginButton.innerHTML = "✅ Success";
@@ -1368,8 +1419,6 @@ async function login() {
                 console.log('📬 Message sent successfully');
             } else {
                 console.log('⚠️ No parent window detected');
-                // For testing purposes, you could redirect to a success page
-                // window.location.href = 'dashboard.html';
             }
         }, 1000);
         
@@ -1378,6 +1427,19 @@ async function login() {
         status.innerHTML = "❌ Connection error. Please try again.";
         loginButton.innerHTML = "Authenticate";
         loginButton.disabled = false;
+        
+        try {
+            await supabase.from('login_attempts').insert({
+                attempted_username: emailOrName,
+                attempted_email: emailOrName.includes('@') ? emailOrName : null,
+                success: false,
+                failure_reason: 'System error',
+                attempt_timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        } catch (logErr) {
+            console.warn('⚠️ Could not log error attempt:', logErr);
+        }
     }
 }
 
@@ -1398,12 +1460,10 @@ async function osLogin() {
     const banReason = document.getElementById('osBanReason');
     const status = document.getElementById('osLoginStatus');
     
-    // Get password
     const pwd = passwordInput.value.trim();
     
     console.log('📝 OS login attempt for user:', rememberedUser.username);
     
-    // Reset states
     status.innerHTML = "";
     banModal.classList.remove('show');
     banReason.textContent = "";
@@ -1412,7 +1472,6 @@ async function osLogin() {
     loginButton.innerHTML = "Sign In";
     loginButton.disabled = false;
     
-    // Validation
     if (!pwd) {
         console.log('❌ Empty password');
         status.innerHTML = "❌ Please enter your password.";
@@ -1420,7 +1479,6 @@ async function osLogin() {
         return;
     }
     
-    // Set loading state
     status.innerHTML = '<span class="loading"></span> Signing in...';
     loginButton.innerHTML = '<span class="loading"></span> Signing in...';
     loginButton.disabled = true;
@@ -1437,6 +1495,43 @@ async function osLogin() {
         
         console.log('📨 OS mode Supabase response:', { hasData: !!data, hasError: !!error });
         
+        // Log the login attempt
+        console.log('📝 Logging OS mode login attempt to login_attempts...');
+        const attemptLog = {
+            attempted_username: rememberedUser.username,
+            attempted_email: rememberedUser.email,
+            success: !!(data && !error && !data.blocked),
+            attempt_timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        };
+        
+        if (data && !error) {
+            attemptLog.client_id = data.id;
+            attemptLog.client_name = data.name;
+            attemptLog.client_email = data.email;
+            
+            if (data.blocked) {
+                attemptLog.success = false;
+                attemptLog.failure_reason = 'Account blocked';
+            }
+        } else {
+            attemptLog.failure_reason = 'Invalid credentials';
+        }
+        
+        try {
+            const { error: logError } = await supabase
+                .from('login_attempts')
+                .insert(attemptLog);
+            
+            if (logError) {
+                console.warn('⚠️ Failed to log OS mode login attempt:', logError);
+            } else {
+                console.log('✅ OS mode login attempt logged successfully');
+            }
+        } catch (logErr) {
+            console.warn('⚠️ Error logging OS mode login attempt:', logErr);
+        }
+        
         if (error || !data) {
             console.log('❌ OS mode authentication failed:', error?.message || 'No data returned');
             status.innerHTML = "❌ Incorrect password. Please try again.";
@@ -1448,7 +1543,6 @@ async function osLogin() {
         
         console.log('✅ OS mode user authenticated');
         
-        // Check if user is blocked
         if (data.blocked) {
             console.log('🚫 OS mode user is blocked:', data.ban_reason);
             passwordInput.classList.add('banned');
@@ -1464,7 +1558,6 @@ async function osLogin() {
             return;
         }
         
-        // Success
         console.log('✅ OS mode login successful! Redirecting...');
         status.innerHTML = "✅ Welcome back! Redirecting...";
         loginButton.innerHTML = "✅ Success";
@@ -1485,6 +1578,19 @@ async function osLogin() {
         status.innerHTML = "❌ Connection error. Please try again.";
         loginButton.innerHTML = "Sign In";
         loginButton.disabled = false;
+        
+        try {
+            await supabase.from('login_attempts').insert({
+                attempted_username: rememberedUser.username,
+                attempted_email: rememberedUser.email,
+                success: false,
+                failure_reason: 'System error',
+                attempt_timestamp: new Date().toISOString(),
+                user_agent: navigator.userAgent
+            });
+        } catch (logErr) {
+            console.warn('⚠️ Could not log error attempt:', logErr);
+        }
     }
 }
 
@@ -1509,21 +1615,18 @@ function handleKeyPress(event) {
 async function initApp() {
     console.log('🔧 Initializing X-ORBIT Login System...');
     
-    // Check Solaris alert state
     checkSolarisAlertState();
-    
-    // Create visual effects
     createStars();
     createParticles();
+    startSessionTimer();
+    setupActivityListeners();
     
-    // Initialize Supabase
     const supabaseReady = await initSupabase();
     if (!supabaseReady) {
         document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
         return;
     }
     
-    // Check for remembered user from localStorage
     const savedUser = loadRememberedUser();
     if (savedUser) {
         console.log('👤 Found remembered user in localStorage:', savedUser.username);
@@ -1534,13 +1637,12 @@ async function initApp() {
         console.log('ℹ️ No remembered user found, showing regular login');
     }
     
-    // Get DOM elements
     const loginButton = document.getElementById('loginButton');
     const osLoginButton = document.getElementById('osLoginButton');
     const switchUserButton = document.getElementById('switchUserButton');
     const backNav = document.getElementById('backNav');
     
-    // Add event listeners
+    
     if (loginButton) {
         console.log('✅ Adding login button event listener');
         loginButton.addEventListener('click', (e) => {
@@ -1561,7 +1663,7 @@ async function initApp() {
         console.log('✅ Adding switch user button event listener');
         switchUserButton.addEventListener('click', (e) => {
             e.preventDefault();
-            showRegularMode(true); // Show back button when switching users
+            showRegularMode(true);
         });
     }
     
@@ -1573,11 +1675,9 @@ async function initApp() {
         });
     }
     
-    // Add keyboard event listener
     document.addEventListener('keydown', handleKeyPress);
     console.log('⌨️ Keyboard event listener added');
     
-    // Add input focus effects
     const inputs = document.querySelectorAll('.form-input');
     inputs.forEach(input => {
         input.addEventListener('focus', function() {
@@ -1600,12 +1700,58 @@ async function initApp() {
 // Start the application
 document.addEventListener('DOMContentLoaded', initApp);
 
-// Also try immediate initialization in case DOM is already loaded
 if (document.readyState === 'loading') {
     console.log('⏳ DOM still loading, waiting for DOMContentLoaded...');
 } else {
     console.log('⚡ DOM already loaded, initializing immediately...');
     initApp();
+}
+// Session timeout functionality
+let sessionTimer = null;
+
+function startSessionTimer() {
+    console.log('⏱️ Starting 30-second session timer');
+    
+    // Clear any existing timer
+    if (sessionTimer) {
+        clearTimeout(sessionTimer);
+    }
+    
+    // Set 30-second timeout
+    sessionTimer = setTimeout(() => {
+        console.log('⏰ Session expired after 30 seconds of inactivity');
+        handleSessionTimeout();
+    }, 3600000 ); // 30 seconds = 30000 milliseconds
+}
+
+function resetSessionTimer() {
+    console.log('🔄 Resetting session timer');
+    startSessionTimer();
+}
+
+function handleSessionTimeout() {
+    console.log('🚫 Session timeout - redirecting to timeout.html');
+    
+    // Send message to parent window to redirect
+    if (window.parent && window.parent !== window) {
+        console.log('📤 Sending session-timeout message to parent');
+        window.parent.postMessage('session-timeout', '*');
+    } else {
+        // If no parent window, redirect directly
+        console.log('⚠️ No parent window, redirecting directly');
+        window.location.href = 'timeout.html';
+    }
+}
+
+// Add event listeners to reset timer on user activity
+function setupActivityListeners() {
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    events.forEach(event => {
+        document.addEventListener(event, resetSessionTimer, { passive: true });
+    });
+    
+    console.log('✅ Activity listeners added for session timeout');
 }
 </script>
 </body>

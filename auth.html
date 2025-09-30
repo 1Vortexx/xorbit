@@ -82,6 +82,158 @@ body {
     100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
 }
 
+/* Warning Modal Overlay */
+.warning-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 2000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.warning-overlay.show {
+    display: flex;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Warning Modal */
+.warning-modal {
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    border-radius: 24px;
+    padding: 3rem;
+    max-width: 500px;
+    width: 90%;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(239, 68, 68, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: modalSlideIn 0.4s ease;
+    position: relative;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.warning-icon-large {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: warningPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+}
+
+@keyframes warningPulse {
+    0%, 100% { 
+        box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+        transform: scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 60px rgba(239, 68, 68, 0.7);
+        transform: scale(1.05);
+    }
+}
+
+.warning-modal h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #fca5a5;
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.warning-content {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.warning-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.warning-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.warning-content::-webkit-scrollbar-thumb {
+    background: rgba(239, 68, 68, 0.5);
+    border-radius: 4px;
+}
+
+.warning-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(239, 68, 68, 0.7);
+}
+
+.warning-message {
+    color: #fecaca;
+    line-height: 1.6;
+    text-align: center;
+    font-size: 1rem;
+    white-space: pre-wrap;
+}
+
+.warning-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.acknowledge-btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 32px rgba(239, 68, 68, 0.3);
+}
+
+.acknowledge-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(239, 68, 68, 0.5);
+}
+
+.acknowledge-btn:active {
+    transform: translateY(0);
+}
+
 /* Solaris Browser Alert */
 .solaris-alert {
     position: fixed;
@@ -330,19 +482,6 @@ body {
     background-size: cover;
     border-radius: 50%;
     z-index: 1;
-}
-
-.logo::after {
-    content: '';
-    position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(45deg, transparent, rgba(147, 51, 234, 0.3), transparent, rgba(0, 212, 255, 0.3), transparent);
-    border-radius: 50%;
-    animation: rotate 3s linear infinite;
-    z-index: 0;
 }
 
 .logo::after {
@@ -872,12 +1011,38 @@ body {
         text-align: center;
         width: 100%;
     }
+
+    .warning-modal {
+        padding: 2rem;
+    }
+
+    .warning-icon-large {
+        width: 60px;
+        height: 60px;
+        font-size: 30px;
+    }
 }
 </style>
 </head>
 <body>
 <div class="cosmic-bg"></div>
 <div class="stars"></div>
+
+<!-- Warning Modal Overlay -->
+<div class="warning-overlay" id="warningOverlay">
+    <div class="warning-modal">
+        <div class="warning-icon-large">⚠</div>
+        <h2>Account Warning</h2>
+        <div class="warning-content">
+            <p class="warning-message" id="warningMessage"></p>
+        </div>
+        <div class="warning-actions">
+            <button class="acknowledge-btn" id="acknowledgeBtn">
+                I Acknowledge
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Solaris Browser Alert -->
 <div class="solaris-alert" id="solarisAlert">
@@ -1003,6 +1168,7 @@ console.log('🚀 X-ORBIT Login System Starting...');
 // Global state
 let rememberedUser = null;
 let supabase = null;
+let pendingUserData = null; // Store user data while showing warning
 
 // Solaris Alert functions
 function dismissSolarisAlert() {
@@ -1010,7 +1176,6 @@ function dismissSolarisAlert() {
     const alert = document.getElementById('solarisAlert');
     if (alert) {
         alert.classList.add('hidden');
-        // Save dismissal state to localStorage
         try {
             localStorage.setItem('xorbit_solaris_alert_dismissed', 'true');
             console.log('💾 Alert dismissal saved to localStorage');
@@ -1032,6 +1197,33 @@ function checkSolarisAlertState() {
         }
     } catch (error) {
         console.warn('⚠️ Could not check alert dismissal state:', error);
+    }
+}
+
+// Warning Modal functions
+function showWarningModal(warningText) {
+    console.log('⚠️ Showing warning modal');
+    const overlay = document.getElementById('warningOverlay');
+    const message = document.getElementById('warningMessage');
+    
+    message.textContent = warningText;
+    overlay.classList.add('show');
+}
+
+function hideWarningModal() {
+    console.log('✅ Hiding warning modal');
+    const overlay = document.getElementById('warningOverlay');
+    overlay.classList.remove('show');
+}
+
+function acknowledgeWarning() {
+    console.log('✅ User acknowledged warning');
+    hideWarningModal();
+    
+    if (pendingUserData) {
+        console.log('🔄 Completing login after warning acknowledgment');
+        completeLogin(pendingUserData);
+        pendingUserData = null;
     }
 }
 
@@ -1137,20 +1329,16 @@ function showOSMode(userData) {
     const savedUsername = document.getElementById('savedUsername');
     const savedEmail = document.getElementById('savedEmail');
     
-    // Update user info display
     savedUsername.textContent = userData.username;
     savedEmail.textContent = userData.email;
     
-    // Store user data in memory
     rememberedUser = userData;
     
-    // Switch to macOS-style view
     regularView.classList.add('hidden');
     osView.classList.add('active');
     container.classList.add('os-mode');
     backNav.classList.remove('show');
     
-    // Focus password input after transition
     setTimeout(() => {
         const passwordInput = document.getElementById('osPassword');
         if (passwordInput) {
@@ -1238,34 +1426,52 @@ function goBackToOSMode() {
     }
 }
 
-// Platform detection helpers
-function detectPlatform() {
-    const ua = navigator.userAgent.toLowerCase();
-    if (/android/i.test(ua)) return 'Android';
-    if (/ipad|iphone|ipod/.test(ua)) return 'iOS';
-    if (/mac os x/.test(ua)) return 'macOS';
-    if (/windows/.test(ua)) return 'Windows';
-    if (/linux/.test(ua)) return 'Linux';
-    return 'Web';
-}
-
-function detectBrowser() {
-    const ua = navigator.userAgent;
-    if (ua.includes('Firefox')) return 'Firefox';
-    if (ua.includes('Edg')) return 'Edge';
-    if (ua.includes('Chrome')) return 'Chrome';
-    if (ua.includes('Safari')) return 'Safari';
-    return 'Unknown';
-}
-
-function detectOS() {
-    const ua = navigator.userAgent;
-    if (ua.includes('Win')) return 'Windows';
-    if (ua.includes('Mac')) return 'macOS';
-    if (ua.includes('Linux')) return 'Linux';
-    if (ua.includes('Android')) return 'Android';
-    if (/iPad|iPhone|iPod/.test(ua)) return 'iOS';
-    return 'Unknown';
+// Complete login after warning acknowledgment or if no warning
+function completeLogin(userData) {
+    console.log('✅ Completing login for user:', userData.username);
+    
+    if (userData.rememberMe) {
+        console.log('💾 Saving user to localStorage for future logins');
+        const userDataToSave = {
+            username: userData.username,
+            email: userData.email,
+            id: userData.id
+        };
+        
+        const saved = saveRememberedUser(userDataToSave);
+        if (saved) {
+            console.log('✅ User successfully saved to localStorage');
+            rememberedUser = userDataToSave;
+        } else {
+            console.warn('⚠️ Failed to save user to localStorage, using memory only');
+            rememberedUser = userDataToSave;
+        }
+    } else {
+        console.log('📝 Remember me not checked, not saving user');
+    }
+    
+    const status = userData.isOSMode ? 
+        document.getElementById('osLoginStatus') : 
+        document.getElementById('loginStatus');
+    const button = userData.isOSMode ? 
+        document.getElementById('osLoginButton') : 
+        document.getElementById('loginButton');
+    
+    status.innerHTML = userData.isOSMode ? 
+        "✅ Welcome back! Redirecting..." : 
+        "✅ Authentication successful! Redirecting...";
+    button.innerHTML = "✅ Success";
+    
+    setTimeout(() => {
+        console.log('📤 Sending postMessage to parent window...');
+        if (window.parent && window.parent !== window) {
+            console.log('🎯 Parent window detected, sending auth-success message');
+            window.parent.postMessage('auth-success', '*');
+            console.log('📬 Message sent successfully');
+        } else {
+            console.log('⚠️ No parent window detected');
+        }
+    }, 1000);
 }
 
 // Login function
@@ -1318,7 +1524,7 @@ async function login() {
         
         const { data, error } = await supabase
             .from('clients')
-            .select('id, name, email, blocked, ban_reason')
+            .select('id, name, email, blocked, ban_reason, warnings')
             .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
             .eq('password', pwd)
             .single();
@@ -1372,7 +1578,7 @@ async function login() {
             return;
         }
         
-        console.log('✅ User authenticated:', { name: data.name, email: data.email, blocked: data.blocked });
+        console.log('✅ User authenticated:', { name: data.name, email: data.email, blocked: data.blocked, hasWarning: !!data.warnings });
         
         if (data.blocked) {
             console.log('🚫 User is blocked:', data.ban_reason);
@@ -1387,40 +1593,35 @@ async function login() {
             return;
         }
         
-        if (rememberMe) {
-            console.log('💾 Saving user to localStorage for future logins');
-            const userDataToSave = {
+        // Check for warnings
+        if (data.warnings && data.warnings.trim() !== '') {
+            console.log('⚠️ User has a warning, showing warning modal');
+            pendingUserData = {
                 username: data.name,
                 email: data.email,
-                id: data.id
+                id: data.id,
+                rememberMe: rememberMe,
+                isOSMode: false
             };
             
-            const saved = saveRememberedUser(userDataToSave);
-            if (saved) {
-                console.log('✅ User successfully saved to localStorage');
-                rememberedUser = userDataToSave;
-            } else {
-                console.warn('⚠️ Failed to save user to localStorage, using memory only');
-                rememberedUser = userDataToSave;
-            }
-        } else {
-            console.log('📝 Remember me not checked, not saving user');
+            status.innerHTML = "";
+            loginButton.innerHTML = "Authenticate";
+            loginButton.disabled = false;
+            
+            showWarningModal(data.warnings);
+            return;
         }
         
-        console.log('✅ Login successful! Redirecting...');
-        status.innerHTML = "✅ Authentication successful! Redirecting...";
-        loginButton.innerHTML = "✅ Success";
+        // No warning, proceed with normal login
+        const userData = {
+            username: data.name,
+            email: data.email,
+            id: data.id,
+            rememberMe: rememberMe,
+            isOSMode: false
+        };
         
-        setTimeout(() => {
-            console.log('📤 Sending postMessage to parent window...');
-            if (window.parent && window.parent !== window) {
-                console.log('🎯 Parent window detected, sending auth-success message');
-                window.parent.postMessage('auth-success', '*');
-                console.log('📬 Message sent successfully');
-            } else {
-                console.log('⚠️ No parent window detected');
-            }
-        }, 1000);
+        completeLogin(userData);
         
     } catch (err) {
         console.error('💥 Critical error during login:', err);
@@ -1488,7 +1689,7 @@ async function osLogin() {
         
         const { data, error } = await supabase
             .from('clients')
-            .select('id, name, email, blocked, ban_reason')
+            .select('id, name, email, blocked, ban_reason, warnings')
             .or(`email.eq.${rememberedUser.email},name.eq.${rememberedUser.username}`)
             .eq('password', pwd)
             .single();
@@ -1541,7 +1742,7 @@ async function osLogin() {
             return;
         }
         
-        console.log('✅ OS mode user authenticated');
+        console.log('✅ OS mode user authenticated:', { hasWarning: !!data.warnings });
         
         if (data.blocked) {
             console.log('🚫 OS mode user is blocked:', data.ban_reason);
@@ -1558,20 +1759,35 @@ async function osLogin() {
             return;
         }
         
-        console.log('✅ OS mode login successful! Redirecting...');
-        status.innerHTML = "✅ Welcome back! Redirecting...";
-        loginButton.innerHTML = "✅ Success";
+        // Check for warnings
+        if (data.warnings && data.warnings.trim() !== '') {
+            console.log('⚠️ OS mode user has a warning, showing warning modal');
+            pendingUserData = {
+                username: data.name,
+                email: data.email,
+                id: data.id,
+                rememberMe: true, // Always remember in OS mode
+                isOSMode: true
+            };
+            
+            status.innerHTML = "";
+            loginButton.innerHTML = "Sign In";
+            loginButton.disabled = false;
+            
+            showWarningModal(data.warnings);
+            return;
+        }
         
-        setTimeout(() => {
-            console.log('📤 OS mode sending postMessage to parent window...');
-            if (window.parent && window.parent !== window) {
-                console.log('🎯 Parent window detected, sending auth-success message');
-                window.parent.postMessage('auth-success', '*');
-                console.log('📬 OS mode message sent successfully');
-            } else {
-                console.log('⚠️ No parent window detected');
-            }
-        }, 1000);
+        // No warning, proceed with normal login
+        const userData = {
+            username: data.name,
+            email: data.email,
+            id: data.id,
+            rememberMe: true, // Always remember in OS mode
+            isOSMode: true
+        };
+        
+        completeLogin(userData);
         
     } catch (err) {
         console.error('💥 Critical error during OS login:', err);
@@ -1641,7 +1857,7 @@ async function initApp() {
     const osLoginButton = document.getElementById('osLoginButton');
     const switchUserButton = document.getElementById('switchUserButton');
     const backNav = document.getElementById('backNav');
-    
+    const acknowledgeBtn = document.getElementById('acknowledgeBtn');
     
     if (loginButton) {
         console.log('✅ Adding login button event listener');
@@ -1672,6 +1888,14 @@ async function initApp() {
         backNav.addEventListener('click', (e) => {
             e.preventDefault();
             goBackToOSMode();
+        });
+    }
+    
+    if (acknowledgeBtn) {
+        console.log('✅ Adding acknowledge button event listener');
+        acknowledgeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            acknowledgeWarning();
         });
     }
     
@@ -1706,22 +1930,21 @@ if (document.readyState === 'loading') {
     console.log('⚡ DOM already loaded, initializing immediately...');
     initApp();
 }
+
 // Session timeout functionality
 let sessionTimer = null;
 
 function startSessionTimer() {
-    console.log('⏱️ Starting 30-second session timer');
+    console.log('⏱️ Starting session timer');
     
-    // Clear any existing timer
     if (sessionTimer) {
         clearTimeout(sessionTimer);
     }
     
-    // Set 30-second timeout
     sessionTimer = setTimeout(() => {
-        console.log('⏰ Session expired after 30 seconds of inactivity');
+        console.log('⏰ Session expired after inactivity');
         handleSessionTimeout();
-    }, 3600000 ); // 30 seconds = 30000 milliseconds
+    }, 3600000); // 1 hour
 }
 
 function resetSessionTimer() {
@@ -1732,18 +1955,15 @@ function resetSessionTimer() {
 function handleSessionTimeout() {
     console.log('🚫 Session timeout - redirecting to timeout.html');
     
-    // Send message to parent window to redirect
     if (window.parent && window.parent !== window) {
         console.log('📤 Sending session-timeout message to parent');
         window.parent.postMessage('session-timeout', '*');
     } else {
-        // If no parent window, redirect directly
         console.log('⚠️ No parent window, redirecting directly');
         window.location.href = 'timeout.html';
     }
 }
 
-// Add event listeners to reset timer on user activity
 function setupActivityListeners() {
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     

@@ -89,54 +89,71 @@
     }
 
     .desktop {
-      flex: 1;
-      position: relative;
-      overflow: hidden;
-      background: transparent;
-    }
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: transparent;
+  width: 100%;
+  height: 100vh;
+}
 
-    .desktop-icons {
-      position: absolute;
-      top: 20px;
-      right: 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-      z-index: 10;
-    }
+.desktop-icons {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 10;
+}
 
-    .desktop-icon {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      padding: 12px;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      width: 80px;
-      text-align: center;
-    }
+.desktop-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 80px;
+  text-align: center;
+}
 
-    .desktop-icon:hover {
-      background: rgba(120, 80, 255, 0.1);
-      transform: scale(1.05);
-    }
+.desktop-icon:hover {
+  background: rgba(120, 80, 255, 0.2);
+  transform: scale(1.05);
+  box-shadow: 0 8px 32px rgba(120, 80, 255, 0.3);
+}
 
-    .desktop-icon i {
-      font-size: 2rem;
-      color: #d0d8ff;
-      filter: drop-shadow(0 2px 8px rgba(120, 80, 255, 0.3));
-    }
+.desktop-icon:active {
+  transform: scale(0.95);
+}
 
-    .desktop-icon span {
-      font-size: 0.75rem;
-      color: #e8f0ff;
-      font-weight: 500;
-      max-width: 100%;
-      word-wrap: break-word;
-    }
+.desktop-icon i {
+  font-size: 2rem;
+  color: #d0d8ff;
+  filter: drop-shadow(0 2px 8px rgba(120, 80, 255, 0.3));
+  transition: all 0.3s ease;
+}
 
+.desktop-icon:hover i {
+  color: #ffffff;
+  filter: drop-shadow(0 4px 12px rgba(120, 80, 255, 0.5));
+}
+
+.desktop-icon span {
+  font-size: 0.75rem;
+  color: #e8f0ff;
+  font-weight: 500;
+  max-width: 100%;
+  word-wrap: break-word;
+  transition: all 0.3s ease;
+}
+
+.desktop-icon:hover span {
+  color: #ffffff;
+}
     .window {
       position: absolute;
       min-width: 400px;
@@ -1141,6 +1158,10 @@
       <i class="fas fa-terminal"></i>
       <span>Terminal</span>
     </div>
+    <div class="desktop-icon" data-app="Solaris Browser" data-src="solaris.html" data-icon="fas fa-rocket">
+      <i class="fas fa-rocket"></i>
+      <span>Solaris</span>
+    </div>
   </div>
 </div>
 
@@ -1173,7 +1194,7 @@
     <i class="fas fa-headset"></i>
     <div class="tooltip">Support</div>
   </div>
-  <div class="dock-item" data-app="Changelog" data-src="changelogs.html" data-icon="fas fa-list-alt">
+  <div class="dock-item" data-app="Changelog" data-src="changelog.html" data-icon="fas fa-list-alt">
     <i class="fas fa-list-alt"></i>
     <div class="tooltip">Changes</div>
   </div>
@@ -1413,7 +1434,16 @@ function applySettings() {
     document.body.classList.remove('no-animations');
   }
 }
-
+// Listen for session timeout messages from auth.html iframe
+window.addEventListener('message', function(event) {
+    if (event.data === 'session-timeout') {
+        console.log('🚫 Received session timeout message from auth.html');
+        window.location.href = 'timeout.html';
+    } else if (event.data === 'auth-success') {
+        console.log('✅ Received auth success message');
+        // Your existing auth success handling
+    }
+});
 // Setup dock auto-hide
 function setupDockAutohide() {
   const dock = document.querySelector('.dock');
@@ -2824,48 +2854,7 @@ function setupXORBITMenu() {
 
 // X-ORBIT Menu Functions
 function showAboutDialog() {
-  const aboutContent = `
-    <div style="text-align: center; padding: 40px 30px;">
-      <div style="margin-bottom: 24px;">
-        <i class="fas fa-rocket" style="font-size: 3rem; color: #7d5cff; margin-bottom: 16px;"></i>
-        <h1 style="font-size: 2rem; font-weight: 600; margin-bottom: 8px; background: linear-gradient(135deg, #ffffff 0%, #d0d8ff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">X-ORBIT Desktop</h1>
-        <p style="color: #a8b4d9; font-size: 1rem; margin-bottom: 24px;">Version 1.0.0</p>
-      </div>
-      
-      <div style="background: rgba(120, 80, 255, 0.1); border-radius: 16px; padding: 24px; margin-bottom: 24px; border: 1px solid rgba(120, 80, 255, 0.2);">
-        <p style="color: #e8f0ff; line-height: 1.6; margin-bottom: 16px;">
-          X-ORBIT is a modern web-based desktop environment featuring glass morphism design, 
-          customizable themes, and a powerful window management system.
-        </p>
-        <p style="color: #a8b4d9; font-size: 0.9rem;">
-          Built with modern web technologies for the future of desktop computing.
-        </p>
-      </div>
-      
-      <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-        <div style="text-align: center;">
-          <div style="color: #7d5cff; font-weight: 600;">🚀 Features</div>
-          <div style="color: #a8b4d9; font-size: 0.85rem;">Window Management</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="color: #7d5cff; font-weight: 600;">🎨 Themes</div>
-          <div style="color: #a8b4d9; font-size: 0.85rem;">Light & Dark Mode</div>
-        </div>
-        <div style="text-align: center;">
-          <div style="color: #7d5cff; font-weight: 600;">⚙️ Settings</div>
-          <div style="color: #a8b4d9; font-size: 0.85rem;">Fully Customizable</div>
-        </div>
-      </div>
-      
-      <div style="margin-top: 32px; padding-top: 24px; border-top: 1px solid rgba(120, 80, 255, 0.2);">
-        <p style="color: #a8b4d9; font-size: 0.85rem;">
-          © 2024 X-ORBIT Desktop. All rights reserved.
-        </p>
-      </div>
-    </div>
-  `;
-  
-  openCustomWindow('About X-ORBIT', aboutContent, 'fas fa-info-circle', 500, 600);
+  openWindow('Build Information', 'build-info.html', 'fas fa-info-circle');
   document.getElementById('xorbitDropdown').classList.remove('show');
 }
 

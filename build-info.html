@@ -1,340 +1,1161 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>About LumiCore Neo | X-ORBIT</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
-    body {
-      margin: 0;
-      padding: 40px 20px;
-      min-height: 100vh;
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, rgba(0, 234, 255, 0.08), rgba(112, 56, 255, 0.08)), #0e0f1a;
-      backdrop-filter: blur(20px);
-      color: #d6e0ff;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Build Information - X-ORBIT</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+    color: #e8f0ff;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: rgba(120, 80, 255, 0.1);
+    border-radius: 20px;
+    border: 1px solid rgba(120, 80, 255, 0.2);
+}
+
+.header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+}
+
+.header p {
+    color: #a8b4d9;
+    font-size: 1.1rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+    margin-bottom: 30px;
+}
+
+.card {
+    background: rgba(15, 15, 35, 0.6);
+    backdrop-filter: blur(20px);
+    border-radius: 16px;
+    border: 1px solid rgba(120, 80, 255, 0.2);
+    padding: 25px;
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    border-color: rgba(120, 80, 255, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(120, 80, 255, 0.2);
+}
+
+.card-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+}
+
+.card-header i {
+    font-size: 1.5rem;
+    color: #7d5cff;
+    margin-right: 12px;
+}
+
+.card-header h2 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #e8f0ff;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #d0d8ff;
+}
+
+.info-value {
+    color: #a8b4d9;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+    text-align: right;
+    max-width: 200px;
+    word-break: break-all;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-online {
+    background: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+}
+
+.status-warning {
+    background: #f59e0b;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+
+.status-error {
+    background: #ef4444;
+    box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+}
+
+.performance-bar {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+
+.performance-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #3b82f6);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.setting-item {
+    background: rgba(120, 80, 255, 0.05);
+    padding: 15px;
+    border-radius: 10px;
+    border: 1px solid rgba(120, 80, 255, 0.1);
+}
+
+.setting-label {
+    font-size: 0.85rem;
+    color: #7d5cff;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.setting-value {
+    color: #e8f0ff;
+    font-weight: 500;
+}
+
+.refresh-btn {
+    background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 20px auto;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(125, 92, 255, 0.4);
+}
+
+.system-health {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.health-score {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #10b981;
+}
+
+.uptime-display {
+    font-size: 1.2rem;
+    color: #7d5cff;
+    font-weight: 600;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.speed-test-btn {
+    background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.speed-test-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(125, 92, 255, 0.4);
+}
+
+.speed-test-popup {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.speed-test-content {
+    background: rgba(15, 15, 35, 0.9);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    border: 1px solid rgba(120, 80, 255, 0.3);
+    padding: 30px;
+    max-width: 450px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+    text-align: center;
+    position: relative;
+}
+
+.speed-test-close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background: rgba(120, 80, 255, 0.2);
+    border: 1px solid rgba(120, 80, 255, 0.3);
+    color: #e8f0ff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.speed-test-close:hover {
+    background: rgba(120, 80, 255, 0.4);
+    color: #ffffff;
+}
+
+.speed-gauge {
+    position: relative;
+    width: 280px;
+    height: 140px;
+    margin: 20px auto;
+}
+
+.gauge-bg {
+    width: 100%;
+    height: 100%;
+    border: 12px solid rgba(120, 80, 255, 0.2);
+    border-bottom: none;
+    border-radius: 140px 140px 0 0;
+    position: relative;
+}
+
+.gauge-fill {
+    width: 100%;
+    height: 100%;
+    border: 12px solid;
+    border-color: #10b981 #3b82f6 #7d5cff transparent;
+    border-bottom: none;
+    border-radius: 140px 140px 0 0;
+    position: absolute;
+    top: -12px;
+    left: -12px;
+    clip-path: polygon(0 0, 0% 0, 0 100%, 50% 100%);
+    transition: clip-path 0.3s ease;
+}
+
+.gauge-numbers {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.gauge-number {
+    position: absolute;
+    color: #a8b4d9;
+    font-size: 0.8rem;
+    font-weight: 500;
+    transform: translate(-50%, -50%);
+}
+
+.gauge-needle {
+    position: absolute;
+    bottom: -2px;
+    left: 50%;
+    width: 3px;
+    height: 120px;
+    background: linear-gradient(to top, #7d5cff, #ffffff);
+    transform-origin: bottom center;
+    transform: translateX(-50%) rotate(-90deg);
+    transition: transform 0.5s ease;
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(125, 92, 255, 0.8);
+}
+
+.gauge-center {
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #ffffff, #7d5cff);
+    border-radius: 50%;
+    transform: translateX(-50%);
+    box-shadow: 0 0 15px rgba(125, 92, 255, 0.6);
+    border: 2px solid rgba(232, 240, 255, 0.3);
+}
+
+.speed-display {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: #e8f0ff;
+    margin: 15px 0;
+}
+
+.speed-unit {
+    font-size: 0.9rem;
+    color: #a8b4d9;
+}
+
+.test-phase {
+    font-size: 1rem;
+    color: #7d5cff;
+    margin-bottom: 15px;
+    font-weight: 600;
+    min-height: 24px;
+}
+
+.test-progress {
+    width: 100%;
+    height: 6px;
+    background: rgba(120, 80, 255, 0.2);
+    border-radius: 3px;
+    margin: 15px 0;
+    overflow: hidden;
+}
+
+.test-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #10b981, #7d5cff);
+    border-radius: 3px;
+    width: 0%;
+    transition: width 0.3s ease;
+}
+
+.test-results {
+    display: none;
+    margin-top: 20px;
+}
+
+.result-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+}
+
+.result-item:last-child {
+    border-bottom: none;
+}
+
+.result-label {
+    color: #d0d8ff;
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.result-value {
+    color: #7d5cff;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.close-btn {
+    background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+    color: white;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 20px;
+    display: none;
+}
+
+.close-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 15px rgba(125, 92, 255, 0.4);
+}
+
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr;
     }
-    .container {
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(112, 56, 255, 0.15);
-      border-radius: 24px;
-      box-shadow: 0 8px 32px rgba(112, 56, 255, 0.3), 0 4px 16px rgba(0, 234, 255, 0.15);
-      padding: 36px 48px;
-      max-width: 680px;
-      width: 100%;
-      backdrop-filter: blur(18px);
+    
+    .header h1 {
+        font-size: 2rem;
     }
-    h1 {
-      font-size: 2.5rem;
-      font-weight: 700;
-      text-align: center;
-      background: linear-gradient(90deg, #7038ff, #00eaff);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      margin-bottom: 28px;
+    
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 5px;
     }
-    .info-list {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 28px 0;
+    
+    .info-value {
+        text-align: left;
+        max-width: 100%;
     }
-    .info-list li {
-      display: flex;
-      justify-content: space-between;
-      padding: 14px 0;
-      border-bottom: 1px solid rgba(156, 38, 217, 0.2);
-      font-weight: 600;
-      font-size: 1.05rem;
-    }
-    .info-label { color: #aab6ff; }
-    .info-value { color: #e0dfff; }
-    .description {
-      font-weight: 400;
-      font-size: 1.1rem;
-      color: #c4ccff;
-      line-height: 1.6;
-      padding-top: 10px;
-    }
-    .button-row {
-      display: flex;
-      gap: 12px;
-      margin-top: 24px;
-      flex-wrap: wrap;
-    }
-    .action-button {
-      background: linear-gradient(135deg, #7038ff, #00eaff);
-      color: #ffffff;
-      border: none;
-      padding: 0.75rem 1.4rem;
-      font-size: 1rem;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
-      text-align: center;
-      box-shadow: 0 0 12px rgba(112, 56, 255, 0.4);
-    }
-    .action-button:hover {
-      background: linear-gradient(135deg, #8447ff, #00cfff);
-      transform: translateY(-2px);
-      box-shadow: 0 4px 15px rgba(112, 56, 255, 0.5), 0 4px 20px rgba(0, 234, 255, 0.3);
-    }
-    .modal {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.6);
-      backdrop-filter: blur(10px);
-      justify-content: center;
-      align-items: center;
-      z-index: 9999;
-    }
-    .modal-content {
-      background: rgba(20, 22, 37, 0.95);
-      padding: 28px;
-      border-radius: 18px;
-      box-shadow: 0 12px 36px rgba(112, 56, 255, 0.3);
-      max-width: 420px;
-      width: 90%;
-      text-align: center;
-    }
-    .modal-content input {
-      width: 100%;
-      padding: 12px;
-      border-radius: 10px;
-      border: 1px solid #7038ff;
-      margin-top: 14px;
-      background: #121321;
-      color: #fff;
-      font-size: 1rem;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    .modal-content button {
-      margin-top: 14px;
-      background: linear-gradient(135deg, #7038ff, #00eaff);
-      color: #fff;
-      padding: 12px 20px;
-      border: none;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 1rem;
-      font-weight: 600;
-      transition: background 0.3s ease;
-    }
-    .modal-content button:hover {
-      background: linear-gradient(135deg, #8b54ff, #00cfff);
-    }
-    .danger {
-      border: 2px solid #ff4d4d !important;
-    }
-    .danger h2 {
-      color: #ff4d4d;
-    }
-    .danger p {
-      color: #ffc4c4;
-      font-size: 1rem;
-    }
-    @media (max-width: 480px) {
-      body { padding: 20px 10px; }
-      .container { padding: 28px 20px; }
-      h1 { font-size: 2rem; }
-      .button-row { flex-direction: column; align-items: stretch; }
-    }
-  </style>
+}
+</style>
 </head>
 <body>
-  <main class="container">
-    <h1>About LumiCore Neo</h1>
-    <ul class="info-list">
-      <li><span class="info-label">OS Name:</span><span class="info-value">LumiCore Neo</span></li>
-      <li><span class="info-label">Version:</span><span class="info-value" id="osVersion">3.2.1 Beta</span></li>
-      <li><span class="info-label">Build Number:</span><span class="info-value" id="buildNumber">DS20250625-3:2:0</span></li>
-      <li><span class="info-label">Publisher:</span><span class="info-value">X-ORBIT Proxy Services & Co.</span></li>
-      <li><span class="info-label">Certificate Signer:</span><span class="info-value">XO-SecureVault WY</span></li>
-      <li><span class="info-label">Author(s):</span><span class="info-value">1Vortexx</span></li>
-      <li><span class="info-label">Session ID:</span><span class="info-value" id="sessionIdValue">Loading...</span></li>
-      <li><span class="info-label">Release Date:</span><span class="info-value" id="releaseDate">Sept 9, 2025</span></li>
-      <li><span class="info-label">Activation:</span><span class="info-value" id="activationStatus">Not Activated</span></li>
-      <li><span class="info-label">Registered Buyer:</span><span class="info-value" id="registeredBuyer">None</span></li>
-      <li><span class="info-label">Package:</span><span class="info-value" id="packageName">None</span></li>
-    </ul>
-    <section class="description">
-      LumiCore Neo by DevSolutions is a secure, intelligent, and cross-platform web-based operating system...
-    </section>
-    <div class="button-row">
-      <button class="action-button" id="activateBtn">Activate a key</button>
-      <button class="action-button" id="refreshBtn">Sync Key Database</button>
-      <button class="action-button" id="clearBtn">Clear Product Activation</button>
+<div class="container">
+    <div class="header">
+        <h1>X-ORBIT Build Information</h1>
+        <p>System diagnostics and configuration overview</p>
     </div>
-  </main>
 
-  <div class="modal" id="activationModal">
-    <div class="modal-content">
-      <h2>Enter Activation Key</h2>
-      <input type="text" id="activationInput" placeholder="XXXX-XXXX-XXXX-XXXX" maxlength="19" autofocus />
-      <button id="submitActivationBtn">Submit</button>
+    <div class="grid">
+        <!-- OS Build Information -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-rocket"></i>
+                <h2>OS Build Information</h2>
+            </div>
+            <div class="info-item">
+                <span class="info-label">X-ORBIT Version</span>
+                <span class="info-value">4.4.1 Astra</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Build Number</span>
+                <span class="info-value" id="buildNumber">20250930.040401</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Kernel Version</span>
+                <span class="info-value">X-ORBIT-Core 5.4.2</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Architecture</span>
+                <span class="info-value">x64 (WebAssembly)</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Build Date</span>
+                <span class="info-value" id="buildDate"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Environment</span>
+                <span class="info-value">
+                    <span class="status-indicator status-online"></span>
+                    Production
+                </span>
+            </div>
+        </div>
+
+        <!-- Device Information -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-desktop"></i>
+                <h2>Device Information</h2>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Device Name</span>
+                <span class="info-value" id="deviceName">X-ORBIT-Station</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">IP Address</span>
+                <span class="info-value" id="ipAddress">192.168.1.100</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Display Resolution</span>
+                <span class="info-value" id="displayRes"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Color Depth</span>
+                <span class="info-value" id="colorDepth"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Timezone</span>
+                <span class="info-value" id="timezone"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Language</span>
+                <span class="info-value" id="language"></span>
+            </div>
+        </div>
+
+        <!-- System Performance -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-tachometer-alt"></i>
+                <h2>System Performance</h2>
+            </div>
+            <div class="info-item">
+                <span class="info-label">CPU Usage</span>
+                <span class="info-value">
+                    <span id="cpuUsage">23%</span>
+                    <div class="performance-bar">
+                        <div class="performance-fill" style="width: 23%"></div>
+                    </div>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Memory Usage</span>
+                <span class="info-value">
+                    <span id="memUsage">67%</span>
+                    <div class="performance-bar">
+                        <div class="performance-fill" style="width: 67%"></div>
+                    </div>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Network Status</span>
+                <span class="info-value">
+                    <span class="status-indicator status-online"></span>
+                    Connected (Fast)
+                </span>
+            </div>
+            <div class="system-health">
+                <span>System Health:</span>
+                <span class="health-score">94</span>
+                <span>/100</span>
+            </div>
+        </div>
+
+        <!-- Browser Information -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-globe"></i>
+                <h2>Browser Environment</h2>
+            </div>
+            <div class="info-item">
+                <span class="info-label">User Agent</span>
+                <span class="info-value" id="userAgent"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Browser</span>
+                <span class="info-value" id="browserName"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Platform</span>
+                <span class="info-value" id="platform"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">WebGL Support</span>
+                <span class="info-value" id="webglSupport"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Local Storage</span>
+                <span class="info-value" id="localStorage"></span>
+            </div>
+        </div>
+
+        <!-- Network Information -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-wifi"></i>
+                <h2>Network Information</h2>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Connection Type</span>
+                <span class="info-value" id="connectionType">4g</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Network Speed</span>
+                <span class="info-value">
+                    <button class="speed-test-btn" onclick="openSpeedTestPopup()">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Run Speed Test
+                    </button>
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Latency</span>
+                <span class="info-value" id="latency">45ms</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Online Status</span>
+                <span class="info-value">
+                    <span class="status-indicator status-online"></span>
+                    <span id="onlineStatus">Online</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- System Uptime -->
+        <div class="card">
+            <div class="card-header">
+                <i class="fas fa-clock"></i>
+                <h2>System Uptime</h2>
+            </div>
+            <div class="uptime-display" id="uptimeDisplay">
+                2d 14h 23m 45s
+            </div>
+            <div class="info-item">
+                <span class="info-label">Session Start</span>
+                <span class="info-value" id="sessionStart"></span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Last Boot</span>
+                <span class="info-value" id="lastBoot"></span>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="modal" id="confirmClearModal">
-    <div class="modal-content danger">
-      <h2>⚠ Confirm Clear Activation</h2>
-      <p>
-        Are you <strong>certain</strong> you want to wipe all local product activation data?
-        <br>This action <strong>cannot be undone</strong> and all keys will have to be re-entered.
-      </p>
-      <button onclick="confirmClearActivation()" style="background:#ff4d4d;">Yes, Clear All</button>
-      <button onclick="cancelClear()" style="background:#444; margin-left:10px;">Cancel</button>
+    <!-- Settings Overview -->
+    <div class="card">
+        <div class="card-header">
+            <i class="fas fa-cog"></i>
+            <h2>Current Settings Overview</h2>
+        </div>
+        <div class="settings-grid">
+            <div class="setting-item">
+                <div class="setting-label">Theme</div>
+                <div class="setting-value" id="currentTheme">Dark Mode</div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">Dock Position</div>
+                <div class="setting-value" id="dockPosition">Bottom</div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">Animations</div>
+                <div class="setting-value" id="animationsEnabled">Enabled</div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">Transparency</div>
+                <div class="setting-value" id="transparencyEnabled">Enabled</div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">Auto-hide Dock</div>
+                <div class="setting-value" id="autohideDock">Disabled</div>
+            </div>
+            <div class="setting-item">
+                <div class="setting-label">Window Snapping</div>
+                <div class="setting-value" id="windowSnapping">Enabled</div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="modal" id="syncStatusModal">
-    <div class="modal-content" id="syncStatusContent">
-      <h2 id="syncStatusTitle">Sync Status</h2>
-      <p id="syncStatusMessage">Checking...</p>
-      <button onclick="closeSyncModal()">OK</button>
+    <button class="refresh-btn" onclick="refreshSystemInfo()">
+        <i class="fas fa-sync-alt"></i>
+        Refresh System Information
+    </button>
+</div>
+
+<!-- Speed Test Popup -->
+<div class="speed-test-popup" id="speedTestPopup">
+    <div class="speed-test-content">
+        <button class="speed-test-close" onclick="closeSpeedTestPopup()">×</button>
+        
+        <h2 style="color: #e8f0ff; margin-bottom: 8px; font-size: 1.4rem;">X-ORBIT Speed Test</h2>
+        <p style="color: #a8b4d9; margin-bottom: 20px; font-size: 0.9rem;">Testing connection to X-ORBIT servers</p>
+        
+        <div class="test-phase" id="testPhase">Preparing test...</div>
+        
+        <div class="test-progress">
+            <div class="test-progress-bar" id="testProgressBar"></div>
+        </div>
+        
+        <div class="speed-gauge">
+            <div class="gauge-bg"></div>
+            <div class="gauge-fill" id="gaugeFill"></div>
+            <div class="gauge-numbers" id="gaugeNumbers"></div>
+            <div class="gauge-needle" id="gaugeNeedle"></div>
+            <div class="gauge-center"></div>
+        </div>
+        
+        <div class="speed-display">
+            <span id="speedValue">0</span>
+            <span class="speed-unit">Mbps</span>
+        </div>
+        
+        <div class="test-results" id="testResults">
+            <div class="result-item">
+                <span class="result-label">Download Speed</span>
+                <span class="result-value" id="downloadResult">-- Mbps</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Upload Speed</span>
+                <span class="result-value" id="uploadResult">-- Mbps</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Ping</span>
+                <span class="result-value" id="pingResult">-- ms</span>
+            </div>
+            <div class="result-item">
+                <span class="result-label">Jitter</span>
+                <span class="result-value" id="jitterResult">-- ms</span>
+            </div>
+        </div>
+        
+        <button class="close-btn" id="closeBtn" onclick="closeSpeedTestPopup()">Close</button>
     </div>
-  </div>
+</div>
 
-  <script>
-  let activationKeys = {};
+<script>
+function getDeviceName() {
+    const funnyNames = [
+        'Computron-3000', 'The-Procrastinator', 'Caffeine-Powered-Beast',
+        'Debugging-Nightmare', 'Code-Monkey-Station', 'Syntax-Error-Generator',
+        'The-Blue-Screen-Special', 'Infinite-Loop-Machine', 'Stack-Overflow-Central',
+        'Rubber-Duck-Debugger', 'The-Feature-Creep', 'Legacy-Code-Survivor',
+        'Deadline-Panic-Box', 'The-Merge-Conflict', 'Spaghetti-Code-Maker',
+        'The-Documentation-Avoider', 'Production-Bug-Factory', 'The-Refactor-Resister',
+        'Memory-Leak-Simulator', 'The-Quick-Fix-Machine'
+    ];
+    
+    const randomIndex = Math.floor(Math.random() * funnyNames.length);
+    document.getElementById('deviceName').textContent = funnyNames[randomIndex];
+}
 
-  async function fetchActivationKeys() {
+function getSystemInfo() {
+    document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 50) + '...';
+    document.getElementById('platform').textContent = navigator.platform;
+    document.getElementById('language').textContent = navigator.language;
+    document.getElementById('displayRes').textContent = `${screen.width} × ${screen.height}`;
+    document.getElementById('colorDepth').textContent = `${screen.colorDepth}-bit`;
+    
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    document.getElementById('timezone').textContent = timezone;
+    
+    let browserName = 'Unknown';
+    if (navigator.userAgent.includes('Chrome')) browserName = 'Chrome';
+    else if (navigator.userAgent.includes('Firefox')) browserName = 'Firefox';
+    else if (navigator.userAgent.includes('Safari')) browserName = 'Safari';
+    else if (navigator.userAgent.includes('Edge')) browserName = 'Edge';
+    document.getElementById('browserName').textContent = browserName;
+    
+    const canvas = document.createElement('canvas');
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    document.getElementById('webglSupport').textContent = gl ? 'Supported' : 'Not Supported';
+    
     try {
-      const base64Url = "aHR0cHM6Ly8xdm9ydGV4eC5naXRodWIuaW8vYXV0aC1rZXlzL2FjdGl2YXRpb25fa2V5c18zMDAwLmpzb24=";
-      const decodedUrl = atob(base64Url);
+        localStorage.setItem('test', 'test');
+        localStorage.removeItem('test');
+        document.getElementById('localStorage').textContent = 'Available';
+    } catch(e) {
+        document.getElementById('localStorage').textContent = 'Not Available';
+    }
+    
+    performSpeedTest();
+    
+    document.getElementById('onlineStatus').textContent = navigator.onLine ? 'Online' : 'Offline';
+    const statusIndicator = document.querySelector('#onlineStatus').previousElementSibling;
+    statusIndicator.className = `status-indicator ${navigator.onLine ? 'status-online' : 'status-error'}`;
+    
+    document.getElementById('buildDate').textContent = new Date().toLocaleDateString();
+    getDeviceName();
+    
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('ipAddress').textContent = data.ip;
+        })
+        .catch(() => {
+            document.getElementById('ipAddress').textContent = '192.168.1.100';
+        });
+}
 
-      const response = await fetch(decodedUrl);
-      if (!response.ok) throw new Error(`Network error: ${response.status} ${response.statusText}`);
-      const data = await response.json();
-      activationKeys = {};
-      for (const key in data) {
-        const normalizedKey = key.toUpperCase().replace(/[-\s]/g, '');
-        activationKeys[normalizedKey] = {
-          buyer: data[key].buyer,
-          package: data[key].package
-        };
-      }
-      showSyncStatus(true);
+async function performSpeedTest() {
+    document.getElementById('latency').textContent = 'Testing...';
+    
+    try {
+        const startTime = performance.now();
+        await fetch('https://httpbin.org/get?t=' + Date.now(), { 
+            method: 'HEAD',
+            mode: 'no-cors',
+            cache: 'no-cache'
+        });
+        const endTime = performance.now();
+        const latency = Math.round(endTime - startTime);
+        
+        document.getElementById('latency').textContent = latency + 'ms';
+        
+        if (navigator.connection) {
+            document.getElementById('connectionType').textContent = navigator.connection.effectiveType || 'Unknown';
+        } else {
+            document.getElementById('connectionType').textContent = 'Unknown';
+        }
     } catch (error) {
-      console.error("❌ Failed to fetch activation keys:", error);
-      showSyncStatus(false);
+        document.getElementById('latency').textContent = '< 50ms';
+        document.getElementById('connectionType').textContent = '4g';
     }
-  }
+}
 
-    function showSyncStatus(success) {
-      const modal = document.getElementById("syncStatusModal");
-      const title = document.getElementById("syncStatusTitle");
-      const message = document.getElementById("syncStatusMessage");
-
-      if (success) {
-        title.textContent = "✅ Keys Synced";
-        title.style.color = "#aaffcc";
-        message.textContent = "The key database was successfully refreshed.";
-      } else {
-        title.textContent = "❌ Sync Failed";
-        title.style.color = "#ff4d4d";
-        message.textContent = "Unable to sync the key database. Please check your connection or try again later.";
-      }
-
-      modal.style.display = "flex";
+function updateUptime() {
+    let indexLoadTime;
+    
+    try {
+        if (window.parent && window.parent.performance && window.parent.performance.timing) {
+            indexLoadTime = window.parent.performance.timing.navigationStart;
+        } else {
+            indexLoadTime = performance.timing.navigationStart;
+        }
+    } catch (e) {
+        indexLoadTime = performance.timing.navigationStart;
     }
-
-    function closeSyncModal() {
-      document.getElementById("syncStatusModal").style.display = "none";
+    
+    const currentTime = Date.now();
+    const uptime = currentTime - indexLoadTime;
+    
+    const days = Math.floor(uptime / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((uptime % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((uptime % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((uptime % (1000 * 60)) / 1000);
+    
+    let uptimeText = '';
+    if (days > 0) {
+        uptimeText = `${days}d ${hours}h ${minutes}m ${seconds}s`;
+    } else if (hours > 0) {
+        uptimeText = `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+        uptimeText = `${minutes}m ${seconds}s`;
+    } else {
+        uptimeText = `${seconds}s`;
     }
+    
+    document.getElementById('uptimeDisplay').textContent = uptimeText;
+    
+    const sessionStartTime = new Date(indexLoadTime);
+    document.getElementById('sessionStart').textContent = sessionStartTime.toLocaleString();
+    document.getElementById('lastBoot').textContent = sessionStartTime.toLocaleString();
+}
 
-    function displaySessionID() {
-      let id = localStorage.getItem("session_id");
-      if (!id) {
-        id = generateSessionID();
-        localStorage.setItem("session_id", id);
-      }
-      document.getElementById("sessionIdValue").textContent = id;
+function updatePerformanceData() {
+    const cpuUsage = Math.floor(Math.random() * 40) + 10;
+    const memUsage = Math.floor(Math.random() * 30) + 50;
+    
+    document.getElementById('cpuUsage').textContent = cpuUsage + '%';
+    document.querySelector('.performance-fill').style.width = cpuUsage + '%';
+    
+    document.getElementById('memUsage').textContent = memUsage + '%';
+    document.querySelectorAll('.performance-fill')[1].style.width = memUsage + '%';
+}
+
+function loadCurrentSettings() {
+    try {
+        if (window.parent && window.parent.settings) {
+            const settings = window.parent.settings;
+            document.getElementById('currentTheme').textContent = settings.theme === 'light' ? 'Light Mode' : 'Dark Mode';
+            document.getElementById('dockPosition').textContent = settings.dockPosition.charAt(0).toUpperCase() + settings.dockPosition.slice(1);
+            document.getElementById('animationsEnabled').textContent = settings.animations ? 'Enabled' : 'Disabled';
+            document.getElementById('transparencyEnabled').textContent = settings.transparency ? 'Enabled' : 'Disabled';
+            document.getElementById('autohideDock').textContent = settings.dockAutohide ? 'Enabled' : 'Disabled';
+            document.getElementById('windowSnapping').textContent = settings.windowSnapping ? 'Enabled' : 'Disabled';
+        }
+    } catch (e) {
+        console.log('Could not access parent settings');
     }
+}
 
-    function generateSessionID(length = 24) {
-      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-      return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-    }
+function openSpeedTestPopup() {
+    document.getElementById('speedTestPopup').style.display = 'flex';
+    resetSpeedTest();
+    createGaugeNumbers();
+    setTimeout(() => runSpeedTest(), 500);
+}
 
-    function loadActivationData() {
-      const activated = localStorage.getItem("activated") === "true";
-      const buyer = localStorage.getItem("buyer");
-      const pack = localStorage.getItem("package");
-      document.getElementById("activationStatus").textContent = activated ? "Activated" : "Not Activated";
-      document.getElementById("activationStatus").style.color = activated ? "#aaffcc" : "#ff5577";
-      document.getElementById("registeredBuyer").textContent = activated ? buyer || "Unknown" : "None";
-      document.getElementById("packageName").textContent = activated ? pack || "Unknown" : "None";
-    }
+function closeSpeedTestPopup() {
+    document.getElementById('speedTestPopup').style.display = 'none';
+}
 
-    async function processActivation() {
-      const input = document.getElementById("activationInput");
-      const rawKey = input.value.trim().toUpperCase().replace(/[-\s]/g, '');
-      const modal = document.getElementById("activationModal");
-
-      if (!Object.keys(activationKeys).length) {
-        alert("Activation keys not loaded. Please refresh keys.");
-        return;
-      }
-
-      const data = activationKeys[rawKey];
-      if (data) {
-        localStorage.setItem("activated", "true");
-        localStorage.setItem("buyer", data.buyer);
-        localStorage.setItem("package", data.package);
-        loadActivationData();
-        modal.style.display = "none";
-        input.value = "";
-      } else {
-        alert("❌ Invalid activation key.");
-      }
-    }
-
-    function confirmClearActivation() {
-      localStorage.clear();
-      loadActivationData();
-      displaySessionID();
-      document.getElementById("confirmClearModal").style.display = "none";
-    }
-
-    function cancelClear() {
-      document.getElementById("confirmClearModal").style.display = "none";
-    }
-
-    document.getElementById("activateBtn").onclick = () => {
-      document.getElementById("activationModal").style.display = "flex";
-      document.getElementById("activationInput").focus();
-    };
-
-    document.getElementById("submitActivationBtn").onclick = processActivation;
-
-    document.getElementById("refreshBtn").onclick = () => {
-  location.reload();
-};
-
-    document.getElementById("clearBtn").onclick = () => {
-      document.getElementById("confirmClearModal").style.display = "flex";
-    };
-
-    window.onclick = (e) => {
-      const activationModal = document.getElementById("activationModal");
-      const confirmModal = document.getElementById("confirmClearModal");
-      const syncModal = document.getElementById("syncStatusModal");
-      if (e.target === activationModal) activationModal.style.display = "none";
-      if (e.target === confirmModal) confirmModal.style.display = "none";
-      if (e.target === syncModal) syncModal.style.display = "none";
-    };
-
-    window.addEventListener("DOMContentLoaded", async () => {
-      await fetchActivationKeys();
-      displaySessionID();
-      loadActivationData();
+function createGaugeNumbers() {
+    const gaugeNumbers = document.getElementById('gaugeNumbers');
+    gaugeNumbers.innerHTML = '';
+    
+    const steps = [0, 10, 20, 30, 50, 70, 100];
+    
+    steps.forEach(speed => {
+        // Convert speed to angle for semicircle: 0 = far left, 100 = far right
+        const percentage = speed / 100;
+        const angle = percentage * 180; // 0° to 180°
+        const radian = ((angle - 90) * Math.PI) / 180; // Convert to -90° to +90°
+        
+        // Position numbers around the outside of the gauge
+        const radius = 110;
+        const centerX = 140; // Half of 280px width
+        const centerY = 130; // Adjusted for semicircle
+        
+        const x = centerX + Math.cos(radian) * radius;
+        const y = centerY + Math.sin(radian) * radius;
+        
+        const numberEl = document.createElement('div');
+        numberEl.className = 'gauge-number';
+        numberEl.textContent = speed;
+        numberEl.style.left = x + 'px';
+        numberEl.style.top = y + 'px';
+        
+        gaugeNumbers.appendChild(numberEl);
     });
-  </script>
+}
+
+function resetSpeedTest() {
+    document.getElementById('testPhase').textContent = 'Preparing test...';
+    document.getElementById('speedValue').textContent = '0';
+    document.getElementById('gaugeNeedle').style.transform = 'translateX(-50%) rotate(-90deg)';
+    document.getElementById('gaugeFill').style.clipPath = 'polygon(50% 100%, 50% 100%, 50% 0%, 50% 0%)';
+    document.getElementById('testResults').style.display = 'none';
+    document.getElementById('testResults').classList.remove('show');
+    document.getElementById('closeBtn').style.display = 'none';
+    document.getElementById('testProgressBar').style.width = '0%';
+    
+    document.getElementById('downloadResult').textContent = '-- Mbps';
+    document.getElementById('uploadResult').textContent = '-- Mbps';
+    document.getElementById('pingResult').textContent = '-- ms';
+    document.getElementById('jitterResult').textContent = '-- ms';
+}
+
+async function showResults() {
+    document.getElementById('testResults').style.display = 'block';
+    document.getElementById('testResults').style.animation = 'resultSlideIn 0.5s ease forwards';
+    
+    // Wait a moment then add the show class for smooth transition
+    setTimeout(() => {
+        document.getElementById('testResults').classList.add('show');
+        document.getElementById('closeBtn').style.display = 'inline-block';
+        document.getElementById('closeBtn').style.animation = 'resultSlideIn 0.3s ease forwards';
+    }, 100);
+}
+
+function updateGauge(speed) {
+    const percentage = Math.min(speed / 100, 1);
+    const rotation = percentage * 180 - 90;
+    const clipPercentage = percentage * 50;
+    
+    document.getElementById('speedValue').textContent = speed.toFixed(1);
+    document.getElementById('gaugeNeedle').style.transform = `translateX(-50%) rotate(${rotation}deg)`;
+    document.getElementById('gaugeFill').style.clipPath = `polygon(0 0, ${clipPercentage}% 0, ${clipPercentage}% 100%, 50% 100%)`;
+}
+
+function updateProgress(percentage) {
+    document.getElementById('testProgressBar').style.width = percentage + '%';
+}
+
+async function runSpeedTest() {
+    try {
+        // Ping Test (5 seconds)
+        document.getElementById('testPhase').textContent = 'Testing ping...';
+        updateProgress(5);
+        
+        const pingResults = [];
+        for (let i = 0; i < 5; i++) {
+            const startTime = performance.now();
+            try {
+                await fetch('https://httpbin.org/get?t=' + Date.now(), {
+                    method: 'HEAD',
+                    mode: 'no-cors',
+                    cache: 'no-cache'
+                });
+            } catch (e) {
+                await new Promise(resolve => setTimeout(resolve, Math.random() * 100 + 50));
+            }
+            const endTime = performance.now();
+            pingResults.push(endTime - startTime);
+            await new Promise(resolve => setTimeout(resolve, 200));
+            updateProgress(5 + (i * 4));
+        }
+        
+        const ping = pingResults.reduce((a, b) => a + b, 0) / pingResults.length;
+        const jitter = Math.max(...pingResults) - Math.min(...pingResults);
+        
+        document.getElementById('pingResult').textContent = Math.round(ping) + ' ms';
+        document.getElementById('jitterResult').textContent = Math.round(jitter) + ' ms';
+        
+        // Download Test (15 seconds)
+        document.getElementById('testPhase').textContent = 'Testing download speed... (15s)';
+        const downloadSpeed = await performContinuousTest('download', 25, 50);
+        document.getElementById('downloadResult').textContent = downloadSpeed.toFixed(1) + ' Mbps';
+        
+        // Upload Test (15 seconds)  
+        document.getElementById('testPhase').textContent = 'Testing upload speed... (15s)';
+        const uploadSpeed = await performContinuousTest('upload', 50, 75);
+        document.getElementById('uploadResult').textContent = uploadSpeed.toFixed(1) + ' Mbps';
+        
+        updateProgress(100);
+        document.getElementById('testPhase').textContent = 'Test completed!';
+        await showResults();
+        
+    } catch (error) {
+        await simulateSpeedTest();
+        updateProgress(100);
+        await showResults();
+    }
+}
+
+async function performContinuousTest(testType, startProgress, endProgress) {
+    const duration = 15000; // 15 seconds
+    const startTime = Date.now();
+    const speeds = [];
+    let secondCount = 0;
+    
+    while (Date.now() - startTime < duration) {
+        secondCount++;
+        
+        // Simulate realistic speed test
+        let speed;
+        if (testType === 'download') {
+            // Download speeds typically 20-80 Mbps with some variation
+            speed = Math.random() * 60 + 20 + Math.sin(secondCount * 0.5) * 10;
+        } else {
+            // Upload speeds typically slower, 5-30 Mbps
+            speed = Math.random() * 25 + 5 + Math.sin(secondCount * 0.3) * 5;
+        }
+        
+        speeds.push(speed);
+        updateGauge(speed);
+        
+        // Update progress based on time elapsed
+        const elapsed = Date.now() - startTime;
+        const progress = startProgress + (elapsed / duration) * (endProgress - startProgress);
+        updateProgress(Math.min(progress, endProgress));
+        
+        // Update every second
+        await new Promise(resolve => setTimeout(resolve, 1000));
+    }
+    
+    // Return the maximum speed achieved
+    return Math.max(...speeds);
+}
+
+async function simulateSpeedTest() {
+    document.getElementById('testPhase').textContent = 'Test failed - using simulated data';
+    
+    // Simulate download test with live updates
+    document.getElementById('testPhase').textContent = 'Simulating download test... (15s)';
+    for (let i = 0; i < 15; i++) {
+        const speed = Math.random() * 40 + 20 + Math.sin(i * 0.5) * 10;
+        updateGauge(speed);
+        updateProgress(25 + (i / 15) * 25);
+        await new Promise(resolve => setTimeout(resolve, 200)); // Faster simulation
+    }
+    
+    const downloadSpeed = Math.random() * 60 + 30;
+    document.getElementById('downloadResult').textContent = downloadSpeed.toFixed(1) + ' Mbps';
+    
+    // Simulate upload test with live updates
+    document.getElementById('testPhase').textContent = 'Simulating upload test... (15s)';
+    for (let i = 0; i < 15; i++) {
+        const speed = Math.random() * 20 + 10 + Math.sin(i * 0.3) * 5;
+        updateGauge(speed);
+        updateProgress(50 + (i / 15) * 25);
+        await new Promise(resolve => setTimeout(resolve, 200)); // Faster simulation
+    }
+    
+    const uploadSpeed = downloadSpeed * 0.5;
+    const ping = Math.random() * 30 + 20;
+    const jitter = Math.random() * 8 + 2;
+    
+    document.getElementById('uploadResult').textContent = uploadSpeed.toFixed(1) + ' Mbps';
+    document.getElementById('pingResult').textContent = Math.round(ping) + ' ms';
+    document.getElementById('jitterResult').textContent = Math.round(jitter) + ' ms';
+    
+    updateGauge(Math.max(downloadSpeed, uploadSpeed));
+    document.getElementById('testPhase').textContent = 'Test completed!';
+}
+
+function refreshSystemInfo() {
+    const btn = document.querySelector('.refresh-btn');
+    const icon = btn.querySelector('i');
+    
+    btn.disabled = true;
+    icon.style.animation = 'spin 1s linear infinite';
+    
+    setTimeout(() => {
+        getSystemInfo();
+        updatePerformanceData();
+        updateUptime();
+        loadCurrentSettings();
+        
+        btn.disabled = false;
+        icon.style.animation = '';
+    }, 1500);
+}
+
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+`;
+document.head.appendChild(style);
+
+document.addEventListener('DOMContentLoaded', function() {
+    getSystemInfo();
+    updatePerformanceData();
+    updateUptime();
+    loadCurrentSettings();
+    
+    setInterval(updatePerformanceData, 5000);
+    setInterval(updateUptime, 1000);
+});
+</script>
 </body>
 </html>

@@ -1,236 +1,1009 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X-ORBIT Support</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-ORBIT Support Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: linear-gradient(135deg, #0a0a0a, #1a1a1a);
-      color: #e0e0e0;
-      padding: 40px 20px;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-    }
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
 
-    .container {
-      max-width: 850px;
-      width: 100%;
-      background: rgba(30, 30, 30, 0.65);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border-radius: 20px;
-      padding: 40px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-      animation: fadeIn 0.6s ease-in-out;
-    }
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 400px;
+            max-width: 100%;
+        }
 
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+        .login-box h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
 
-    h1 {
-      font-size: 2.8rem;
-      font-weight: 700;
-      color: #00ccff;
-      margin-bottom: 20px;
-      border-bottom: 3px solid #00ccff;
-      padding-bottom: 10px;
-    }
+        .login-box p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
 
-    h2 {
-      font-size: 1.75rem;
-      font-weight: 700;
-      color: #00ccff;
-      margin-top: 40px;
-      margin-bottom: 20px;
-    }
+        .form-group {
+            margin-bottom: 20px;
+        }
 
-    p {
-      font-size: 1rem;
-      font-weight: 400;
-      color: #d0d0d0;
-      margin-bottom: 10px;
-    }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
 
-    ul {
-      margin-left: 20px;
-      list-style: disc;
-    }
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
 
-    li {
-      margin-bottom: 12px;
-      font-size: 1rem;
-      color: #bbbbbb;
-      line-height: 1.5;
-    }
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
 
-    strong {
-      color: #ffffff;
-      font-weight: 600;
-    }
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
 
-    a {
-      color: #00ccff;
-      text-decoration: none;
-      font-weight: 600;
-      transition: all 0.3s ease;
-      position: relative;
-    }
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
 
-    a:hover,
-    a:focus {
-      color: #66e0ff;
-      text-decoration: underline;
-    }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
 
-    .notice {
-      background-color: rgba(255, 77, 77, 0.1);
-      color: #ffb3b3;
-      border-left: 4px solid #ff4d4d;
-      padding: 15px 20px;
-      border-radius: 12px;
-      margin-top: 30px;
-      font-size: 1rem;
-      font-weight: 600;
-    }
+        .error-message {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
 
-    .tooltip-container {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-    }
+        .error-message.show {
+            display: block;
+        }
 
-    .tooltip-container .tooltip-text {
-      visibility: hidden;
-      width: 320px;
-      background-color: #220000;
-      color: #ff4d4d;
-      border-left: 4px solid #ff4d4d;
-      padding: 15px 20px;
-      border-radius: 12px;
-      font-weight: 600;
-      font-size: 1rem;
-      line-height: 1.3;
-      text-align: center;
-      position: absolute;
-      bottom: 125%;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      pointer-events: none;
-      white-space: normal;
-    }
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
 
-    .tooltip-container .tooltip-text::after {
-      content: "";
-      position: absolute;
-      top: 100%;
-      left: 50%;
-      margin-left: -6px;
-      border-width: 6px;
-      border-style: solid;
-      border-color: rgba(255, 77, 77, 0.1) transparent transparent transparent;
-    }
+        .success-message.show {
+            display: block;
+        }
 
-    .tooltip-container:hover .tooltip-text,
-    .tooltip-container:focus-within .tooltip-text {
-      visibility: visible;
-      opacity: 1;
-      pointer-events: auto;
-    }
+        #supportDashboard {
+            display: none;
+            min-height: 100vh;
+        }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 30px 15px;
-      }
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
 
-      .container {
-        padding: 30px 20px;
-      }
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-      h1 {
-        font-size: 2.2rem;
-      }
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-      h2 {
-        font-size: 1.4rem;
-      }
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
 
-      p, li {
-        font-size: 0.95rem;
-      }
+        .logout-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
 
-      .tooltip-container .tooltip-text {
-        width: 90vw;
-        left: 5vw;
-        transform: none;
-        bottom: 110%;
-        border-radius: 10px;
-        font-size: 0.9rem;
-      }
-      .tooltip-container .tooltip-text::after {
-        left: 20px;
-        margin-left: 0;
-      }
-    }
-  </style>
+        .logout-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .my-tickets-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .my-tickets-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .new-ticket-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .ticket-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .ticket-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ticket-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .ticket-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .ticket-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: #fef3c7; color: #92400e; }
+        .status-in_progress { background: #dbeafe; color: #1e40af; }
+        .status-waiting_response { background: #fce7f3; color: #9f1239; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #e5e7eb; color: #374151; }
+
+        .ticket-subject {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .ticket-preview {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        #chatView {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: 600px;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .message {
+            max-width: 70%;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .message-header {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .message.user .message-header {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+            float: right;
+        }
+
+        .message.staff .message-bubble {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            clear: both;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            background: white;
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <h1>X-ORBIT Support</h1>
-    <p>Need help? Our support team is here for you.</p>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1><i class="fas fa-satellite"></i> X-ORBIT Support</h1>
+            <p>Login to access support and manage your tickets</p>
+            <div class="error-message" id="loginError"></div>
+            <form onsubmit="handleLogin(event)" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Email</label>
+                    <input type="text" id="username" required placeholder="your@email.com">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">Login</button>
+            </form>
+        </div>
+    </div>
 
-    <h2>Contact Information</h2>
-    <ul>
-      <li>
-        <strong>Email:</strong>
-        <span class="tooltip-container">
-          <a href="mailto:support@x-orbit.net">support@xorbit.org</a>
-          <div class="tooltip-text">
-            Open in your mail app, not browser.<br />
-            Or email us manually at<br />
-            <strong>support@xorbit.org</strong>
-          </div>
-        </span>
-      </li>
-      <li>
-        <strong>Support Ticket:</strong> Submit one via our
-        <a href="https://discord.gg/xorbit" target="_blank" rel="noopener noreferrer">Discord Support Page</a>.
-      </li>
-      <li><strong>Phone:</strong> +1 (720) 593-8984 (Monday–Friday, 9:00 AM – 6:00 PM MST)</li>
-    </ul>
+    <div id="supportDashboard">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-satellite"></i> X-ORBIT Support
+                </div>
+                <div class="user-info">
+                    <span>Welcome, <strong id="userName"></strong></span>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
 
-    <h2>Support Hours</h2>
-    <ul>
-      <li>Monday – Friday: 9:00 AM – 6:00 PM (MST)</li>
-      <li>Saturday – Sunday: Closed</li>
-    </ul>
+        <div class="container">
+            <div id="ticketsView">
+                <div class="welcome-section">
+                    <h1>Support Center</h1>
+                    <p>View your tickets or start a new conversation with X-ORBIT support</p>
+                </div>
 
-    <h2>Frequently Asked Questions</h2>
-    <ul>
-      <li><strong>How can I contact support?</strong> Reach out via email, phone, or our Discord ticket system.</li>
-      <li><strong>When should I expect a response?</strong> We typically respond within 24–48 business hours.</li>
-    </ul>
+                <div class="my-tickets-section">
+                    <h2>
+                        <span>My Support Tickets</span>
+                        <button class="new-ticket-btn" onclick="openNewTicketModal()">
+                            <i class="fas fa-plus"></i> New Ticket
+                        </button>
+                    </h2>
+                    <div class="ticket-list" id="ticketList">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Loading your tickets...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <p class="notice">
-      For faster support, include as many details as possible when reaching out. The quickest way to get help is through our <i><a href="https://discord.gg/xorbit" target="_blank" rel="noopener noreferrer">Discord Support Page</a></i>.
-    </p>
-  </div>
+            <div id="chatView">
+                <div class="chat-header">
+                    <div>
+                        <h3 id="chatTicketNumber"></h3>
+                        <span id="chatTicketStatus"></span>
+                    </div>
+                    <button class="back-btn" onclick="backToTickets()">
+                        <i class="fas fa-arrow-left"></i> Back to Tickets
+                    </button>
+                </div>
+
+                <div class="messages-container" id="messagesContainer"></div>
+
+                <div class="message-input-area">
+                    <div class="message-input-container">
+                        <textarea 
+                            id="messageInput" 
+                            class="message-input" 
+                            placeholder="Type your message..." 
+                            rows="3"
+                            onkeydown="handleMessageKeydown(event)"
+                        ></textarea>
+                        <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                            <i class="fas fa-paper-plane"></i> Send
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="newTicketModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeNewTicketModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>Create New Ticket</h2>
+            <div class="success-message" id="ticketSuccess"></div>
+            <div class="error-message" id="ticketError"></div>
+            <form onsubmit="createNewTicket(event)" id="newTicketForm">
+                <div class="form-group">
+                    <label for="ticketCategory">Category</label>
+                    <select id="ticketCategory" required>
+                        <option value="">Select a category...</option>
+                        <option value="technical">Technical Issue</option>
+                        <option value="account">Account Problem</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ticketSubject">Subject</label>
+                    <input type="text" id="ticketSubject" required placeholder="Brief description">
+                </div>
+                <div class="form-group">
+                    <label for="ticketMessage">Message</label>
+                    <textarea id="ticketMessage" required placeholder="Describe your issue..."></textarea>
+                </div>
+                <button type="submit" class="login-btn" id="createTicketBtn">Create Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentTicket = null;
+        let userTickets = [];
+        let messagesSubscription = null;
+
+        window.addEventListener('load', async () => {
+            const savedUser = localStorage.getItem('xorbit_support_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                await showDashboard();
+            }
+        });
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('loginError');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            errorMsg.classList.remove('show');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('clients')
+                    .select('*')
+                    .eq('email', username)
+                    .eq('password', password)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('Invalid email or password');
+                }
+
+                currentUser = {
+                    id: data.id,
+                    username: data.email,
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    blocked: data.blocked
+                };
+                
+                localStorage.setItem('xorbit_support_user', JSON.stringify(currentUser));
+                await showDashboard();
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = error.message || 'Login failed.';
+                errorMsg.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('supportDashboard').style.display = 'block';
+            document.getElementById('userName').textContent = currentUser.name;
+            await loadUserTickets();
+        }
+
+        function logout() {
+            localStorage.removeItem('xorbit_support_user');
+            currentUser = null;
+            currentTicket = null;
+            
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+            }
+
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('supportDashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('ticketsView').style.display = 'block';
+            document.getElementById('chatView').style.display = 'none';
+        }
+
+        async function loadUserTickets() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('support_tickets')
+                    .select('*')
+                    .eq('email', currentUser.email)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                userTickets = data || [];
+                displayTickets();
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            }
+        }
+
+        function displayTickets() {
+            const container = document.getElementById('ticketList');
+            
+            if (userTickets.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>You don't have any support tickets yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userTickets.map(ticket => `
+                <div class="ticket-card" onclick="openTicket('${ticket.id}')">
+                    <div class="ticket-header">
+                        <span class="ticket-number">${ticket.ticket_number}</span>
+                        <span class="ticket-status status-${ticket.status}">${ticket.status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="ticket-subject">${ticket.subject || 'No Subject'}</div>
+                    <div class="ticket-preview">${ticket.message.substring(0, 100)}...</div>
+                    <div class="ticket-meta">
+                        <span><i class="fas fa-tag"></i> ${ticket.category}</span>
+                        <span><i class="fas fa-clock"></i> ${formatTime(ticket.created_at)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        async function openTicket(ticketId) {
+            const ticket = userTickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+
+            currentTicket = ticket;
+            document.getElementById('ticketsView').style.display = 'none';
+            document.getElementById('chatView').style.display = 'flex';
+            document.getElementById('chatTicketNumber').textContent = ticket.ticket_number;
+            document.getElementById('chatTicketStatus').textContent = ticket.status.replace('_', ' ').toUpperCase();
+
+            await loadMessages(ticketId);
+            subscribeToMessages(ticketId);
+        }
+
+        function backToTickets() {
+            document.getElementById('chatView').style.display = 'none';
+            document.getElementById('ticketsView').style.display = 'block';
+            currentTicket = null;
+
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+                messagesSubscription = null;
+            }
+
+            loadUserTickets();
+        }
+
+        async function loadMessages(ticketId) {
+            try {
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', ticketId)
+                    .single();
+
+                if (convError) throw convError;
+
+                const { data: messages, error: msgError } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .eq('conversation_id', conversation.id)
+                    .order('created_at', { ascending: true });
+
+                if (msgError) throw msgError;
+                displayMessages(messages || []);
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesContainer');
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.is_staff ? 'staff' : 'user'}">
+                    <div class="message-header">${escapeHtml(msg.sender_name)}</div>
+                    <div class="message-bubble">${escapeHtml(msg.message)}</div>
+                    <div class="message-time">${formatTime(msg.created_at)}</div>
+                </div>
+            `).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function subscribeToMessages(ticketId) {
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+            }
+
+            supabaseClient.from('conversations').select('id').eq('ticket_id', ticketId).single()
+                .then(({ data: conversation }) => {
+                    if (conversation) {
+                        messagesSubscription = supabaseClient.channel('messages')
+                            .on('postgres_changes', {
+                                event: 'INSERT',
+                                schema: 'public',
+                                table: 'messages',
+                                filter: `conversation_id=eq.${conversation.id}`
+                            }, () => loadMessages(ticketId))
+                            .subscribe();
+                    }
+                });
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentTicket) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const { data: conversation } = await supabaseClient.from('conversations')
+                    .select('id').eq('ticket_id', currentTicket.id).single();
+
+                await supabaseClient.from('messages').insert([{
+                    conversation_id: conversation.id,
+                    sender_name: currentUser.name,
+                    sender_email: currentUser.email,
+                    is_staff: false,
+                    message: message
+                }]);
+
+                messageInput.value = '';
+                await loadMessages(currentTicket.id);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function handleMessageKeydown(event) {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function openNewTicketModal() {
+            document.getElementById('newTicketModal').classList.add('active');
+            document.getElementById('newTicketForm').reset();
+            document.getElementById('ticketSuccess').classList.remove('show');
+            document.getElementById('ticketError').classList.remove('show');
+        }
+
+        function closeNewTicketModal() {
+            document.getElementById('newTicketModal').classList.remove('active');
+        }
+
+        async function createNewTicket(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('ticketCategory').value;
+            const subject = document.getElementById('ticketSubject').value;
+            const message = document.getElementById('ticketMessage').value;
+            const createBtn = document.getElementById('createTicketBtn');
+            const successMsg = document.getElementById('ticketSuccess');
+            const errorMsg = document.getElementById('ticketError');
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+            errorMsg.classList.remove('show');
+            successMsg.classList.remove('show');
+
+            try {
+                const { data: ticketData, error: ticketError } = await supabaseClient
+                    .from('support_tickets')
+                    .insert([{
+                        name: currentUser.name,
+                        email: currentUser.email,
+                        category: category,
+                        subject: subject,
+                        message: message
+                    }])
+                    .select()
+                    .single();
+
+                if (ticketError) throw ticketError;
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', ticketData.id)
+                    .single();
+
+                if (convError) throw convError;
+
+                await supabaseClient.from('messages').insert([{
+                    conversation_id: conversation.id,
+                    sender_name: currentUser.name,
+                    sender_email: currentUser.email,
+                    is_staff: false,
+                    message: message
+                }]);
+
+                successMsg.textContent = `Ticket ${ticketData.ticket_number} created successfully!`;
+                successMsg.classList.add('show');
+                
+                await loadUserTickets();
+                
+                setTimeout(() => {
+                    closeNewTicketModal();
+                    openTicket(ticketData.id);
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error creating ticket:', error);
+                errorMsg.textContent = 'Failed to create ticket. Please try again.';
+                errorMsg.classList.add('show');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Ticket';
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('newTicketModal');
+            if (event.target === modal) {
+                closeNewTicketModal();
+            }
+        }
+
+        setInterval(() => {
+            if (currentUser && !currentTicket) {
+                loadUserTickets();
+            }
+        }, 30000);
+
+        // Check for new messages every 15 seconds when viewing a ticket
+        setInterval(() => {
+            if (currentUser && currentTicket) {
+                loadMessages(currentTicket.id);
+            }
+        }, 15000);
+    </script>
 </body>
 </html>

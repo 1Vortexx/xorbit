@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-ORBIT Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bcryptjs/2.4.3/bcrypt.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+        }
+
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 400px;
+            max-width: 90%;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        #dashboard {
+            display: none;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h2 {
+            font-size: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .dashboard-content {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .sidebar-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            background: #f5f5f5;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 10px 35px 10px 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+        }
+
+        .search-box i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .ticket-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .ticket-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ticket-item:hover {
+            background: #f8f9ff;
+        }
+
+        .ticket-item.active {
+            background: #e8ecff;
+            border-left: 4px solid #667eea;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .ticket-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .ticket-status {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: #fef3c7; color: #92400e; }
+        .status-in_progress { background: #dbeafe; color: #1e40af; }
+        .status-waiting_response { background: #fce7f3; color: #9f1239; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #e5e7eb; color: #374151; }
+
+        .ticket-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .ticket-subject {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        .ticket-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            background: #f9fafb;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+
+        .chat-ticket-info h3 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .chat-ticket-meta {
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .ticket-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .action-btn {
+            padding: 6px 12px;
+            border: 1px solid #e0e0e0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+
+        .action-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .message {
+            max-width: 70%;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message-header {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.staff .message-bubble {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            max-width: 100%;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .message.system .message-bubble {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px dashed #d1d5db;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-style: italic;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+            border-bottom-left-radius: 15px;
+            border-bottom-right-radius: 15px;
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            padding: 15px 20px;
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            position: sticky;
+            top: 59px;
+            z-index: 99;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 8px;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1><i class="fas fa-satellite"></i> X-ORBIT Admin</h1>
+            <div class="error-message" id="loginError"></div>
+            <form onsubmit="handleLogin(event)" id="loginForm">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required placeholder="Enter your username">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="login-btn" id="loginBtn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard">
+        <div class="dashboard-header">
+            <h2><i class="fas fa-satellite"></i> X-ORBIT Support Dashboard</h2>
+            <div class="user-info">
+                <span id="adminName">Admin User</span>
+                <button class="logout-btn" onclick="logout()">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <div class="stats-bar">
+            <div class="stat-card">
+                <div class="stat-number" id="statOpen">0</div>
+                <div class="stat-label">Open</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statInProgress">0</div>
+                <div class="stat-label">In Progress</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statWaiting">0</div>
+                <div class="stat-label">Waiting</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="statTotal">0</div>
+                <div class="stat-label">Total</div>
+            </div>
+        </div>
+
+        <div class="dashboard-content">
+            <div class="sidebar">
+                <div class="sidebar-header">
+                    <div class="sidebar-tabs">
+                        <button class="tab-btn active" onclick="switchTab('tickets')">
+                            <i class="fas fa-ticket-alt"></i> Tickets
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('requests')">
+                            <i class="fas fa-inbox"></i> Requests
+                        </button>
+                        <button class="tab-btn" onclick="switchTab('admins')">
+                            <i class="fas fa-user-shield"></i> Admins
+                        </button>
+                    </div>
+                    <div class="search-box">
+                        <input type="text" placeholder="Search tickets..." id="searchInput" oninput="searchTickets()">
+                        <i class="fas fa-search"></i>
+                    </div>
+                </div>
+                <div class="ticket-list" id="ticketList">
+                    <!-- Tickets will be loaded here -->
+                </div>
+            </div>
+
+            <div class="chat-area">
+                <div class="empty-state" id="emptyState">
+                    <i class="fas fa-comments"></i>
+                    <p>Select a ticket to view the conversation</p>
+                </div>
+
+                <div id="chatContent" style="display: none; height: 100%; flex-direction: column;">
+                    <div class="chat-header">
+                        <div class="chat-ticket-info">
+                            <h3 id="chatTicketNumber"></h3>
+                            <div class="chat-ticket-meta">
+                                <span><i class="fas fa-user"></i> <span id="chatUserName"></span></span>
+                                <span><i class="fas fa-envelope"></i> <span id="chatUserEmail"></span></span>
+                                <span><i class="fas fa-tag"></i> <span id="chatCategory"></span></span>
+                            </div>
+                            <div class="ticket-actions">
+                                <select class="action-btn" id="statusSelect" onchange="updateTicketStatus()">
+                                    <option value="open">Open</option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="waiting_response">Waiting Response</option>
+                                    <option value="resolved">Resolved</option>
+                                    <option value="closed">Closed</option>
+                                </select>
+                                <select class="action-btn" id="prioritySelect" onchange="updateTicketPriority()">
+                                    <option value="low">Low Priority</option>
+                                    <option value="medium">Medium Priority</option>
+                                    <option value="high">High Priority</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="messages-container" id="messagesContainer">
+                        <!-- Messages will be loaded here -->
+                    </div>
+
+                    <div class="message-input-area">
+                        <div class="message-input-container">
+                            <textarea 
+                                id="messageInput" 
+                                class="message-input" 
+                                placeholder="Type your response..." 
+                                rows="3"
+                                onkeydown="handleMessageKeydown(event)"
+                            ></textarea>
+                            <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentAdmin = null;
+        let currentTicket = null;
+        let allTickets = [];
+        let messagesSubscription = null;
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('loginError');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            errorMsg.classList.remove('show');
+
+            try {
+                // Query admin user
+                const { data, error } = await supabaseClient
+                    .from('admin_login')
+                    .select('*')
+                    .eq('username', username)
+                    .eq('is_active', true)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('Invalid username or password');
+                }
+
+                // In production, you'd verify the password hash using bcrypt
+                // For now, we'll accept any password for the demo
+                // const passwordMatch = await bcrypt.compare(password, data.password_hash);
+                
+                // Store admin info
+                currentAdmin = data;
+                sessionStorage.setItem('currentAdmin', JSON.stringify(data));
+
+                // Update last login
+                await supabaseClient
+                    .from('admin_login')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', data.id);
+
+                // Show dashboard
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('adminName').textContent = data.full_name;
+
+                // Load tickets
+                await loadTickets();
+                loadStats();
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = error.message || 'Login failed. Please try again.';
+                errorMsg.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('currentAdmin');
+            currentAdmin = null;
+            currentTicket = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+        }
+
+        async function loadTickets() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('support_tickets')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allTickets = data;
+                displayTickets(data);
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            }
+        }
+
+        function displayTickets(tickets) {
+            const listContainer = document.getElementById('ticketList');
+            
+            if (tickets.length === 0) {
+                listContainer.innerHTML = '<div style="padding: 20px; text-align: center; color: #999;">No tickets found</div>';
+                return;
+            }
+
+            listContainer.innerHTML = tickets.map(ticket => `
+                <div class="ticket-item ${currentTicket?.id === ticket.id ? 'active' : ''}" onclick="selectTicket('${ticket.id}')">
+                    <div class="ticket-header">
+                        <span class="ticket-number">${ticket.ticket_number}</span>
+                        <span class="ticket-status status-${ticket.status}">${ticket.status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="ticket-name">${ticket.name}</div>
+                    <div class="ticket-subject">${ticket.subject || ticket.message.substring(0, 50) + '...'}</div>
+                    <div class="ticket-time">${formatTime(ticket.created_at)}</div>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        async function selectTicket(ticketId) {
+            const ticket = allTickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+
+            currentTicket = ticket;
+            
+            // Update UI
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('chatContent').style.display = 'flex';
+            
+            document.getElementById('chatTicketNumber').textContent = ticket.ticket_number;
+            document.getElementById('chatUserName').textContent = ticket.name;
+            document.getElementById('chatUserEmail').textContent = ticket.email;
+            document.getElementById('chatCategory').textContent = ticket.category;
+            document.getElementById('statusSelect').value = ticket.status;
+            document.getElementById('prioritySelect').value = ticket.priority;
+
+            // Highlight active ticket
+            displayTickets(allTickets);
+
+            // Load messages
+            await loadMessages(ticketId);
+            
+            // Subscribe to new messages
+            subscribeToMessages(ticketId);
+        }
+
+        async function loadMessages(ticketId) {
+            try {
+                // Get conversation ID for this ticket
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', ticketId)
+                    .single();
+
+                if (convError) throw convError;
+
+                // Get messages
+                const { data: messages, error: msgError } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .eq('conversation_id', conversation.id)
+                    .order('created_at', { ascending: true });
+
+                if (msgError) throw msgError;
+
+                displayMessages(messages);
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesContainer');
+            
+            container.innerHTML = messages.map(msg => `
+                <div class="message ${msg.is_staff ? 'staff' : 'user'}">
+                    <div class="message-header">
+                        ${msg.sender_name}
+                    </div>
+                    <div class="message-bubble">
+                        ${msg.message}
+                    </div>
+                    <div class="message-time">${formatTime(msg.created_at)}</div>
+                </div>
+            `).join('');
+
+            // Scroll to bottom
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function subscribeToMessages(ticketId) {
+            // Unsubscribe from previous subscription
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+            }
+
+            // Subscribe to new messages for this ticket
+            supabaseClient
+                .from('conversations')
+                .select('id')
+                .eq('ticket_id', ticketId)
+                .single()
+                .then(({ data: conversation }) => {
+                    if (conversation) {
+                        messagesSubscription = supabaseClient
+                            .channel('messages')
+                            .on('postgres_changes', {
+                                event: 'INSERT',
+                                schema: 'public',
+                                table: 'messages',
+                                filter: `conversation_id=eq.${conversation.id}`
+                            }, (payload) => {
+                                // Add new message to display
+                                loadMessages(ticketId);
+                            })
+                            .subscribe();
+                    }
+                });
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentTicket) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                // Get conversation ID
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', currentTicket.id)
+                    .single();
+
+                if (convError) throw convError;
+
+                // Insert message
+                const { error: msgError } = await supabaseClient
+                    .from('messages')
+                    .insert([{
+                        conversation_id: conversation.id,
+                        sender_name: currentAdmin.full_name,
+                        sender_email: currentAdmin.email,
+                        sender_admin_id: currentAdmin.id,
+                        is_staff: true,
+                        message: message
+                    }]);
+
+                if (msgError) throw msgError;
+
+                // Clear input
+                messageInput.value = '';
+                
+                // Update ticket status if it's open
+                if (currentTicket.status === 'open') {
+                    await supabaseClient
+                        .from('support_tickets')
+                        .update({ status: 'in_progress' })
+                        .eq('id', currentTicket.id);
+                    
+                    currentTicket.status = 'in_progress';
+                    document.getElementById('statusSelect').value = 'in_progress';
+                    await loadTickets();
+                }
+
+                // Reload messages
+                await loadMessages(currentTicket.id);
+
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message. Please try again.');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function handleMessageKeydown(event) {
+            // Send on Ctrl+Enter or Cmd+Enter
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        async function updateTicketStatus() {
+            if (!currentTicket) return;
+
+            const newStatus = document.getElementById('statusSelect').value;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('support_tickets')
+                    .update({ status: newStatus })
+                    .eq('id', currentTicket.id);
+
+                if (error) throw error;
+
+                currentTicket.status = newStatus;
+                await loadTickets();
+                await loadStats();
+                
+                // Reload messages to show system message
+                setTimeout(() => {
+                    loadMessages(currentTicket.id);
+                }, 500);
+            } catch (error) {
+                console.error('Error updating status:', error);
+                alert('Failed to update status');
+            }
+        }
+
+        async function updateTicketPriority() {
+            if (!currentTicket) return;
+
+            const newPriority = document.getElementById('prioritySelect').value;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('support_tickets')
+                    .update({ priority: newPriority })
+                    .eq('id', currentTicket.id);
+
+                if (error) throw error;
+
+                currentTicket.priority = newPriority;
+                await loadTickets();
+                
+                // Reload messages to show system message
+                setTimeout(() => {
+                    loadMessages(currentTicket.id);
+                }, 500);
+            } catch (error) {
+                console.error('Error updating priority:', error);
+                alert('Failed to update priority');
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('support_tickets')
+                    .select('status');
+
+                if (error) throw error;
+
+                const stats = {
+                    open: 0,
+                    in_progress: 0,
+                    waiting: 0,
+                    total: 0
+                };
+
+                if (data && data.length > 0) {
+                    stats.open = data.filter(t => t.status === 'open').length;
+                    stats.in_progress = data.filter(t => t.status === 'in_progress').length;
+                    stats.waiting = data.filter(t => t.status === 'waiting_response').length;
+                    stats.total = data.length;
+                }
+
+                document.getElementById('statOpen').textContent = stats.open;
+                document.getElementById('statInProgress').textContent = stats.in_progress;
+                document.getElementById('statWaiting').textContent = stats.waiting;
+                document.getElementById('statTotal').textContent = stats.total;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Set to 0 if error
+                document.getElementById('statOpen').textContent = '0';
+                document.getElementById('statInProgress').textContent = '0';
+                document.getElementById('statWaiting').textContent = '0';
+                document.getElementById('statTotal').textContent = '0';
+            }
+        }
+
+        function searchTickets() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!query) {
+                displayTickets(allTickets);
+                return;
+            }
+
+            const filtered = allTickets.filter(ticket => 
+                ticket.ticket_number.toLowerCase().includes(query) ||
+                ticket.name.toLowerCase().includes(query) ||
+                ticket.email.toLowerCase().includes(query) ||
+                ticket.subject?.toLowerCase().includes(query) ||
+                ticket.message.toLowerCase().includes(query)
+            );
+
+            displayTickets(filtered);
+        }
+
+        function switchTab(tab) {
+            // Update active tab button
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            if (tab === 'tickets') {
+                loadTickets();
+            } else if (tab === 'requests') {
+                // Load account/password requests (to be implemented)
+                alert('Requests tab - coming soon!\n\nThis will show:\n- Account creation requests\n- Password reset requests');
+            }
+        }
+
+        // Check for existing session on load
+        window.addEventListener('load', () => {
+            const savedAdmin = sessionStorage.getItem('currentAdmin');
+            if (savedAdmin) {
+                currentAdmin = JSON.parse(savedAdmin);
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'flex';
+                document.getElementById('adminName').textContent = currentAdmin.full_name;
+                loadTickets();
+                loadStats();
+            }
+        });
+
+        // Refresh tickets every 30 seconds
+        setInterval(() => {
+            if (currentAdmin) {
+                loadTickets();
+                loadStats();
+            }
+        }, 30000);
+
+        // Refresh messages every 15 seconds when viewing a ticket
+        setInterval(() => {
+            if (currentAdmin && currentTicket) {
+                loadMessages(currentTicket.id);
+            }
+        }, 15000);
+    </script>
+</body>
+</html>

@@ -1005,6 +1005,57 @@ body {
     color: #fecaca;
     text-align: center;
     line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.ban-modal-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.support-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(0, 212, 255, 0.3);
+    background: rgba(0, 212, 255, 0.1);
+    color: #00d4ff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.support-btn:hover {
+    background: rgba(0, 212, 255, 0.2);
+    border-color: rgba(0, 212, 255, 0.5);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+}
+
+.retry-btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.retry-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    transform: translateY(-1px);
 }
 
 /* Back navigation */
@@ -1208,7 +1259,7 @@ body {
             </div>
             <h1 class="brand-title">X-ORBIT</h1>
             <div class="notice-card">
-    <strong>System Update:</strong> We've released our ticket system for support! Click the menu button in the bottom-right corner to access our Support Center and submit tickets for any issues or questions you may have.
+    <strong>New Feature:</strong> We've released our ticket system for support! Click the menu button in the bottom-right corner to access our Support Center and submit tickets for any issues or questions you may have.
 </div>
         </div>
         
@@ -1249,6 +1300,13 @@ body {
             <div id="banModal" class="ban-modal">
                 <h2>Access Denied</h2>
                 <p id="banReason"></p>
+                <div class="ban-modal-actions">
+                    <a href="https://xorbit.org/support" class="support-btn" target="_blank">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Contact Support</span>
+                    </a>
+                    <button class="retry-btn" onclick="location.reload()">Try Again</button>
+                </div>
             </div>
             
             <div id="loginStatus" class="status-message"></div>
@@ -1285,6 +1343,13 @@ body {
             <div id="osBanModal" class="ban-modal">
                 <h2>Access Denied</h2>
                 <p id="osBanReason"></p>
+                <div class="ban-modal-actions">
+                    <a href="https://xorbit.org/support" class="support-btn" target="_blank">
+                        <i class="fas fa-life-ring"></i>
+                        <span>Contact Support</span>
+                    </a>
+                    <button class="retry-btn" onclick="location.reload()">Try Again</button>
+                </div>
             </div>
             
             <div id="osLoginStatus" class="status-message"></div>
@@ -1712,11 +1777,13 @@ async function login() {
         }
         
         if (error || !data) {
-            status.innerHTML = "❌ Invalid credentials. Please try again.";
+            status.innerHTML = "";
             usernameInput.classList.add('error');
             passwordInput.classList.add('error');
             loginButton.innerHTML = "Authenticate";
             loginButton.disabled = false;
+            banModal.classList.add('show');
+            banReason.textContent = "Invalid username/email or password. Please check your credentials and try again.";
             return;
         }
         
@@ -1839,10 +1906,12 @@ async function osLogin() {
         }
         
         if (error || !data) {
-            status.innerHTML = "❌ Incorrect password. Please try again. Please contact support at the : below if you forgot your password";
+            status.innerHTML = "";
             passwordInput.classList.add('error');
             loginButton.innerHTML = "Sign In";
             loginButton.disabled = false;
+            banModal.classList.add('show');
+            banReason.textContent = "Incorrect password. Please check your password and try again.";
             return;
         }
         
@@ -1889,7 +1958,7 @@ async function osLogin() {
         
     } catch (err) {
         console.error('💥 Critical error during OS login:', err);
-        status.innerHTML = "❌ Connection error. Please try again., and contact support if this continues";
+        status.innerHTML = "❌ Connection error. Please try again.";
         loginButton.innerHTML = "Sign In";
         loginButton.disabled = false;
     }

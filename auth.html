@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Login into X-ORBIT</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
@@ -80,6 +81,112 @@ body {
     10% { opacity: 1; }
     90% { opacity: 1; }
     100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+}
+
+/* Support/Admin Menu Button */
+.help-menu-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 999;
+}
+
+.help-trigger {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(15, 15, 35, 0.6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.help-trigger:hover {
+    background: rgba(15, 15, 35, 0.8);
+    border-color: rgba(147, 51, 234, 0.5);
+    box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+.help-trigger i {
+    font-size: 20px;
+    color: #94a3b8;
+    transition: all 0.3s ease;
+}
+
+.help-trigger:hover i {
+    color: #9333ea;
+    transform: rotate(90deg);
+}
+
+.help-menu {
+    position: absolute;
+    bottom: 60px;
+    right: 0;
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 0.5rem;
+    min-width: 200px;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(147, 51, 234, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px) scale(0.95);
+    transition: all 0.3s ease;
+}
+
+.help-menu.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+
+.help-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1rem;
+    border-radius: 12px;
+    color: #e2e8f0;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.help-menu-item:hover {
+    background: rgba(147, 51, 234, 0.15);
+    color: #fff;
+    transform: translateX(2px);
+}
+
+.help-menu-item i {
+    font-size: 16px;
+    width: 20px;
+    text-align: center;
+    color: #9333ea;
+    transition: all 0.3s ease;
+}
+
+.help-menu-item:hover i {
+    color: #00d4ff;
+    transform: scale(1.1);
+}
+
+.help-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.1);
+    margin: 0.5rem 0;
 }
 
 /* Warning Modal Overlay */
@@ -1021,12 +1128,35 @@ body {
         height: 60px;
         font-size: 30px;
     }
+
+    .help-menu-container {
+        bottom: 1rem;
+        right: 1rem;
+    }
 }
 </style>
 </head>
 <body>
 <div class="cosmic-bg"></div>
 <div class="stars"></div>
+
+<!-- Help/Support Menu -->
+<div class="help-menu-container">
+    <div class="help-trigger" id="helpTrigger">
+        <i class="fas fa-ellipsis-h"></i>
+    </div>
+    <div class="help-menu" id="helpMenu">
+        <a href="https://xorbit.org/support" class="help-menu-item" target="_blank">
+            <i class="fas fa-life-ring"></i>
+            <span>Support Center</span>
+        </a>
+        <div class="help-menu-divider"></div>
+        <a href="https://xorbit.org/admin/dashboard" class="help-menu-item" target="_blank">
+            <i class="fas fa-shield-halved"></i>
+            <span>Admin Dashboard</span>
+        </a>
+    </div>
+</div>
 
 <!-- Warning Modal Overlay -->
 <div class="warning-overlay" id="warningOverlay">
@@ -1078,7 +1208,7 @@ body {
             </div>
             <h1 class="brand-title">X-ORBIT</h1>
             <div class="notice-card">
-    <strong>System Update:</strong> We're redesigning the X-ORBIT login page to enhance your experience with improved security and a modernized interface. Stay tuned for exciting updates coming soon!
+    <strong>System Update:</strong> We've released our ticket system for support! Click the menu button in the bottom-right corner to access our Support Center and submit tickets for any issues or questions you may have.
 </div>
         </div>
         
@@ -1168,7 +1298,23 @@ console.log('🚀 X-ORBIT Login System Starting...');
 // Global state
 let rememberedUser = null;
 let supabase = null;
-let pendingUserData = null; // Store user data while showing warning
+let pendingUserData = null;
+
+// Help Menu Toggle
+function toggleHelpMenu() {
+    const menu = document.getElementById('helpMenu');
+    menu.classList.toggle('show');
+}
+
+// Close help menu when clicking outside
+document.addEventListener('click', function(e) {
+    const helpContainer = document.querySelector('.help-menu-container');
+    const helpMenu = document.getElementById('helpMenu');
+    
+    if (helpContainer && !helpContainer.contains(e.target)) {
+        helpMenu.classList.remove('show');
+    }
+});
 
 // Solaris Alert functions
 function dismissSolarisAlert() {
@@ -1426,7 +1572,6 @@ function goBackToOSMode() {
     }
 }
 
-// Complete login after warning acknowledgment or if no warning
 function completeLogin(userData) {
     console.log('✅ Completing login for user:', userData.username);
     
@@ -1462,19 +1607,34 @@ function completeLogin(userData) {
         "✅ Authentication successful! Redirecting...";
     button.innerHTML = "✅ Success";
     
+    try {
+        const authSession = {
+            authenticated: true,
+            username: userData.username,
+            email: userData.email,
+            userId: userData.id,
+            timestamp: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 3600000).toISOString()
+        };
+        
+        localStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
+        sessionStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
+        
+        console.log('✅ Authentication session stored');
+    } catch (error) {
+        console.warn('⚠️ Could not store auth session:', error);
+    }
+    
     setTimeout(() => {
         console.log('📤 Sending postMessage to parent window...');
         if (window.parent && window.parent !== window) {
-            console.log('🎯 Parent window detected, sending auth-success message');
             window.parent.postMessage('auth-success', '*');
-            console.log('📬 Message sent successfully');
         } else {
-            console.log('⚠️ No parent window detected');
+            window.location.href = 'browser.html';
         }
     }, 1000);
 }
 
-// Login function
 async function login() {
     console.log('🚀 Login function called');
     
@@ -1496,8 +1656,6 @@ async function login() {
     const pwd = passwordInput.value.trim();
     const rememberMe = rememberCheckbox.checked;
     
-    console.log('📝 Login attempt:', { emailOrName: !!emailOrName, password: !!pwd, rememberMe });
-    
     status.innerHTML = "";
     banModal.classList.remove('show');
     banReason.textContent = "";
@@ -1508,7 +1666,6 @@ async function login() {
     loginButton.disabled = false;
     
     if (!emailOrName || !pwd) {
-        console.log('❌ Empty fields');
         status.innerHTML = "❌ Please fill in both fields.";
         if (!emailOrName) usernameInput.classList.add('error');
         if (!pwd) passwordInput.classList.add('error');
@@ -1520,8 +1677,6 @@ async function login() {
     loginButton.disabled = true;
     
     try {
-        console.log('📡 Making Supabase query...');
-        
         const { data, error } = await supabase
             .from('clients')
             .select('id, name, email, blocked, ban_reason, warnings')
@@ -1529,10 +1684,6 @@ async function login() {
             .eq('password', pwd)
             .single();
         
-        console.log('📨 Supabase response:', { hasData: !!data, hasError: !!error });
-        
-        // Log the login attempt
-        console.log('📝 Logging login attempt to login_attempts...');
         const attemptLog = {
             attempted_username: emailOrName,
             attempted_email: emailOrName.includes('@') ? emailOrName : null,
@@ -1555,21 +1706,12 @@ async function login() {
         }
         
         try {
-            const { error: logError } = await supabase
-                .from('login_attempts')
-                .insert(attemptLog);
-            
-            if (logError) {
-                console.warn('⚠️ Failed to log login attempt:', logError);
-            } else {
-                console.log('✅ Login attempt logged successfully');
-            }
+            await supabase.from('login_attempts').insert(attemptLog);
         } catch (logErr) {
             console.warn('⚠️ Error logging login attempt:', logErr);
         }
         
         if (error || !data) {
-            console.log('❌ Authentication failed:', error?.message || 'No data returned');
             status.innerHTML = "❌ Invalid credentials. Please try again.";
             usernameInput.classList.add('error');
             passwordInput.classList.add('error');
@@ -1578,10 +1720,7 @@ async function login() {
             return;
         }
         
-        console.log('✅ User authenticated:', { name: data.name, email: data.email, blocked: data.blocked, hasWarning: !!data.warnings });
-        
         if (data.blocked) {
-            console.log('🚫 User is blocked:', data.ban_reason);
             usernameInput.classList.add('banned');
             passwordInput.classList.add('banned');
             loginButton.classList.add('banned');
@@ -1593,9 +1732,7 @@ async function login() {
             return;
         }
         
-        // Check for warnings
         if (data.warnings && data.warnings.trim() !== '') {
-            console.log('⚠️ User has a warning, showing warning modal');
             pendingUserData = {
                 username: data.name,
                 email: data.email,
@@ -1612,7 +1749,6 @@ async function login() {
             return;
         }
         
-        // No warning, proceed with normal login
         const userData = {
             username: data.name,
             email: data.email,
@@ -1628,23 +1764,9 @@ async function login() {
         status.innerHTML = "❌ Connection error. Please try again.";
         loginButton.innerHTML = "Authenticate";
         loginButton.disabled = false;
-        
-        try {
-            await supabase.from('login_attempts').insert({
-                attempted_username: emailOrName,
-                attempted_email: emailOrName.includes('@') ? emailOrName : null,
-                success: false,
-                failure_reason: 'System error',
-                attempt_timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        } catch (logErr) {
-            console.warn('⚠️ Could not log error attempt:', logErr);
-        }
     }
 }
 
-// OS Mode login function
 async function osLogin() {
     console.log('🖥️ OS login function called');
     
@@ -1663,8 +1785,6 @@ async function osLogin() {
     
     const pwd = passwordInput.value.trim();
     
-    console.log('📝 OS login attempt for user:', rememberedUser.username);
-    
     status.innerHTML = "";
     banModal.classList.remove('show');
     banReason.textContent = "";
@@ -1674,7 +1794,6 @@ async function osLogin() {
     loginButton.disabled = false;
     
     if (!pwd) {
-        console.log('❌ Empty password');
         status.innerHTML = "❌ Please enter your password.";
         passwordInput.classList.add('error');
         return;
@@ -1685,8 +1804,6 @@ async function osLogin() {
     loginButton.disabled = true;
     
     try {
-        console.log('📡 Making OS mode Supabase query...');
-        
         const { data, error } = await supabase
             .from('clients')
             .select('id, name, email, blocked, ban_reason, warnings')
@@ -1694,10 +1811,6 @@ async function osLogin() {
             .eq('password', pwd)
             .single();
         
-        console.log('📨 OS mode Supabase response:', { hasData: !!data, hasError: !!error });
-        
-        // Log the login attempt
-        console.log('📝 Logging OS mode login attempt to login_attempts...');
         const attemptLog = {
             attempted_username: rememberedUser.username,
             attempted_email: rememberedUser.email,
@@ -1720,32 +1833,20 @@ async function osLogin() {
         }
         
         try {
-            const { error: logError } = await supabase
-                .from('login_attempts')
-                .insert(attemptLog);
-            
-            if (logError) {
-                console.warn('⚠️ Failed to log OS mode login attempt:', logError);
-            } else {
-                console.log('✅ OS mode login attempt logged successfully');
-            }
+            await supabase.from('login_attempts').insert(attemptLog);
         } catch (logErr) {
             console.warn('⚠️ Error logging OS mode login attempt:', logErr);
         }
         
         if (error || !data) {
-            console.log('❌ OS mode authentication failed:', error?.message || 'No data returned');
-            status.innerHTML = "❌ Incorrect password. Please try again.";
+            status.innerHTML = "❌ Incorrect password. Please try again. Please contact support at the : below if you forgot your password";
             passwordInput.classList.add('error');
             loginButton.innerHTML = "Sign In";
             loginButton.disabled = false;
             return;
         }
         
-        console.log('✅ OS mode user authenticated:', { hasWarning: !!data.warnings });
-        
         if (data.blocked) {
-            console.log('🚫 OS mode user is blocked:', data.ban_reason);
             passwordInput.classList.add('banned');
             loginButton.classList.add('banned');
             loginButton.innerHTML = "Return to Login";
@@ -1759,14 +1860,12 @@ async function osLogin() {
             return;
         }
         
-        // Check for warnings
         if (data.warnings && data.warnings.trim() !== '') {
-            console.log('⚠️ OS mode user has a warning, showing warning modal');
             pendingUserData = {
                 username: data.name,
                 email: data.email,
                 id: data.id,
-                rememberMe: true, // Always remember in OS mode
+                rememberMe: true,
                 isOSMode: true
             };
             
@@ -1778,12 +1877,11 @@ async function osLogin() {
             return;
         }
         
-        // No warning, proceed with normal login
         const userData = {
             username: data.name,
             email: data.email,
             id: data.id,
-            rememberMe: true, // Always remember in OS mode
+            rememberMe: true,
             isOSMode: true
         };
         
@@ -1791,43 +1889,25 @@ async function osLogin() {
         
     } catch (err) {
         console.error('💥 Critical error during OS login:', err);
-        status.innerHTML = "❌ Connection error. Please try again.";
+        status.innerHTML = "❌ Connection error. Please try again., and contact support if this continues";
         loginButton.innerHTML = "Sign In";
         loginButton.disabled = false;
-        
-        try {
-            await supabase.from('login_attempts').insert({
-                attempted_username: rememberedUser.username,
-                attempted_email: rememberedUser.email,
-                success: false,
-                failure_reason: 'System error',
-                attempt_timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            });
-        } catch (logErr) {
-            console.warn('⚠️ Could not log error attempt:', logErr);
-        }
     }
 }
 
-// Event handlers
 function handleKeyPress(event) {
     if (event.key === 'Enter') {
-        console.log('⌨️ Enter key pressed');
         event.preventDefault();
         
         const osView = document.getElementById('osView');
         if (osView.classList.contains('active')) {
-            console.log('🔄 Calling OS login');
             osLogin();
         } else {
-            console.log('🔄 Calling regular login');
             login();
         }
     }
 }
 
-// Initialize application
 async function initApp() {
     console.log('🔧 Initializing X-ORBIT Login System...');
     
@@ -1845,12 +1925,11 @@ async function initApp() {
     
     const savedUser = loadRememberedUser();
     if (savedUser) {
-        console.log('👤 Found remembered user in localStorage:', savedUser.username);
-        console.log('🖥️ Automatically switching to macOS-style login');
+        console.log('👤 Found remembered user:', savedUser.username);
         rememberedUser = savedUser;
         showOSMode(savedUser);
     } else {
-        console.log('ℹ️ No remembered user found, showing regular login');
+        console.log('ℹ️ No remembered user found');
     }
     
     const loginButton = document.getElementById('loginButton');
@@ -1858,9 +1937,9 @@ async function initApp() {
     const switchUserButton = document.getElementById('switchUserButton');
     const backNav = document.getElementById('backNav');
     const acknowledgeBtn = document.getElementById('acknowledgeBtn');
+    const helpTrigger = document.getElementById('helpTrigger');
     
     if (loginButton) {
-        console.log('✅ Adding login button event listener');
         loginButton.addEventListener('click', (e) => {
             e.preventDefault();
             login();
@@ -1868,7 +1947,6 @@ async function initApp() {
     }
     
     if (osLoginButton) {
-        console.log('✅ Adding OS login button event listener');
         osLoginButton.addEventListener('click', (e) => {
             e.preventDefault();
             osLogin();
@@ -1876,7 +1954,6 @@ async function initApp() {
     }
     
     if (switchUserButton) {
-        console.log('✅ Adding switch user button event listener');
         switchUserButton.addEventListener('click', (e) => {
             e.preventDefault();
             showRegularMode(true);
@@ -1884,7 +1961,6 @@ async function initApp() {
     }
     
     if (backNav) {
-        console.log('✅ Adding back navigation event listener');
         backNav.addEventListener('click', (e) => {
             e.preventDefault();
             goBackToOSMode();
@@ -1892,15 +1968,20 @@ async function initApp() {
     }
     
     if (acknowledgeBtn) {
-        console.log('✅ Adding acknowledge button event listener');
         acknowledgeBtn.addEventListener('click', (e) => {
             e.preventDefault();
             acknowledgeWarning();
         });
     }
     
+    if (helpTrigger) {
+        helpTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleHelpMenu();
+        });
+    }
+    
     document.addEventListener('keydown', handleKeyPress);
-    console.log('⌨️ Keyboard event listener added');
     
     const inputs = document.querySelectorAll('.form-input');
     inputs.forEach(input => {
@@ -1917,49 +1998,40 @@ async function initApp() {
         });
     });
     
-    console.log('✅ X-ORBIT Login System initialized successfully');
-    console.log(`🎯 Mode: ${savedUser ? 'macOS Login' : 'Regular Login'}`);
+    console.log('✅ X-ORBIT Login System initialized');
 }
 
-// Start the application
 document.addEventListener('DOMContentLoaded', initApp);
 
 if (document.readyState === 'loading') {
-    console.log('⏳ DOM still loading, waiting for DOMContentLoaded...');
+    console.log('⏳ DOM loading...');
 } else {
-    console.log('⚡ DOM already loaded, initializing immediately...');
+    console.log('⚡ DOM ready');
     initApp();
 }
 
-// Session timeout functionality
 let sessionTimer = null;
 
 function startSessionTimer() {
-    console.log('⏱️ Starting session timer');
-    
     if (sessionTimer) {
         clearTimeout(sessionTimer);
     }
     
     sessionTimer = setTimeout(() => {
-        console.log('⏰ Session expired after inactivity');
         handleSessionTimeout();
-    }, 3600000); // 1 hour
+    }, 3600000);
 }
 
 function resetSessionTimer() {
-    console.log('🔄 Resetting session timer');
     startSessionTimer();
 }
 
 function handleSessionTimeout() {
-    console.log('🚫 Session timeout - redirecting to timeout.html');
+    console.log('⏰ Session timed out');
     
     if (window.parent && window.parent !== window) {
-        console.log('📤 Sending session-timeout message to parent');
         window.parent.postMessage('session-timeout', '*');
     } else {
-        console.log('⚠️ No parent window, redirecting directly');
         window.location.href = 'timeout.html';
     }
 }
@@ -1970,8 +2042,6 @@ function setupActivityListeners() {
     events.forEach(event => {
         document.addEventListener(event, resetSessionTimer, { passive: true });
     });
-    
-    console.log('✅ Activity listeners added for session timeout');
 }
 </script>
 </body>

@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>X-ORBIT Support Center</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        #loginScreen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 400px;
+            max-width: 100%;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .login-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .login-option-btn {
+            width: 100%;
+            padding: 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 12px;
+            text-align: left;
+        }
+
+        .login-option-btn:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+            transform: translateY(-2px);
+        }
+
+        .login-option-btn i {
+            font-size: 32px;
+            color: #667eea;
+            min-width: 40px;
+        }
+
+        .login-option-btn h3 {
+            color: #333;
+            font-size: 16px;
+            margin-bottom: 4px;
+        }
+
+        .login-option-btn p {
+            color: #666;
+            font-size: 13px;
+            margin: 0;
+        }
+
+        .back-link {
+            background: none;
+            border: none;
+            color: #667eea;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0;
+            transition: all 0.2s;
+        }
+
+        .back-link:hover {
+            color: #764ba2;
+        }
+
+        .error-message {
+            background: #ef4444;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .success-message {
+            background: #10b981;
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 14px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        #supportDashboard {
+            display: none;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logout-btn {
+            background: rgba(102, 126, 234, 0.1);
+            border: 2px solid #667eea;
+            color: #667eea;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .welcome-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin-bottom: 40px;
+            text-align: center;
+        }
+
+        .welcome-section h1 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .my-tickets-section {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .my-tickets-section h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .new-ticket-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .ticket-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .ticket-card {
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .ticket-card:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .ticket-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .ticket-number {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .ticket-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-open { background: #fef3c7; color: #92400e; }
+        .status-in_progress { background: #dbeafe; color: #1e40af; }
+        .status-waiting_response { background: #fce7f3; color: #9f1239; }
+        .status-resolved { background: #d1fae5; color: #065f46; }
+        .status-closed { background: #e5e7eb; color: #374151; }
+
+        .ticket-subject {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .ticket-preview {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .ticket-meta {
+            display: flex;
+            gap: 15px;
+            font-size: 13px;
+            color: #999;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .ticket-closed-state {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex: 1;
+            padding: 40px 20px;
+            background: #f9fafb;
+        }
+
+        .ticket-closed-modal {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 400px;
+            max-width: 100%;
+            text-align: center;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .ticket-closed-modal i.status-icon {
+            font-size: 56px;
+            margin-bottom: 20px;
+            color: #f59e0b;
+            display: block;
+        }
+
+        .ticket-closed-modal.closed-status i.status-icon {
+            color: #6b7280;
+        }
+
+        .ticket-closed-modal h2 {
+            color: #111827;
+            margin-bottom: 10px;
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .ticket-closed-modal p {
+            color: #6b7280;
+            margin-bottom: 24px;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .ticket-closed-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .reopen-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: #111827;
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .reopen-btn:hover {
+            background: #1f2937;
+        }
+
+        .delete-btn {
+            width: 100%;
+            padding: 12px 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            color: #6b7280;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .delete-btn:hover {
+            border-color: #d1d5db;
+            color: #111827;
+        }
+
+        .ticket-info-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #fef3c7;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            color: #92400e;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        #chatView {
+            display: none;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            height: 600px;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 2px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #f9fafb;
+        }
+
+        .back-btn {
+            padding: 8px 16px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .messages-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #f9fafb;
+        }
+
+        .message {
+            max-width: 70%;
+            margin-bottom: 15px;
+            animation: fadeIn 0.3s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .message-header {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .message.user .message-header {
+            text-align: right;
+        }
+
+        .message-bubble {
+            display: inline-block;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user .message-bubble {
+            background: #667eea;
+            color: white;
+            border-bottom-right-radius: 4px;
+            float: right;
+        }
+
+        .message.staff .message-bubble {
+            background: white;
+            border: 1px solid #e0e0e0;
+            color: #333;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.system {
+            max-width: 100%;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .message.system .message-bubble {
+            background: #f3f4f6;
+            color: #6b7280;
+            border: 1px dashed #d1d5db;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-style: italic;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #999;
+            margin-top: 4px;
+            clear: both;
+        }
+
+        .message.user .message-time {
+            text-align: right;
+        }
+
+        .message-input-area {
+            padding: 20px;
+            border-top: 2px solid #e0e0e0;
+            background: white;
+        }
+
+        .message-input-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        .message-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            resize: none;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .send-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .modal h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        select, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        select:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginScreen">
+        <div class="login-box">
+            <h1><i class="fas fa-satellite"></i> X-ORBIT Support</h1>
+            <p>How can we help you today?</p>
+            
+            <div id="loginOptions">
+                <button class="login-option-btn" onclick="showClientLogin()">
+                    <i class="fas fa-user"></i>
+                    <div>
+                        <h3>X-ORBIT Member</h3>
+                        <p>Login with your X-ORBIT account</p>
+                    </div>
+                </button>
+                <button class="login-option-btn" onclick="showGuestServices()">
+                    <i class="fas fa-headset"></i>
+                    <div>
+                        <h3>Account Services</h3>
+                        <p>Password reset or account creation</p>
+                    </div>
+                </button>
+                <button class="login-option-btn" onclick="showGuestLogin()">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <h3>Returning Guest</h3>
+                        <p>Continue previous support conversation</p>
+                    </div>
+                </button>
+            </div>
+
+            <div id="clientLoginForm" style="display: none;">
+                <button class="back-link" onclick="showLoginOptions()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <div class="error-message" id="loginError"></div>
+                <form onsubmit="handleLogin(event)" id="loginForm">
+                    <div class="form-group">
+                        <label for="username">Email</label>
+                        <input type="text" id="username" required placeholder="your@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" required placeholder="Enter your password">
+                    </div>
+                    <button type="submit" class="login-btn" id="loginBtn">Login</button>
+                </form>
+            </div>
+
+            <div id="guestServicesForm" style="display: none;">
+                <button class="back-link" onclick="showLoginOptions()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 10px;">Account Services</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 20px; font-size: 14px;">
+                    Get help with password resets or account creation
+                </p>
+                <div class="error-message" id="guestError"></div>
+                <form onsubmit="handleGuestServices(event)" id="guestForm">
+                    <div class="form-group">
+                        <label for="guestFirstName">First Name</label>
+                        <input type="text" id="guestFirstName" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="guestLastName">Last Name</label>
+                        <input type="text" id="guestLastName" required placeholder="Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="guestEmail">Email</label>
+                        <input type="email" id="guestEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="submit" class="login-btn" id="guestBtn">Continue to Support</button>
+                </form>
+            </div>
+
+            <div id="guestLoginForm" style="display: none;">
+                <button class="back-link" onclick="showLoginOptions()">
+                    <i class="fas fa-arrow-left"></i> Back
+                </button>
+                <h2 style="text-align: center; color: #667eea; margin-bottom: 10px;">Returning Guest</h2>
+                <p style="text-align: center; color: #666; margin-bottom: 20px; font-size: 14px;">
+                    Access your previous support tickets
+                </p>
+                <div class="error-message" id="guestLoginError"></div>
+                <form onsubmit="handleGuestLogin(event)" id="guestLoginFormElement">
+                    <div class="form-group">
+                        <label for="guestLoginFirstName">First Name</label>
+                        <input type="text" id="guestLoginFirstName" required placeholder="John">
+                    </div>
+                    <div class="form-group">
+                        <label for="guestLoginLastName">Last Name</label>
+                        <input type="text" id="guestLoginLastName" required placeholder="Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="guestLoginEmail">Email</label>
+                        <input type="email" id="guestLoginEmail" required placeholder="your@email.com">
+                    </div>
+                    <button type="submit" class="login-btn" id="guestLoginBtn">Access Support</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="supportDashboard">
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-satellite"></i> X-ORBIT Support
+                </div>
+                <div class="user-info">
+                    <span>Welcome, <strong id="userName"></strong></span>
+                    <button class="logout-btn" onclick="logout()">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <div class="container">
+            <div id="ticketsView">
+                <div class="welcome-section">
+                    <h1>Support Center</h1>
+                    <p>View your tickets or start a new conversation with X-ORBIT support</p>
+                </div>
+
+                <div class="my-tickets-section">
+                    <h2>
+                        <span>My Support Tickets</span>
+                        <button class="new-ticket-btn" onclick="openNewTicketModal()">
+                            <i class="fas fa-plus"></i> New Ticket
+                        </button>
+                    </h2>
+                    <div class="ticket-list" id="ticketList">
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>Loading your tickets...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chatView">
+                <div class="chat-header">
+                    <div>
+                        <h3 id="chatTicketNumber"></h3>
+                        <span id="chatTicketStatus"></span>
+                    </div>
+                    <button class="back-btn" onclick="backToTickets()">
+                        <i class="fas fa-arrow-left"></i> Back to Tickets
+                    </button>
+                </div>
+
+                <div id="ticketClosedMessage" style="display: none;" class="ticket-closed-state">
+                    <div class="ticket-closed-modal" id="closedModalContent">
+                        <div class="ticket-info-badge" id="ticketBadge">
+                            <i class="fas fa-ticket-alt"></i>
+                            <span id="modalTicketNumber"></span>
+                        </div>
+                        <i class="fas fa-check-circle status-icon" id="closedIcon"></i>
+                        <h2 id="closedTitle">Ticket Resolved</h2>
+                        <p id="closedMessage">
+                            This ticket has been marked as resolved. If you're still experiencing issues, you can reopen it below.
+                        </p>
+                        <div class="ticket-closed-actions">
+                            <button class="reopen-btn" onclick="reopenTicket()">
+                                <i class="fas fa-arrow-rotate-left"></i>
+                                Reopen Ticket
+                            </button>
+                            <button class="delete-btn" onclick="confirmDeleteTicket()">
+                                <i class="fas fa-trash-can"></i>
+                                Delete Ticket
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="chatMessagesArea" style="display: flex; flex-direction: column; flex: 1;">
+                    <div class="messages-container" id="messagesContainer"></div>
+
+                    <div class="message-input-area">
+                        <div class="message-input-container">
+                            <textarea 
+                                id="messageInput" 
+                                class="message-input" 
+                                placeholder="Type your message..." 
+                                rows="3"
+                                onkeydown="handleMessageKeydown(event)"
+                            ></textarea>
+                            <button class="send-btn" onclick="sendMessage()" id="sendBtn">
+                                <i class="fas fa-paper-plane"></i> Send
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="newTicketModal" class="modal">
+        <div class="modal-content">
+            <button class="close-modal" onclick="closeNewTicketModal()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2>Create New Ticket</h2>
+            <div class="success-message" id="ticketSuccess"></div>
+            <div class="error-message" id="ticketError"></div>
+            <form onsubmit="createNewTicket(event)" id="newTicketForm">
+                <div class="form-group">
+                    <label for="ticketCategory">Category</label>
+                    <select id="ticketCategory" required>
+                        <option value="">Select a category...</option>
+                        <option value="technical">Technical Issue</option>
+                        <option value="account">Account Problem</option>
+                        <option value="billing">Billing Question</option>
+                        <option value="feature">Feature Request</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="ticketSubject">Subject</label>
+                    <input type="text" id="ticketSubject" required placeholder="Brief description">
+                </div>
+                <div class="form-group">
+                    <label for="ticketMessage">Message</label>
+                    <textarea id="ticketMessage" required placeholder="Describe your issue..."></textarea>
+                </div>
+                <button type="submit" class="login-btn" id="createTicketBtn">Create Ticket</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+        
+        const { createClient } = supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let currentUser = null;
+        let currentTicket = null;
+        let userTickets = [];
+        let messagesSubscription = null;
+        let isGuest = false;
+
+        window.addEventListener('load', async () => {
+            const savedUser = localStorage.getItem('xorbit_support_user');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                isGuest = currentUser.isGuest || false;
+                await showDashboard();
+            }
+        });
+
+        function showLoginOptions() {
+            document.getElementById('loginOptions').style.display = 'block';
+            document.getElementById('clientLoginForm').style.display = 'none';
+            document.getElementById('guestServicesForm').style.display = 'none';
+            document.getElementById('guestLoginForm').style.display = 'none';
+        }
+
+        function showClientLogin() {
+            document.getElementById('loginOptions').style.display = 'none';
+            document.getElementById('clientLoginForm').style.display = 'block';
+        }
+
+        function showGuestServices() {
+            document.getElementById('loginOptions').style.display = 'none';
+            document.getElementById('guestServicesForm').style.display = 'block';
+        }
+
+        function showGuestLogin() {
+            document.getElementById('loginOptions').style.display = 'none';
+            document.getElementById('guestLoginForm').style.display = 'block';
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMsg = document.getElementById('loginError');
+
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Logging in...';
+            errorMsg.classList.remove('show');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('clients')
+                    .select('*')
+                    .eq('email', username)
+                    .eq('password', password)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('Invalid email or password');
+                }
+
+                currentUser = {
+                    id: data.id,
+                    username: data.email,
+                    name: data.name,
+                    email: data.email,
+                    phone: data.phone,
+                    blocked: data.blocked,
+                    isGuest: false
+                };
+                
+                localStorage.setItem('xorbit_support_user', JSON.stringify(currentUser));
+                isGuest = false;
+                await showDashboard();
+
+            } catch (error) {
+                console.error('Login error:', error);
+                errorMsg.textContent = error.message || 'Login failed.';
+                errorMsg.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
+        }
+
+        async function handleGuestServices(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('guestFirstName').value.trim();
+            const lastName = document.getElementById('guestLastName').value.trim();
+            const email = document.getElementById('guestEmail').value.trim();
+            const guestBtn = document.getElementById('guestBtn');
+            const errorMsg = document.getElementById('guestError');
+
+            guestBtn.disabled = true;
+            guestBtn.textContent = 'Processing...';
+            errorMsg.classList.remove('show');
+
+            try {
+                // Check if guest user exists
+                let { data: existingGuest } = await supabaseClient
+                    .from('guest_users')
+                    .select('*')
+                    .eq('email', email)
+                    .single();
+
+                let guestUser;
+
+                if (existingGuest) {
+                    // Update existing guest
+                    const { data, error } = await supabaseClient
+                        .from('guest_users')
+                        .update({
+                            first_name: firstName,
+                            last_name: lastName,
+                            last_login: new Date().toISOString()
+                        })
+                        .eq('id', existingGuest.id)
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    guestUser = data;
+                } else {
+                    // Create new guest user
+                    const { data, error } = await supabaseClient
+                        .from('guest_users')
+                        .insert([{
+                            first_name: firstName,
+                            last_name: lastName,
+                            email: email
+                        }])
+                        .select()
+                        .single();
+
+                    if (error) throw error;
+                    guestUser = data;
+                }
+
+                currentUser = {
+                    id: guestUser.id,
+                    username: email,
+                    name: `${firstName} ${lastName}`,
+                    email: email,
+                    isGuest: true
+                };
+
+                localStorage.setItem('xorbit_support_user', JSON.stringify(currentUser));
+                isGuest = true;
+                await showDashboard();
+
+            } catch (error) {
+                console.error('Guest services error:', error);
+                errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.classList.add('show');
+            } finally {
+                guestBtn.disabled = false;
+                guestBtn.textContent = 'Continue to Support';
+            }
+        }
+
+        async function handleGuestLogin(event) {
+            event.preventDefault();
+            const firstName = document.getElementById('guestLoginFirstName').value.trim();
+            const lastName = document.getElementById('guestLoginLastName').value.trim();
+            const email = document.getElementById('guestLoginEmail').value.trim();
+            const guestLoginBtn = document.getElementById('guestLoginBtn');
+            const errorMsg = document.getElementById('guestLoginError');
+
+            guestLoginBtn.disabled = true;
+            guestLoginBtn.textContent = 'Accessing...';
+            errorMsg.classList.remove('show');
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('guest_users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('first_name', firstName)
+                    .eq('last_name', lastName)
+                    .single();
+
+                if (error || !data) {
+                    throw new Error('No account found with those details. Please check your information or use Account Services.');
+                }
+
+                // Update last login
+                await supabaseClient
+                    .from('guest_users')
+                    .update({ last_login: new Date().toISOString() })
+                    .eq('id', data.id);
+
+                currentUser = {
+                    id: data.id,
+                    username: email,
+                    name: `${firstName} ${lastName}`,
+                    email: email,
+                    isGuest: true
+                };
+
+                localStorage.setItem('xorbit_support_user', JSON.stringify(currentUser));
+                isGuest = true;
+                await showDashboard();
+
+            } catch (error) {
+                console.error('Guest login error:', error);
+                errorMsg.textContent = error.message || 'Login failed.';
+                errorMsg.classList.add('show');
+            } finally {
+                guestLoginBtn.disabled = false;
+                guestLoginBtn.textContent = 'Access Support';
+            }
+        }
+
+        async function showDashboard() {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('supportDashboard').style.display = 'block';
+            document.getElementById('userName').textContent = currentUser.name;
+            await loadUserTickets();
+        }
+
+        function logout() {
+            localStorage.removeItem('xorbit_support_user');
+            currentUser = null;
+            currentTicket = null;
+            
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+            }
+
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('supportDashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
+            document.getElementById('ticketsView').style.display = 'block';
+            document.getElementById('chatView').style.display = 'none';
+        }
+
+        async function loadUserTickets() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('support_tickets')
+                    .select('*')
+                    .eq('email', currentUser.email)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                userTickets = data || [];
+                displayTickets();
+            } catch (error) {
+                console.error('Error loading tickets:', error);
+            }
+        }
+
+        function displayTickets() {
+            const container = document.getElementById('ticketList');
+            
+            if (userTickets.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>You don't have any support tickets yet.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = userTickets.map(ticket => `
+                <div class="ticket-card" onclick="openTicket('${ticket.id}')">
+                    <div class="ticket-header">
+                        <span class="ticket-number">${ticket.ticket_number}</span>
+                        <span class="ticket-status status-${ticket.status}">${ticket.status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="ticket-subject">${ticket.subject || 'No Subject'}</div>
+                    <div class="ticket-preview">${ticket.message.substring(0, 100)}...</div>
+                    <div class="ticket-meta">
+                        <span><i class="fas fa-tag"></i> ${ticket.category}</span>
+                        <span><i class="fas fa-clock"></i> ${formatTime(ticket.created_at)}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diff = now - date;
+            const minutes = Math.floor(diff / 60000);
+            const hours = Math.floor(diff / 3600000);
+            const days = Math.floor(diff / 86400000);
+
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes}m ago`;
+            if (hours < 24) return `${hours}h ago`;
+            if (days < 7) return `${days}d ago`;
+            return date.toLocaleDateString();
+        }
+
+        async function openTicket(ticketId) {
+            const ticket = userTickets.find(t => t.id === ticketId);
+            if (!ticket) return;
+
+            currentTicket = ticket;
+            document.getElementById('ticketsView').style.display = 'none';
+            document.getElementById('chatView').style.display = 'flex';
+            document.getElementById('chatTicketNumber').textContent = ticket.ticket_number;
+            document.getElementById('chatTicketStatus').textContent = ticket.status.replace('_', ' ').toUpperCase();
+
+            // Check if ticket is closed or resolved
+            if (ticket.status === 'resolved' || ticket.status === 'closed') {
+                document.getElementById('ticketClosedMessage').style.display = 'flex';
+                document.getElementById('chatMessagesArea').style.display = 'none';
+                
+                // Update modal content
+                document.getElementById('modalTicketNumber').textContent = ticket.ticket_number;
+                const modalContent = document.getElementById('closedModalContent');
+                const icon = document.getElementById('closedIcon');
+                
+                // Update message based on status
+                if (ticket.status === 'resolved') {
+                    modalContent.classList.remove('closed-status');
+                    icon.className = 'fas fa-check-circle status-icon';
+                    document.getElementById('closedTitle').textContent = 'Ticket Resolved';
+                    document.getElementById('closedMessage').textContent = 
+                        'This ticket has been marked as resolved. If you\'re still experiencing issues, you can reopen it below.';
+                } else {
+                    modalContent.classList.add('closed-status');
+                    icon.className = 'fas fa-lock status-icon';
+                    document.getElementById('closedTitle').textContent = 'Ticket Closed';
+                    document.getElementById('closedMessage').textContent = 
+                        'This ticket has been closed. You can reopen it to continue the conversation or delete it.';
+                }
+            } else {
+                document.getElementById('ticketClosedMessage').style.display = 'none';
+                document.getElementById('chatMessagesArea').style.display = 'flex';
+                await loadMessages(ticketId);
+                subscribeToMessages(ticketId);
+            }
+        }
+
+        function backToTickets() {
+            document.getElementById('chatView').style.display = 'none';
+            document.getElementById('ticketsView').style.display = 'block';
+            currentTicket = null;
+
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+                messagesSubscription = null;
+            }
+
+            loadUserTickets();
+        }
+
+        async function loadMessages(ticketId) {
+            try {
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', ticketId)
+                    .single();
+
+                if (convError) throw convError;
+
+                const { data: messages, error: msgError } = await supabaseClient
+                    .from('messages')
+                    .select('*')
+                    .eq('conversation_id', conversation.id)
+                    .order('created_at', { ascending: true });
+
+                if (msgError) throw msgError;
+                displayMessages(messages || []);
+            } catch (error) {
+                console.error('Error loading messages:', error);
+            }
+        }
+
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesContainer');
+            
+            if (messages.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-comments"></i>
+                        <p>No messages yet. Start the conversation!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = messages.map(msg => {
+                if (msg.is_system) {
+                    return `
+                        <div class="message system">
+                            <div class="message-bubble">
+                                <i class="fas fa-info-circle"></i> ${escapeHtml(msg.message)}
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                return `
+                    <div class="message ${msg.is_staff ? 'staff' : 'user'}">
+                        <div class="message-header">${escapeHtml(msg.sender_name)}</div>
+                        <div class="message-bubble">${escapeHtml(msg.message)}</div>
+                        <div class="message-time">${formatTime(msg.created_at)}</div>
+                    </div>
+                `;
+            }).join('');
+
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function subscribeToMessages(ticketId) {
+            if (messagesSubscription) {
+                messagesSubscription.unsubscribe();
+            }
+
+            supabaseClient.from('conversations').select('id').eq('ticket_id', ticketId).single()
+                .then(({ data: conversation }) => {
+                    if (conversation) {
+                        messagesSubscription = supabaseClient.channel('messages')
+                            .on('postgres_changes', {
+                                event: 'INSERT',
+                                schema: 'public',
+                                table: 'messages',
+                                filter: `conversation_id=eq.${conversation.id}`
+                            }, () => loadMessages(ticketId))
+                            .subscribe();
+                    }
+                });
+        }
+
+        async function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            const message = messageInput.value.trim();
+            
+            if (!message || !currentTicket) return;
+
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+
+            try {
+                const { data: conversation } = await supabaseClient.from('conversations')
+                    .select('id').eq('ticket_id', currentTicket.id).single();
+
+                await supabaseClient.from('messages').insert([{
+                    conversation_id: conversation.id,
+                    sender_name: currentUser.name,
+                    sender_email: currentUser.email,
+                    is_staff: false,
+                    message: message
+                }]);
+
+                messageInput.value = '';
+                await loadMessages(currentTicket.id);
+            } catch (error) {
+                console.error('Error sending message:', error);
+                alert('Failed to send message');
+            } finally {
+                sendBtn.disabled = false;
+            }
+        }
+
+        function handleMessageKeydown(event) {
+            if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function openNewTicketModal() {
+            document.getElementById('newTicketModal').classList.add('active');
+            document.getElementById('newTicketForm').reset();
+            document.getElementById('ticketSuccess').classList.remove('show');
+            document.getElementById('ticketError').classList.remove('show');
+        }
+
+        function closeNewTicketModal() {
+            document.getElementById('newTicketModal').classList.remove('active');
+        }
+
+        async function createNewTicket(event) {
+            event.preventDefault();
+            
+            const category = document.getElementById('ticketCategory').value;
+            const subject = document.getElementById('ticketSubject').value;
+            const message = document.getElementById('ticketMessage').value;
+            const createBtn = document.getElementById('createTicketBtn');
+            const successMsg = document.getElementById('ticketSuccess');
+            const errorMsg = document.getElementById('ticketError');
+
+            createBtn.disabled = true;
+            createBtn.textContent = 'Creating...';
+            errorMsg.classList.remove('show');
+            successMsg.classList.remove('show');
+
+            try {
+                const ticketData = {
+                    name: currentUser.name,
+                    email: currentUser.email,
+                    category: category,
+                    subject: subject,
+                    message: message,
+                    is_guest: isGuest
+                };
+
+                // Only add guest_user_id if it exists and is a valid UUID
+                if (isGuest && currentUser.id) {
+                    ticketData.guest_user_id = currentUser.id;
+                }
+
+                const { data: ticketResult, error: ticketError } = await supabaseClient
+                    .from('support_tickets')
+                    .insert([ticketData])
+                    .select()
+                    .single();
+
+                if (ticketError) {
+                    console.error('Ticket creation error:', ticketError);
+                    throw ticketError;
+                }
+
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const { data: conversation, error: convError } = await supabaseClient
+                    .from('conversations')
+                    .select('id')
+                    .eq('ticket_id', ticketResult.id)
+                    .single();
+
+                if (convError) throw convError;
+
+                await supabaseClient.from('messages').insert([{
+                    conversation_id: conversation.id,
+                    sender_name: currentUser.name,
+                    sender_email: currentUser.email,
+                    is_staff: false,
+                    message: message
+                }]);
+
+                successMsg.textContent = `Ticket ${ticketResult.ticket_number} created successfully!`;
+                successMsg.classList.add('show');
+                
+                await loadUserTickets();
+                
+                setTimeout(() => {
+                    closeNewTicketModal();
+                    openTicket(ticketResult.id);
+                }, 1500);
+
+            } catch (error) {
+                console.error('Error creating ticket:', error);
+                errorMsg.textContent = 'Failed to create ticket. Please try again.';
+                errorMsg.classList.add('show');
+            } finally {
+                createBtn.disabled = false;
+                createBtn.textContent = 'Create Ticket';
+            }
+        }
+
+        window.onclick = function(event) {
+            const modal = document.getElementById('newTicketModal');
+            if (event.target === modal) {
+                closeNewTicketModal();
+            }
+        }
+
+        async function reopenTicket() {
+            if (!currentTicket) return;
+
+            const confirmReopen = confirm('Are you sure you want to reopen this ticket?');
+            if (!confirmReopen) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('support_tickets')
+                    .update({ status: 'open' })
+                    .eq('id', currentTicket.id);
+
+                if (error) throw error;
+
+                // Reload the ticket
+                await loadUserTickets();
+                currentTicket.status = 'open';
+                
+                // Show chat interface
+                document.getElementById('ticketClosedMessage').style.display = 'none';
+                document.getElementById('chatMessagesArea').style.display = 'flex';
+                document.getElementById('chatTicketStatus').textContent = 'OPEN';
+                
+                await loadMessages(currentTicket.id);
+                subscribeToMessages(currentTicket.id);
+
+                alert('Ticket has been reopened!');
+            } catch (error) {
+                console.error('Error reopening ticket:', error);
+                alert('Failed to reopen ticket. Please try again.');
+            }
+        }
+
+        async function confirmDeleteTicket() {
+            if (!currentTicket) return;
+
+            const confirmDelete = confirm(
+                'Are you sure you want to delete this ticket?\n\n' +
+                'This action cannot be undone and all conversation history will be permanently deleted.'
+            );
+            
+            if (!confirmDelete) return;
+
+            try {
+                const { error } = await supabaseClient
+                    .from('support_tickets')
+                    .delete()
+                    .eq('id', currentTicket.id);
+
+                if (error) throw error;
+
+                alert('Ticket deleted successfully.');
+                backToTickets();
+            } catch (error) {
+                console.error('Error deleting ticket:', error);
+                alert('Failed to delete ticket. Please try again or contact support.');
+            }
+        }
+
+        setInterval(() => {
+            if (currentUser && !currentTicket) {
+                loadUserTickets();
+            }
+        }, 30000);
+
+        // Check for new messages every 15 seconds when viewing a ticket
+        setInterval(() => {
+            if (currentUser && currentTicket) {
+                loadMessages(currentTicket.id);
+            }
+        }, 15000);
+    </script>
+</body>
+</html>

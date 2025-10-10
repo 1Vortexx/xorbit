@@ -559,14 +559,16 @@
         }
 
         .message.system .message-bubble {
-            background: #f3f4f6;
-            color: #6b7280;
-            border: 1px dashed #d1d5db;
-            padding: 8px 16px;
+            background: #fffbeb;
+            color: #92400e;
+            border: 2px solid #fcd34d;
+            padding: 12px 20px;
             font-size: 13px;
-            font-style: italic;
             border-radius: 8px;
             display: inline-block;
+            max-width: 90%;
+            line-height: 1.6;
+            font-weight: 500;
         }
 
         .message-time {
@@ -1024,7 +1026,6 @@
             errorMsg.classList.remove('show');
 
             try {
-                // Check if guest user exists
                 let { data: existingGuest } = await supabaseClient
                     .from('guest_users')
                     .select('*')
@@ -1034,7 +1035,6 @@
                 let guestUser;
 
                 if (existingGuest) {
-                    // Update existing guest
                     const { data, error } = await supabaseClient
                         .from('guest_users')
                         .update({
@@ -1049,7 +1049,6 @@
                     if (error) throw error;
                     guestUser = data;
                 } else {
-                    // Create new guest user
                     const { data, error } = await supabaseClient
                         .from('guest_users')
                         .insert([{
@@ -1111,7 +1110,6 @@
                     throw new Error('No account found with those details. Please check your information or use Account Services.');
                 }
 
-                // Update last login
                 await supabaseClient
                     .from('guest_users')
                     .update({ last_login: new Date().toISOString() })
@@ -1232,17 +1230,14 @@
             document.getElementById('chatTicketNumber').textContent = ticket.ticket_number;
             document.getElementById('chatTicketStatus').textContent = ticket.status.replace('_', ' ').toUpperCase();
 
-            // Check if ticket is closed or resolved
             if (ticket.status === 'resolved' || ticket.status === 'closed') {
                 document.getElementById('ticketClosedMessage').style.display = 'flex';
                 document.getElementById('chatMessagesArea').style.display = 'none';
                 
-                // Update modal content
                 document.getElementById('modalTicketNumber').textContent = ticket.ticket_number;
                 const modalContent = document.getElementById('closedModalContent');
                 const icon = document.getElementById('closedIcon');
                 
-                // Update message based on status
                 if (ticket.status === 'resolved') {
                     modalContent.classList.remove('closed-status');
                     icon.className = 'fas fa-check-circle status-icon';
@@ -1285,7 +1280,12 @@
                     .eq('ticket_id', ticketId)
                     .single();
 
-                if (convError) throw convError;
+                if (convError) {
+                    console.error('Conversation error:', convError);
+                    throw convError;
+                }
+
+                console.log('Found conversation:', conversation);
 
                 const { data: messages, error: msgError } = await supabaseClient
                     .from('messages')
@@ -1293,10 +1293,22 @@
                     .eq('conversation_id', conversation.id)
                     .order('created_at', { ascending: true });
 
-                if (msgError) throw msgError;
+                if (msgError) {
+                    console.error('Messages error:', msgError);
+                    throw msgError;
+                }
+                
+                console.log('Messages loaded:', messages);
                 displayMessages(messages || []);
             } catch (error) {
                 console.error('Error loading messages:', error);
+                const container = document.getElementById('messagesContainer');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <p>Error loading messages. Please refresh the page.</p>
+                    </div>
+                `;
             }
         }
 
@@ -1314,11 +1326,11 @@
             }
 
             container.innerHTML = messages.map(msg => {
-                if (msg.is_system) {
+                if (msg.sender_email === 'system@xorbit.org') {
                     return `
                         <div class="message system">
                             <div class="message-bubble">
-                                <i class="fas fa-info-circle"></i> ${escapeHtml(msg.message)}
+                                ⚠️ ${escapeHtml(msg.message)}
                             </div>
                         </div>
                     `;
@@ -1436,7 +1448,6 @@
                     is_guest: isGuest
                 };
 
-                // Only add guest_user_id if it exists and is a valid UUID
                 if (isGuest && currentUser.id) {
                     ticketData.guest_user_id = currentUser.id;
                 }
@@ -1468,6 +1479,14 @@
                     sender_email: currentUser.email,
                     is_staff: false,
                     message: message
+                }]);
+
+                await supabaseClient.from('messages').insert([{
+                    conversation_id: conversation.id,
+                    sender_name: 'X-ORBIT Support System',
+                    sender_email: 'system@xorbit.org',
+                    is_staff: false,
+                    message: 'NOTICE: This inbox is checked daily. The X-ORBIT team will respond shortly. Tickets may not be handled immediately. To help us assist you better, please provide a detailed explanation of your issue including any error messages, screenshots, or steps to reproduce the problem.'
                 }]);
 
                 successMsg.textContent = `Ticket ${ticketResult.ticket_number} created successfully!`;
@@ -1511,11 +1530,9 @@
 
                 if (error) throw error;
 
-                // Reload the ticket
                 await loadUserTickets();
                 currentTicket.status = 'open';
                 
-                // Show chat interface
                 document.getElementById('ticketClosedMessage').style.display = 'none';
                 document.getElementById('chatMessagesArea').style.display = 'flex';
                 document.getElementById('chatTicketStatus').textContent = 'OPEN';
@@ -1562,7 +1579,6 @@
             }
         }, 30000);
 
-        // Check for new messages every 15 seconds when viewing a ticket
         setInterval(() => {
             if (currentUser && currentTicket) {
                 loadMessages(currentTicket.id);

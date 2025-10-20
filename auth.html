@@ -83,7 +83,7 @@ body {
     100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
 }
 
-/* Support/Admin Menu Button */
+
 .help-menu-container {
     position: fixed;
     bottom: 2rem;
@@ -1184,6 +1184,316 @@ body {
         bottom: 1rem;
         right: 1rem;
     }
+.help-menu-container {
+        bottom: 1rem;
+        right: 1rem;
+    }
+}
+
+/* Registration Modal Overlay */
+.registration-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    z-index: 2001;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.registration-overlay.show {
+    display: flex;
+}
+
+/* Registration Modal */
+.registration-modal {
+    background: rgba(15, 15, 35, 0.95);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(147, 51, 234, 0.5);
+    border-radius: 24px;
+    padding: 2.5rem 3rem;
+    max-width: 700px;
+    width: 90%;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(147, 51, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: modalSlideIn 0.4s ease;
+    position: relative;
+}
+
+.registration-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.registration-modal::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}
+
+.registration-modal::-webkit-scrollbar-thumb {
+    background: rgba(147, 51, 234, 0.5);
+    border-radius: 4px;
+}
+
+.registration-modal::-webkit-scrollbar-thumb:hover {
+    background: rgba(147, 51, 234, 0.7);
+}
+
+.registration-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.registration-icon-large {
+    width: 70px;
+    height: 70px;
+    margin: 0 auto 1.25rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9333ea, #00d4ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    color: #fff;
+    animation: iconPulse 2s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
+}
+
+.registration-modal h2 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #f8fafc;
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.registration-modal .subtitle {
+    color: #94a3b8;
+    font-size: 0.95rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.registration-content {
+    background: rgba(147, 51, 234, 0.08);
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.registration-steps {
+    color: #e2e8f0;
+    line-height: 1.6;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+}
+
+.registration-steps .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem;
+    background: rgba(15, 15, 35, 0.4);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.registration-steps .step:hover {
+    background: rgba(15, 15, 35, 0.6);
+    border-color: rgba(147, 51, 234, 0.3);
+    transform: translateY(-2px);
+}
+
+.registration-steps .step-icon {
+    min-width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #9333ea, #00d4ff);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    color: #fff;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(147, 51, 234, 0.3);
+}
+
+.registration-steps .step-content {
+    flex: 1;
+    padding-top: 0.125rem;
+}
+
+.registration-steps .step-title {
+    font-weight: 600;
+    color: #f8fafc;
+    font-size: 0.95rem;
+    margin-bottom: 0.25rem;
+}
+
+.registration-steps .step-description {
+    color: #94a3b8;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+.registration-steps strong {
+    color: #00d4ff;
+    font-weight: 600;
+}
+
+.registration-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.support-portal-btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: none;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+    background: linear-gradient(135deg, #9333ea 0%, #7c3aed 50%, #00d4ff 100%);
+    background-size: 200% 200%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    position: relative;
+    overflow: hidden;
+    animation: buttonGradient 3s ease-in-out infinite;
+}
+
+.support-portal-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s;
+}
+
+.support-portal-btn:hover::before {
+    left: 100%;
+}
+
+.support-portal-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(147, 51, 234, 0.5);
+}
+
+.support-portal-btn:active {
+    transform: translateY(0);
+}
+
+.close-registration-btn {
+    flex: 1;
+    padding: 1rem 2rem;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.05);
+    color: #94a3b8;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.close-registration-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+    transform: translateY(-2px);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.close-registration-btn:active {
+    transform: translateY(0);
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #94a3b8;
+}
+
+.register-link button {
+    background: none;
+    border: none;
+    color: #00d4ff;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+    border-bottom: 1px solid transparent;
+    padding-bottom: 2px;
+}
+
+.register-link button:hover {
+    color: #38bdf8;
+    border-bottom-color: #38bdf8;
+}
+
+/* Mobile responsiveness for registration */
+@media (max-width: 768px) {
+    .registration-modal {
+        padding: 2rem;
+        max-width: 95%;
+    }
+
+    .registration-icon-large {
+        width: 60px;
+        height: 60px;
+        font-size: 28px;
+    }
+
+    .registration-modal h2 {
+        font-size: 1.5rem;
+    }
+
+    .registration-content {
+        padding: 1.25rem;
+    }
+
+    .registration-steps {
+        grid-template-columns: 1fr;
+    }
+
+    .registration-steps .step {
+        padding: 0.875rem;
+    }
+
+    .registration-steps .step-icon {
+        min-width: 34px;
+        height: 34px;
+        font-size: 15px;
+    }
+
+    .registration-actions {
+        flex-direction: column;
+    }
 }
 </style>
 </head>
@@ -1296,7 +1606,73 @@ body {
             <button type="button" id="loginButton" class="login-btn">
                 Authenticate
             </button>
-            
+            <div class="register-link">
+    Don't have an account? <button id="registerBtn">Register here</button>
+</div>
+<!-- Registration Modal Overlay -->
+<div class="registration-overlay" id="registrationOverlay">
+    <div class="registration-modal">
+        <div class="registration-header">
+            <div class="registration-icon-large">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <h2>Create an Account</h2>
+            <p class="subtitle">Follow these steps to get started with X-ORBIT</p>
+        </div>
+        
+        <div class="registration-content">
+            <div class="registration-steps">
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">Visit Support Portal</div>
+                        <div class="step-description">Click the button below to access our <strong>Support Portal</strong></div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">Create Account Services Account</div>
+                        <div class="step-description">Register for an <strong>Account Services</strong> account on the portal</div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-ticket-alt"></i>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">Submit Support Ticket</div>
+                        <div class="step-description">Open a ticket requesting <strong>X-ORBIT account creation</strong></div>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="step-content">
+                        <div class="step-title">Receive Credentials</div>
+                        <div class="step-description">Our team will process your request and send your login credentials</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="registration-actions">
+            <button class="support-portal-btn" id="supportPortalBtn">
+                <i class="fas fa-external-link-alt"></i>
+                <span>Open Support Portal</span>
+            </button>
+            <button class="close-registration-btn" id="closeRegistrationBtn">
+                <i class="fas fa-times"></i>
+                <span>Close</span>
+            </button>
+        </div>
+    </div>
+</div>
             <div id="banModal" class="ban-modal">
                 <h2>Access Denied</h2>
                 <p id="banReason"></p>
@@ -1381,6 +1757,23 @@ document.addEventListener('click', function(e) {
     }
 });
 
+// Registration Modal functions
+function showRegistrationModal() {
+    console.log('📝 Showing registration modal');
+    const overlay = document.getElementById('registrationOverlay');
+    overlay.classList.add('show');
+}
+
+function hideRegistrationModal() {
+    console.log('✅ Hiding registration modal');
+    const overlay = document.getElementById('registrationOverlay');
+    overlay.classList.remove('show');
+}
+
+function openSupportPortal() {
+    console.log('🌐 Opening support portal in new tab');
+    window.open('https://xorbit.org/support', '_blank');
+}
 // Solaris Alert functions
 function dismissSolarisAlert() {
     console.log('👋 Dismissing Solaris alert');
@@ -2007,6 +2400,9 @@ async function initApp() {
     const backNav = document.getElementById('backNav');
     const acknowledgeBtn = document.getElementById('acknowledgeBtn');
     const helpTrigger = document.getElementById('helpTrigger');
+    const registerBtn = document.getElementById('registerBtn');
+    const supportPortalBtn = document.getElementById('supportPortalBtn');
+    const closeRegistrationBtn = document.getElementById('closeRegistrationBtn');
     
     if (loginButton) {
         loginButton.addEventListener('click', (e) => {
@@ -2047,6 +2443,27 @@ async function initApp() {
         helpTrigger.addEventListener('click', (e) => {
             e.stopPropagation();
             toggleHelpMenu();
+        });
+    }
+    
+    if (registerBtn) {
+        registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegistrationModal();
+        });
+    }
+    
+    if (supportPortalBtn) {
+        supportPortalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openSupportPortal();
+        });
+    }
+    
+    if (closeRegistrationBtn) {
+        closeRegistrationBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideRegistrationModal();
         });
     }
     

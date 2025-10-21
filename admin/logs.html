@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>X-ORBIT Logs Viewer</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #0a0a0f;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* Blocked Access Page */
+.blocked-page {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.blocked-page.show {
+    display: flex;
+}
+
+.blocked-content {
+    text-align: center;
+    padding: 3rem;
+    background: rgba(15, 15, 35, 0.95);
+    border: 2px solid rgba(239, 68, 68, 0.5);
+    border-radius: 24px;
+    max-width: 500px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 100px rgba(239, 68, 68, 0.3);
+}
+
+.blocked-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 40px;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(239, 68, 68, 0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 60px rgba(239, 68, 68, 0.7); transform: scale(1.05); }
+}
+
+.blocked-content h1 {
+    font-size: 2rem;
+    color: #fca5a5;
+    margin-bottom: 1rem;
+}
+
+.blocked-content p {
+    color: #fecaca;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+/* Logs Container */
+.logs-container {
+    display: none;
+    height: 100vh;
+    flex-direction: column;
+    background: rgba(15, 15, 35, 0.4);
+}
+
+.logs-container.show {
+    display: flex;
+}
+
+.logs-header {
+    padding: 1.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+}
+
+.logs-tabs {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.log-tab-btn {
+    flex: 1;
+    padding: 0.875rem 1.25rem;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(147, 51, 234, 0.2);
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    color: #a1a1aa;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.log-tab-btn:hover {
+    border-color: #9333ea;
+    background: rgba(147, 51, 234, 0.05);
+    color: #9333ea;
+}
+
+.log-tab-btn.active {
+    background: linear-gradient(135deg, #6B46C1 0%, #9333EA 50%, #EC4899 100%);
+    color: white;
+    border: none;
+}
+
+.filters-row {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.filter-group {
+    flex: 1;
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.filter-group label {
+    font-size: 0.875rem;
+    color: #a1a1aa;
+    white-space: nowrap;
+}
+
+.filter-group input,
+.filter-group select {
+    flex: 1;
+    padding: 0.625rem 0.875rem;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.875rem;
+}
+
+.filter-group input:focus,
+.filter-group select:focus {
+    outline: none;
+    border-color: #9333ea;
+    background: rgba(147, 51, 234, 0.05);
+}
+
+.refresh-btn {
+    padding: 0.625rem 1.25rem;
+    background: linear-gradient(135deg, #6B46C1 0%, #9333EA 50%, #EC4899 100%);
+    border: none;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    white-space: nowrap;
+}
+
+.refresh-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(147, 51, 234, 0.4);
+}
+
+.logs-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.logs-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.logs-content::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.logs-content::-webkit-scrollbar-thumb {
+    background: rgba(147, 51, 234, 0.3);
+    border-radius: 10px;
+}
+
+.logs-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.logs-table thead {
+    position: sticky;
+    top: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+}
+
+.logs-table th {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #a1a1aa;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid rgba(147, 51, 234, 0.2);
+}
+
+.logs-table td {
+    padding: 1rem;
+    border-bottom: 1px solid rgba(147, 51, 234, 0.1);
+    font-size: 0.875rem;
+}
+
+.logs-table tbody tr {
+    background: rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+}
+
+.logs-table tbody tr:hover {
+    background: rgba(147, 51, 234, 0.05);
+    border-left: 3px solid #9333ea;
+}
+
+.success-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.2);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    white-space: nowrap;
+}
+
+.success-badge i {
+    font-size: 0.875rem;
+}
+
+.failed-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    white-space: nowrap;
+}
+
+.failed-badge i {
+    font-size: 0.875rem;
+}
+
+.action-badge {
+    display: inline-block;
+    padding: 0.375rem 0.875rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    white-space: nowrap;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: #a1a1aa;
+    padding: 3rem;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #6B46C1 0%, #9333EA 50%, #EC4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    opacity: 0.5;
+}
+
+.loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    color: #9333ea;
+}
+
+.loading i {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.log-count {
+    padding: 0.625rem 1rem;
+    background: rgba(147, 51, 234, 0.1);
+    border: 1px solid rgba(147, 51, 234, 0.3);
+    border-radius: 8px;
+    font-size: 0.875rem;
+    color: #9333ea;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* New Logs Notification */
+.new-logs-notification {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    background: linear-gradient(135deg, #6B46C1 0%, #9333EA 50%, #EC4899 100%);
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(147, 51, 234, 0.5);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    z-index: 1000;
+    transition: transform 0.4s ease;
+    cursor: pointer;
+}
+
+.new-logs-notification.show {
+    transform: translateX(-50%) translateY(0);
+}
+
+.new-logs-notification:hover {
+    box-shadow: 0 15px 50px rgba(147, 51, 234, 0.7);
+    transform: translateX(-50%) translateY(-2px);
+}
+
+.new-logs-notification i {
+    font-size: 1.25rem;
+    animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.new-logs-notification .notification-text {
+    display: flex;
+    flex-direction: column;
+}
+
+.new-logs-notification .notification-title {
+    font-weight: 700;
+    font-size: 0.95rem;
+}
+
+.new-logs-notification .notification-subtitle {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+.notification-close {
+    margin-left: 0.5rem;
+    padding: 0.25rem 0.5rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+    font-size: 0.75rem;
+    transition: all 0.3s;
+}
+
+.notification-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+</style>
+</head>
+<body>
+
+<!-- Blocked Access Page -->
+<div class="blocked-page" id="blockedPage">
+    <div class="blocked-content">
+        <div class="blocked-icon">
+            <i class="fas fa-shield-alt"></i>
+        </div>
+        <h1>Access Denied</h1>
+        <p>This page can only be accessed through the X-ORBIT Admin Dashboard. Direct access is not permitted for security reasons.</p>
+        <p style="font-size: 0.875rem; opacity: 0.7;">If you believe this is an error, please contact your system administrator.</p>
+    </div>
+</div>
+
+<!-- New Logs Notification -->
+<div class="new-logs-notification" id="newLogsNotification" onclick="refreshFromNotification()">
+    <i class="fas fa-bell"></i>
+    <div class="notification-text">
+        <div class="notification-title">New logs available!</div>
+        <div class="notification-subtitle">Click to refresh and view updates</div>
+    </div>
+    <button class="notification-close" onclick="dismissNotification(event)">Dismiss</button>
+</div>
+
+<!-- Logs Container -->
+<div class="logs-container" id="logsContainer">
+    <div class="logs-header">
+        <div class="logs-tabs">
+            <button class="log-tab-btn active" data-tab="login_attempts" onclick="switchLogTab('login_attempts')">
+                <i class="fas fa-sign-in-alt"></i> Login Attempts
+            </button>
+        </div>
+        <div class="filters-row">
+            <div class="filter-group">
+                <label>Search:</label>
+                <input type="text" id="searchFilter" placeholder="Username, email, IP..." oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <label>Filter:</label>
+                <select id="successFilter" onchange="applyFilters()">
+                    <option value="all">All Attempts</option>
+                    <option value="true">Successful Only</option>
+                    <option value="false">Failed Only</option>
+                </select>
+            </div>
+            <div class="log-count" id="logCount">0 logs</div>
+            <button class="refresh-btn" onclick="refreshLogs()">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+    </div>
+
+    <div class="logs-content" id="logsContent">
+        <div class="loading">
+            <i class="fas fa-circle-notch fa-2x"></i>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+
+const { createClient } = supabase;
+const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+let currentTab = 'login_attempts';
+let allLogs = [];
+let isAuthenticated = false;
+let authToken = null;
+let latestLogTimestamp = null;
+let backgroundCheckInterval = null;
+
+// Check if page is loaded in iframe with proper authentication
+function checkIframeStatus() {
+    try {
+        // Check if in iframe
+        const inIframe = window.self !== window.top;
+        
+        if (!inIframe) {
+            showBlockedPage();
+            return;
+        }
+
+        // Wait for authentication message from parent
+        waitForAuthentication();
+        
+    } catch (e) {
+        showBlockedPage();
+    }
+}
+
+function showBlockedPage() {
+    document.getElementById('blockedPage').classList.add('show');
+    document.getElementById('logsContainer').classList.remove('show');
+}
+
+function showLogsPage() {
+    document.getElementById('blockedPage').classList.remove('show');
+    document.getElementById('logsContainer').classList.add('show');
+    loadLogs();
+    startBackgroundCheck();
+}
+
+// Wait for authentication message from parent dashboard
+function waitForAuthentication() {
+    // Set a timeout - if no auth message received in 2 seconds, block access
+    const authTimeout = setTimeout(() => {
+        if (!isAuthenticated) {
+            console.error('Authentication timeout - no message from parent');
+            showBlockedPage();
+        }
+    }, 2000);
+
+    // Listen for auth message
+    window.addEventListener('message', (event) => {
+        // Verify message is from parent and contains auth token
+        if (event.data && event.data.type === 'auth-token') {
+            clearTimeout(authTimeout);
+            authToken = event.data.token;
+            
+            // Verify token matches expected format (session-based)
+            if (verifyAuthToken(authToken)) {
+                isAuthenticated = true;
+                showLogsPage();
+            } else {
+                console.error('Invalid authentication token');
+                showBlockedPage();
+            }
+        }
+    });
+
+    // Request authentication from parent
+    window.parent.postMessage({ type: 'request-auth' }, '*');
+}
+
+function verifyAuthToken(token) {
+    // Simple verification - check if token exists and has correct structure
+    // In production, you'd want more robust verification
+    return token && typeof token === 'string' && token.startsWith('xorbit-admin-');
+}
+
+// Load logs based on current tab
+async function loadLogs() {
+    // Check authentication before loading
+    if (!isAuthenticated) {
+        console.error('Not authenticated - cannot load logs');
+        showBlockedPage();
+        return;
+    }
+
+    const logsContent = document.getElementById('logsContent');
+    logsContent.innerHTML = '<div class="loading"><i class="fas fa-circle-notch fa-2x"></i></div>';
+
+    try {
+        const result = await supabaseClient
+            .from('login_attempts')
+            .select('*')
+            .order('attempt_timestamp', { ascending: false })
+            .limit(500);
+
+        if (result.error) throw result.error;
+
+        allLogs = result.data || [];
+        
+        // Store the latest timestamp for background checks
+        if (allLogs.length > 0) {
+            latestLogTimestamp = allLogs[0].attempt_timestamp;
+        }
+        
+        displayLogs(allLogs);
+        updateLogCount(allLogs.length);
+    } catch (error) {
+        console.error('Error loading logs:', error);
+        logsContent.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-exclamation-triangle"></i>
+                <p>Failed to load logs</p>
+                <p style="font-size: 0.875rem; opacity: 0.7;">${error.message}</p>
+            </div>
+        `;
+    }
+}
+
+// Background check for new logs without refreshing display
+async function checkForNewLogs() {
+    if (!isAuthenticated || !latestLogTimestamp) return;
+
+    try {
+        const result = await supabaseClient
+            .from('login_attempts')
+            .select('attempt_timestamp')
+            .order('attempt_timestamp', { ascending: false })
+            .limit(1);
+
+        if (result.error) throw result.error;
+
+        if (result.data && result.data.length > 0) {
+            const newestTimestamp = result.data[0].attempt_timestamp;
+            
+            // Check if there are new logs
+            if (newestTimestamp > latestLogTimestamp) {
+                showNewLogsNotification();
+            }
+        }
+    } catch (error) {
+        console.error('Error checking for new logs:', error);
+    }
+}
+
+// Start background checking
+function startBackgroundCheck() {
+    // Clear any existing interval
+    if (backgroundCheckInterval) {
+        clearInterval(backgroundCheckInterval);
+    }
+    
+    // Check every 15 seconds
+    backgroundCheckInterval = setInterval(checkForNewLogs, 15000);
+}
+
+// Stop background checking
+function stopBackgroundCheck() {
+    if (backgroundCheckInterval) {
+        clearInterval(backgroundCheckInterval);
+        backgroundCheckInterval = null;
+    }
+}
+
+// Show notification for new logs
+function showNewLogsNotification() {
+    const notification = document.getElementById('newLogsNotification');
+    notification.classList.add('show');
+    
+    // Auto-dismiss after 30 seconds
+    setTimeout(() => {
+        dismissNotification();
+    }, 30000);
+}
+
+// Refresh from notification
+function refreshFromNotification() {
+    dismissNotification();
+    refreshLogs();
+}
+
+// Dismiss notification
+function dismissNotification(event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    const notification = document.getElementById('newLogsNotification');
+    notification.classList.remove('show');
+}
+
+// Display logs in table
+function displayLogs(logs) {
+    const logsContent = document.getElementById('logsContent');
+
+    if (logs.length === 0) {
+        logsContent.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-inbox"></i>
+                <p>No logs found</p>
+            </div>
+        `;
+        return;
+    }
+
+    logsContent.innerHTML = `
+        <table class="logs-table">
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Client Name</th>
+                    <th>Failure Reason</th>
+                    <th>User Agent</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${logs.map(log => `
+                    <tr>
+                        <td>${formatTimestamp(log.attempt_timestamp)}</td>
+                        <td><strong>${log.attempted_username || 'N/A'}</strong></td>
+                        <td>${log.attempted_email || 'N/A'}</td>
+                        <td>
+                            <span class="${log.success ? 'success-badge' : 'failed-badge'}">
+                                <i class="fas fa-${log.success ? 'check-circle' : 'times-circle'}"></i>
+                                ${log.success ? 'Success' : 'Failed'}
+                            </span>
+                        </td>
+                        <td>${log.client_name || 'N/A'}</td>
+                        <td style="color: #ef4444;">${log.failure_reason || '-'}</td>
+                        <td style="font-size: 0.75rem; opacity: 0.7;">${truncate(log.user_agent, 40)}</td>
+                    </tr>
+                `).join('')}
+            </tbody>
+        </table>
+    `;
+}
+
+// Switch between log tabs
+function switchLogTab(tab) {
+    if (!isAuthenticated) {
+        console.error('Not authenticated');
+        return;
+    }
+    
+    currentTab = tab;
+    
+    // Update active tab button
+    document.querySelectorAll('.log-tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+
+    // Load logs for new tab
+    loadLogs();
+}
+
+// Apply filters
+function applyFilters() {
+    const searchTerm = document.getElementById('searchFilter').value.toLowerCase();
+    const successFilter = document.getElementById('successFilter').value;
+
+    let filtered = allLogs;
+
+    // Apply search filter
+    if (searchTerm) {
+        filtered = filtered.filter(log => 
+            (log.attempted_username || '').toLowerCase().includes(searchTerm) ||
+            (log.attempted_email || '').toLowerCase().includes(searchTerm) ||
+            (log.client_name || '').toLowerCase().includes(searchTerm) ||
+            (log.user_agent || '').toLowerCase().includes(searchTerm)
+        );
+    }
+
+    // Apply success filter
+    if (successFilter !== 'all') {
+        const filterValue = successFilter === 'true';
+        filtered = filtered.filter(log => log.success === filterValue);
+    }
+
+    displayLogs(filtered);
+    updateLogCount(filtered.length);
+}
+
+// Refresh logs
+function refreshLogs() {
+    if (!isAuthenticated) {
+        console.error('Not authenticated - cannot refresh logs');
+        return;
+    }
+    loadLogs();
+}
+
+// Format timestamp
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    return date.toLocaleString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+    });
+}
+
+// Truncate text
+function truncate(text, maxLength) {
+    if (!text) return '';
+    return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
+}
+
+// Update log count
+function updateLogCount(count) {
+    document.getElementById('logCount').textContent = `${count} log${count !== 1 ? 's' : ''}`;
+}
+
+// Listen for messages from parent dashboard
+window.addEventListener('message', (event) => {
+    // Handle authentication
+    if (event.data && event.data.type === 'auth-token') {
+        authToken = event.data.token;
+        if (verifyAuthToken(authToken)) {
+            isAuthenticated = true;
+            showLogsPage();
+        } else {
+            showBlockedPage();
+        }
+        return;
+    }
+
+    // Handle refresh command (only if authenticated)
+    if (event.data === 'refresh-logs' && isAuthenticated) {
+        refreshLogs();
+    }
+});
+
+// Send ready message to parent
+function notifyParentReady() {
+    if (isAuthenticated) {
+        window.parent.postMessage('logs-ready', '*');
+    }
+}
+
+// Initialize on page load
+window.addEventListener('load', () => {
+    checkIframeStatus();
+});
+
+// Cleanup on page unload
+window.addEventListener('beforeunload', () => {
+    stopBackgroundCheck();
+});
+</script>
+</body>
+</html>

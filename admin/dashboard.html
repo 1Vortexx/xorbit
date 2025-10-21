@@ -256,6 +256,12 @@
             display: flex;
             flex-direction: column;
             backdrop-filter: blur(10px);
+            transition: transform 0.3s ease, width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            transform: translateX(-380px);
+            width: 0;
         }
 
         .sidebar-header {
@@ -468,6 +474,36 @@
             flex-direction: column;
             background: var(--card-bg);
             border-left: 1px solid var(--card-border);
+            position: relative;
+        }
+
+        .sidebar-toggle {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background: var(--primary-gradient);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s;
+            box-shadow: 0 5px 20px rgba(147, 51, 234, 0.4);
+        }
+
+        .sidebar-toggle:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(147, 51, 234, 0.5);
+        }
+
+        .sidebar-toggle.visible {
+            display: flex;
         }
 
         .chat-header {
@@ -749,6 +785,136 @@
             margin-top: 5px;
             font-weight: 500;
         }
+
+        /* Logs container styles */
+        #logsContent {
+            display: none;
+            height: 100%;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 25px;
+            overflow-y: auto;
+        }
+
+        #logsContent::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #logsContent::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+
+        #logsContent::-webkit-scrollbar-thumb {
+            background: rgba(147, 51, 234, 0.3);
+            border-radius: 10px;
+        }
+
+        #logsContent::-webkit-scrollbar-thumb:hover {
+            background: rgba(147, 51, 234, 0.5);
+        }
+
+        .logs-header {
+            margin-bottom: 25px;
+        }
+
+        .logs-header h3 {
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .log-entry {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: all 0.3s;
+        }
+
+        .log-entry:hover {
+            border-color: var(--accent-purple);
+            box-shadow: 0 5px 20px rgba(147, 51, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .log-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+        }
+
+        .log-status.success {
+            color: var(--success);
+        }
+
+        .log-status.success i {
+            color: var(--success);
+        }
+
+        .log-status.failed {
+            color: var(--error);
+        }
+
+        .log-status.failed i {
+            color: var(--error);
+        }
+
+        .log-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .log-details {
+            display: grid;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .log-detail-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .log-detail-label {
+            color: var(--text-secondary);
+            min-width: 100px;
+        }
+
+        .log-detail-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+
+        .loading-spinner i {
+            font-size: 32px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -803,14 +969,14 @@
         </div>
 
         <div class="dashboard-content">
-            <div class="sidebar">
+            <div class="sidebar" id="sidebar">
                 <div class="sidebar-header">
                     <div class="sidebar-tabs">
                         <button class="tab-btn active" onclick="switchTab('tickets')">
                             <i class="fas fa-ticket-alt"></i> Tickets
                         </button>
-                        <button class="tab-btn" onclick="switchTab('requests')">
-                            <i class="fas fa-inbox"></i> Requests
+                        <button class="tab-btn" onclick="switchTab('logs')">
+                            <i class="fas fa-clipboard-list"></i> Logs
                         </button>
                         <button class="tab-btn" onclick="switchTab('admins')">
                             <i class="fas fa-user-shield"></i> Admins
@@ -827,6 +993,10 @@
             </div>
 
             <div class="chat-area">
+                <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
+                    <i class="fas fa-chevron-right" id="toggleIcon"></i>
+                </button>
+
                 <div class="empty-state" id="emptyState">
                     <i class="fas fa-comments"></i>
                     <p>Select a ticket to view the conversation</p>
@@ -878,6 +1048,11 @@
                         </div>
                     </div>
                 </div>
+
+                <!-- Logs iframe container -->
+                <div id="logsContent">
+                    <iframe id="logsFrame" src="logs.html" style="width: 100%; height: 100%; border: none; background: rgba(0, 0, 0, 0.2);"></iframe>
+                </div>
             </div>
         </div>
     </div>
@@ -893,6 +1068,31 @@
         let currentTicket = null;
         let allTickets = [];
         let messagesSubscription = null;
+        let currentView = 'tickets';
+        let sidebarCollapsed = false;
+        let logsAuthToken = null;
+
+        function generateLogsAuthToken() {
+            if (!currentAdmin) return null;
+            const timestamp = Date.now();
+            const random = Math.random().toString(36).substring(7);
+            return `xorbit-admin-${currentAdmin.id}-${timestamp}-${random}`;
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const toggleIcon = document.getElementById('toggleIcon');
+            
+            sidebarCollapsed = !sidebarCollapsed;
+            
+            if (sidebarCollapsed) {
+                sidebar.classList.add('collapsed');
+                toggleIcon.className = 'fas fa-chevron-right';
+            } else {
+                sidebar.classList.remove('collapsed');
+                toggleIcon.className = 'fas fa-chevron-left';
+            }
+        }
 
         async function handleLogin(event) {
             event.preventDefault();
@@ -906,7 +1106,6 @@
             errorMsg.classList.remove('show');
 
             try {
-                // Query admin user
                 const { data, error } = await supabaseClient
                     .from('admin_login')
                     .select('*')
@@ -918,26 +1117,18 @@
                     throw new Error('Invalid username or password');
                 }
 
-                // In production, you'd verify the password hash using bcrypt
-                // For now, we'll accept any password for the demo
-                // const passwordMatch = await bcrypt.compare(password, data.password_hash);
-                
-                // Store admin info
                 currentAdmin = data;
                 sessionStorage.setItem('currentAdmin', JSON.stringify(data));
 
-                // Update last login
                 await supabaseClient
                     .from('admin_login')
                     .update({ last_login: new Date().toISOString() })
                     .eq('id', data.id);
 
-                // Show dashboard
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('dashboard').style.display = 'flex';
                 document.getElementById('adminName').textContent = data.full_name;
 
-                // Load tickets
                 await loadTickets();
                 loadStats();
 
@@ -949,6 +1140,15 @@
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Login';
             }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('currentAdmin');
+            currentAdmin = null;
+            currentTicket = null;
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+            document.getElementById('loginForm').reset();
         }
 
         function logout() {
@@ -1017,9 +1217,10 @@
 
             currentTicket = ticket;
             
-            // Update UI
+            document.getElementById('logsContent').style.display = 'none';
             document.getElementById('emptyState').style.display = 'none';
             document.getElementById('chatContent').style.display = 'flex';
+            document.getElementById('sidebarToggle').classList.remove('visible');
             
             document.getElementById('chatTicketNumber').textContent = ticket.ticket_number;
             document.getElementById('chatUserName').textContent = ticket.name;
@@ -1028,19 +1229,13 @@
             document.getElementById('statusSelect').value = ticket.status;
             document.getElementById('prioritySelect').value = ticket.priority;
 
-            // Highlight active ticket
             displayTickets(allTickets);
-
-            // Load messages
             await loadMessages(ticketId);
-            
-            // Subscribe to new messages
             subscribeToMessages(ticketId);
         }
 
         async function loadMessages(ticketId) {
             try {
-                // Get conversation ID for this ticket
                 const { data: conversation, error: convError } = await supabaseClient
                     .from('conversations')
                     .select('id')
@@ -1049,7 +1244,6 @@
 
                 if (convError) throw convError;
 
-                // Get messages
                 const { data: messages, error: msgError } = await supabaseClient
                     .from('messages')
                     .select('*')
@@ -1091,17 +1285,14 @@
                 `;
             }).join('');
 
-            // Scroll to bottom
             container.scrollTop = container.scrollHeight;
         }
 
         function subscribeToMessages(ticketId) {
-            // Unsubscribe from previous subscription
             if (messagesSubscription) {
                 messagesSubscription.unsubscribe();
             }
 
-            // Subscribe to new messages for this ticket
             supabaseClient
                 .from('conversations')
                 .select('id')
@@ -1117,7 +1308,6 @@
                                 table: 'messages',
                                 filter: `conversation_id=eq.${conversation.id}`
                             }, (payload) => {
-                                // Add new message to display
                                 loadMessages(ticketId);
                             })
                             .subscribe();
@@ -1135,7 +1325,6 @@
             sendBtn.disabled = true;
 
             try {
-                // Get conversation ID
                 const { data: conversation, error: convError } = await supabaseClient
                     .from('conversations')
                     .select('id')
@@ -1144,7 +1333,6 @@
 
                 if (convError) throw convError;
 
-                // Insert message
                 const { error: msgError } = await supabaseClient
                     .from('messages')
                     .insert([{
@@ -1158,10 +1346,8 @@
 
                 if (msgError) throw msgError;
 
-                // Clear input
                 messageInput.value = '';
                 
-                // Update ticket status if it's open
                 if (currentTicket.status === 'open') {
                     await supabaseClient
                         .from('support_tickets')
@@ -1174,7 +1360,6 @@
                     await loadStats();
                 }
 
-                // Reload messages
                 await loadMessages(currentTicket.id);
 
             } catch (error) {
@@ -1186,7 +1371,6 @@
         }
 
         function handleMessageKeydown(event) {
-            // Send on Ctrl+Enter or Cmd+Enter
             if (event.key === 'Enter' && (event.ctrlKey || event.metaKey)) {
                 event.preventDefault();
                 sendMessage();
@@ -1210,7 +1394,6 @@
                 await loadTickets();
                 await loadStats();
                 
-                // Reload messages to show system message
                 setTimeout(() => {
                     loadMessages(currentTicket.id);
                 }, 500);
@@ -1236,7 +1419,6 @@
                 currentTicket.priority = newPriority;
                 await loadTickets();
                 
-                // Reload messages to show system message
                 setTimeout(() => {
                     loadMessages(currentTicket.id);
                 }, 500);
@@ -1265,7 +1447,6 @@
                     stats.open = data.filter(t => t.status === 'open').length;
                     stats.in_progress = data.filter(t => t.status === 'in_progress').length;
                     stats.waiting = data.filter(t => t.status === 'waiting_response').length;
-                    // Only count active tickets (not resolved or closed)
                     stats.total = data.filter(t => t.status !== 'resolved' && t.status !== 'closed').length;
                 }
 
@@ -1275,7 +1456,6 @@
                 document.getElementById('statTotal').textContent = stats.total;
             } catch (error) {
                 console.error('Error loading stats:', error);
-                // Set to 0 if error
                 document.getElementById('statOpen').textContent = '0';
                 document.getElementById('statInProgress').textContent = '0';
                 document.getElementById('statWaiting').textContent = '0';
@@ -1302,23 +1482,82 @@
             displayTickets(filtered);
         }
 
+        async function loadClientLogs() {
+            // This function is no longer used since we're using iframe
+            // but keeping it for reference
+        }
+
         function switchTab(tab) {
-            // Update active tab button
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
 
+            currentView = tab;
+
             if (tab === 'tickets') {
+                document.getElementById('ticketList').style.display = 'flex';
+                document.getElementById('logsContent').style.display = 'none';
+                document.getElementById('sidebarToggle').classList.remove('visible');
+                
+                if (!sidebarCollapsed) {
+                    document.getElementById('sidebar').classList.remove('collapsed');
+                }
+                
+                if (currentTicket) {
+                    document.getElementById('chatContent').style.display = 'flex';
+                    document.getElementById('emptyState').style.display = 'none';
+                } else {
+                    document.getElementById('chatContent').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'flex';
+                }
                 loadTickets();
-            } else if (tab === 'requests') {
-                // Load account/password requests (to be implemented)
-                alert('Requests tab - coming soon!\n\nThis will show:\n- Account creation requests\n- Password reset requests');
+            } else if (tab === 'logs') {
+                document.getElementById('ticketList').style.display = 'none';
+                document.getElementById('chatContent').style.display = 'none';
+                document.getElementById('emptyState').style.display = 'none';
+                document.getElementById('logsContent').style.display = 'block';
+                
+                // Collapse sidebar and show toggle button
+                document.getElementById('sidebar').classList.add('collapsed');
+                document.getElementById('sidebarToggle').classList.add('visible');
+                document.getElementById('toggleIcon').className = 'fas fa-chevron-right';
+                sidebarCollapsed = true;
+                
+                // Generate and send authentication token to logs iframe
+                logsAuthToken = generateLogsAuthToken();
+                
+                setTimeout(() => {
+                    const logsFrame = document.getElementById('logsFrame');
+                    if (logsFrame && logsFrame.contentWindow) {
+                        logsFrame.contentWindow.postMessage({
+                            type: 'auth-token',
+                            token: logsAuthToken
+                        }, '*');
+                    }
+                }, 100);
             } else if (tab === 'admins') {
-                // Admin management (to be implemented)
                 alert('Admin management - coming soon!\n\nThis will allow:\n- Adding new admin users\n- Managing admin permissions\n- Viewing admin activity logs');
             }
         }
 
-        // Check for existing session on load
+        // Listen for messages from logs iframe
+        window.addEventListener('message', (event) => {
+            if (event.data === 'logs-ready') {
+                console.log('Logs viewer is ready and authenticated');
+            } else if (event.data && event.data.type === 'request-auth') {
+                if (!logsAuthToken) {
+                    logsAuthToken = generateLogsAuthToken();
+                }
+                
+                const logsFrame = document.getElementById('logsFrame');
+                if (logsFrame && logsFrame.contentWindow) {
+                    logsFrame.contentWindow.postMessage({
+                        type: 'auth-token',
+                        token: logsAuthToken
+                    }, '*');
+                }
+            }
+        });
+
         window.addEventListener('load', () => {
             const savedAdmin = sessionStorage.getItem('currentAdmin');
             if (savedAdmin) {
@@ -1331,15 +1570,13 @@
             }
         });
 
-        // Refresh tickets every 30 seconds
         setInterval(() => {
-            if (currentAdmin) {
+            if (currentAdmin && currentView === 'tickets') {
                 loadTickets();
                 loadStats();
             }
         }, 30000);
 
-        // Refresh messages every 15 seconds when viewing a ticket
         setInterval(() => {
             if (currentAdmin && currentTicket) {
                 loadMessages(currentTicket.id);

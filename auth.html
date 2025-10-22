@@ -342,62 +342,95 @@ body {
 }
 
 /* Solaris Browser Alert */
+/* Solaris Survey Notification - Fullscreen */
 .solaris-alert {
     position: fixed;
-    top: 2rem;
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 1000;
-    width: 90%;
-    max-width: 500px;
-    background: rgba(0, 212, 255, 0.1);
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 15, 0.97);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 16px;
-    padding: 1.5rem;
-    box-shadow: 
-        0 20px 40px rgba(0, 0, 0, 0.4),
-        0 0 60px rgba(0, 212, 255, 0.2),
-        inset 0 1px 0 rgba(255, 255, 255, 0.1);
-    animation: alertSlideIn 0.8s ease-out;
+    z-index: 1999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeInOverlay 0.5s ease;
     transition: all 0.3s ease;
 }
 
 .solaris-alert.hidden {
-    transform: translateX(-50%) translateY(-120%);
     opacity: 0;
     pointer-events: none;
+    visibility: hidden;
 }
 
-@keyframes alertSlideIn {
+@keyframes fadeInOverlay {
     from {
-        transform: translateX(-50%) translateY(-120%);
         opacity: 0;
     }
     to {
-        transform: translateX(-50%) translateY(0);
         opacity: 1;
     }
 }
 
+@keyframes alertSlideIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.alert-content-wrapper {
+    background: rgba(15, 15, 35, 0.98);
+    backdrop-filter: blur(25px);
+    border: 2px solid rgba(147, 51, 234, 0.5);
+    border-radius: 24px;
+    padding: 3rem;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 
+        0 25px 50px rgba(0, 0, 0, 0.5),
+        0 0 100px rgba(147, 51, 234, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    animation: alertSlideIn 0.5s ease;
+    text-align: center;
+}
+
 .alert-header {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.75rem;
-    margin-bottom: 1rem;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
 .alert-icon {
-    width: 24px;
-    height: 24px;
+    width: 80px;
+    height: 80px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #00d4ff, #0ea5e9);
+    background: linear-gradient(135deg, #9333ea, #00d4ff);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
-    font-weight: bold;
-    animation: iconPulse 2s ease-in-out infinite;
+    font-size: 40px;
+    animation: rotateGlow 3s ease-in-out infinite;
+    box-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
+}
+
+@keyframes rotateGlow {
+    0%, 100% { 
+        box-shadow: 0 0 40px rgba(147, 51, 234, 0.5);
+        transform: rotate(0deg) scale(1);
+    }
+    50% { 
+        box-shadow: 0 0 60px rgba(0, 212, 255, 0.7);
+        transform: rotate(180deg) scale(1.05);
+    }
 }
 
 @keyframes iconPulse {
@@ -412,21 +445,26 @@ body {
 }
 
 .alert-title {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #00d4ff;
-    text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    background: linear-gradient(135deg, #9333ea, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: none;
 }
 
 .alert-content {
-    color: #e2e8f0;
-    font-size: 0.9rem;
-    line-height: 1.5;
-    margin-bottom: 1rem;
+    color: #cbd5e1;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    text-align: center;
 }
 
 .alert-content strong {
-    color: #38bdf8;
+    color: #fff;
     font-weight: 600;
 }
 
@@ -452,20 +490,33 @@ body {
 
 .alert-actions {
     display: flex;
-    gap: 0.75rem;
-    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
-.alert-link {
-    color: #00d4ff;
+.alert-link, .survey-btn {
+    color: #fff;
     text-decoration: none;
-    font-size: 0.9rem;
-    font-weight: 500;
-    padding: 0.5rem 1rem;
-    border: 1px solid rgba(0, 212, 255, 0.3);
-    border-radius: 8px;
-    background: rgba(0, 212, 255, 0.05);
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
     transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.survey-btn {
+    background: linear-gradient(135deg, #9333ea, #7c3aed);
+    box-shadow: 0 4px 20px rgba(147, 51, 234, 0.4);
+}
+
+.survey-btn:hover {
+    background: linear-gradient(135deg, #7c3aed, #6d28d9);
+    box-shadow: 0 6px 30px rgba(147, 51, 234, 0.6);
+    transform: translateY(-2px);
 }
 
 .alert-link:hover {
@@ -476,19 +527,22 @@ body {
 }
 
 .alert-dismiss {
-    background: none;
-    border: none;
-    color: #64748b;
-    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #cbd5e1;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 6px;
+    padding: 1rem 2rem;
+    border-radius: 12px;
     transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
 }
 
 .alert-dismiss:hover {
-    color: #94a3b8;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    transform: translateY(-2px);
 }
 
 /* Main container */
@@ -1537,20 +1591,21 @@ body {
 
 <!-- Solaris Browser Alert -->
 <div class="solaris-alert" id="solarisAlert">
-    <div class="alert-header">
-        <div class="alert-icon">🚀</div>
-        <div class="alert-title">Introducing Solaris Browser</div>
-    </div>
-    <div class="alert-content">
-        <strong>X-ORBIT</strong> is transitioning to our own custom-designed browser experience called <strong>Solaris</strong>. This experimental browser will provide enhanced security and performance features tailored specifically for X-ORBIT users.
-        <span class="beta-badge">Beta</span>
-    </div>
-    <div class="alert-content">
-        Solaris Browser is currently in experimental phase and will only be available at <strong>beta.xorbit.org</strong>. The browser is designed to optimize your X-ORBIT experience with advanced features and improved security protocols.
-    </div>
-    <div class="alert-actions">
-        <a href="#" class="alert-link" onclick="window.open('https://beta.xorbit.org', '_blank')">Visit Beta Portal</a>
-        <button class="alert-dismiss" onclick="dismissSolarisAlert()">Dismiss</button>
+    <div class="alert-content-wrapper">
+        <div class="alert-header">
+            <div class="alert-icon"><i class="fas fa-poll"></i></div>
+            <div class="alert-title">Help Shape X-ORBIT</div>
+        </div>
+        <div class="alert-content">
+            We're constantly improving <strong>X-ORBIT</strong> and we need your input! Take a few minutes to share your thoughts and help us build the best experience possible for our community.
+        </div>
+        <div class="alert-content">
+            Your feedback is invaluable in guiding our development priorities and ensuring we're meeting your needs.
+        </div>
+        <div class="alert-actions">
+            <button class="survey-btn" onclick="openSurvey()">Fill Out Survey</button>
+            <button class="alert-dismiss" onclick="dismissSolarisAlert()">Maybe Later</button>
+        </div>
     </div>
 </div>
 
@@ -1774,33 +1829,41 @@ function openSupportPortal() {
     console.log('🌐 Opening support portal in new tab');
     window.open('https://xorbit.org/support', '_blank');
 }
-// Solaris Alert functions
+// Survey and Solaris Alert functions
+function openSurvey() {
+    console.log('📊 Opening survey');
+    window.open('https://forms.gle/H56VPQmS5omvzbRq7', '_blank');
+    dismissSolarisAlert();
+}
+
 function dismissSolarisAlert() {
-    console.log('👋 Dismissing Solaris alert');
+    console.log('👋 Dismissing survey notification');
     const alert = document.getElementById('solarisAlert');
     if (alert) {
         alert.classList.add('hidden');
         try {
-            localStorage.setItem('xorbit_solaris_alert_dismissed', 'true');
-            console.log('💾 Alert dismissal saved to localStorage');
+            localStorage.setItem('xorbit_survey_2025_shown', 'true');
+            console.log('💾 Survey notification dismissal saved to localStorage');
         } catch (error) {
-            console.warn('⚠️ Could not save alert dismissal state:', error);
+            console.warn('⚠️ Could not save survey notification dismissal state:', error);
         }
     }
 }
 
 function checkSolarisAlertState() {
     try {
-        const dismissed = localStorage.getItem('xorbit_solaris_alert_dismissed');
+        const dismissed = localStorage.getItem('xorbit_survey_2025_shown');
         if (dismissed === 'true') {
-            console.log('📂 Alert previously dismissed, hiding automatically');
+            console.log('📂 Survey notification previously shown, hiding automatically');
             const alert = document.getElementById('solarisAlert');
             if (alert) {
                 alert.classList.add('hidden');
             }
+        } else {
+            console.log('🆕 First time showing survey notification');
         }
     } catch (error) {
-        console.warn('⚠️ Could not check alert dismissal state:', error);
+        console.warn('⚠️ Could not check survey notification state:', error);
     }
 }
 

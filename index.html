@@ -1194,7 +1194,7 @@
     <i class="fas fa-headset"></i>
     <div class="tooltip">Support</div>
   </div>
-  <div class="dock-item" data-app="Changelog" data-src="changelogs.html" data-icon="fas fa-list-alt">
+  <div class="dock-item" data-app="Changelog" data-src="changelog.html" data-icon="fas fa-list-alt">
     <i class="fas fa-list-alt"></i>
     <div class="tooltip">Changes</div>
   </div>
@@ -1262,6 +1262,10 @@ let windowCounter = 0;
 let activeWindows = new Map();
 let isAuthenticated = false;
 let zIndexCounter = 100;
+let currentUser = {
+  username: '',
+  email: ''
+};
 let userLocation = {
   city: 'Casper',
   state: 'Wyoming',
@@ -1345,6 +1349,69 @@ let tutorialSteps = [
     highlightElement: null
   }
 ];
+
+// Load user data from session storage
+function loadUserData() {
+  try {
+    const authData = sessionStorage.getItem('xorbit_auth_session') || 
+                     localStorage.getItem('xorbit_auth_session');
+    if (authData) {
+      const authSession = JSON.parse(authData);
+      currentUser.username = authSession.username || '';
+      currentUser.email = authSession.email || '';
+      console.log('✅ User data loaded:', currentUser.username);
+      updateUserDisplay();
+    }
+  } catch (e) {
+    console.warn('Could not load user data:', e);
+  }
+}
+
+// Update the user display in the menu bar
+function updateUserDisplay() {
+  const menuRight = document.querySelector('.menu-right');
+  
+  if (!menuRight) return;
+  
+  // Check if user display already exists
+  let userDisplay = document.getElementById('userDisplay');
+  
+  if (!userDisplay && currentUser.username) {
+    // Create user display element
+    userDisplay = document.createElement('div');
+    userDisplay.id = 'userDisplay';
+    userDisplay.className = 'menu-item';
+    userDisplay.style.cssText = `
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      background: rgba(120, 80, 255, 0.1);
+      border: 1px solid rgba(120, 80, 255, 0.2);
+      border-radius: 8px;
+      cursor: default;
+    `;
+    
+    userDisplay.innerHTML = `
+      <i class="fas fa-user" style="color: #7d5cff;"></i>
+      <span style="font-weight: 500;">${currentUser.username}</span>
+    `;
+    
+    // Insert before the time menu
+    const timeMenu = document.getElementById('timeMenu');
+    if (timeMenu) {
+      menuRight.insertBefore(userDisplay, timeMenu);
+    } else {
+      menuRight.appendChild(userDisplay);
+    }
+  } else if (userDisplay && currentUser.username) {
+    // Update existing display
+    const usernameSpan = userDisplay.querySelector('span');
+    if (usernameSpan) {
+      usernameSpan.textContent = currentUser.username;
+    }
+  }
+}
 
 // Load settings from localStorage
 function loadSettings() {
@@ -1434,16 +1501,7 @@ function applySettings() {
     document.body.classList.remove('no-animations');
   }
 }
-// Listen for session timeout messages from auth.html iframe
-window.addEventListener('message', function(event) {
-    if (event.data === 'session-timeout') {
-        console.log('🚫 Received session timeout message from auth.html');
-        window.location.href = 'timeout.html';
-    } else if (event.data === 'auth-success') {
-        console.log('✅ Received auth success message');
-        // Your existing auth success handling
-    }
-});
+
 // Setup dock auto-hide
 function setupDockAutohide() {
   const dock = document.querySelector('.dock');
@@ -1469,14 +1527,30 @@ function setupDockAutohide() {
 }
 
 // Listen for messages
-window.addEventListener('message', function(event) {
-  if (event.data === 'auth-success') {
+window.addEventListener('message', async function(event) {
+  if (event.data === 'session-timeout') {
+    console.log('🚫 Received session timeout message from auth.html');
+    stopBanChecking(); // Stop checking on timeout
+    window.location.href = 'timeout.html';
+  } else if (event.data === 'auth-success') {
+    console.log('✅ Received auth success message');
     isAuthenticated = true;
+    
+    // Check ban status before proceeding
+    const isBanned = await checkAccountBanStatus();
+    if (isBanned) {
+      return;
+    }
+    
     const welcomeOverlay = document.getElementById('welcomeOverlay');
     if (welcomeOverlay) {
       welcomeOverlay.style.display = 'none';
     }
+    loadUserData();
     initDesktop();
+    
+    // Start periodic ban checking
+    startBanChecking();
   } else if (event.data && event.data.type === 'settings-updated') {
     settings = { ...settings, ...event.data.settings };
     applySettings();
@@ -1486,6 +1560,7 @@ window.addEventListener('message', function(event) {
 // Initialize desktop
 function initDesktop() {
   loadSettings();
+  loadUserData();
   updateTime();
   setInterval(updateTime, 1000);
   
@@ -1819,6 +1894,14 @@ function openWindow(title, src, icon) {
   windowEl.style.width = '600px';
   windowEl.style.height = '450px';
   
+  // Get username and update window title if it's the Browser
+  let displayTitle = title;
+  if (title === 'Browser' && currentUser.username) {
+    displayTitle = `Browser - ${currentUser.username}`;
+    // Also append username to iframe src as URL parameter
+    src = `${src}?username=${encodeURIComponent(currentUser.username)}`;
+  }
+  
   windowEl.innerHTML = 
     '<div class="window-titlebar">' +
       '<div class="window-controls">' +
@@ -1828,7 +1911,7 @@ function openWindow(title, src, icon) {
       '</div>' +
       '<div class="window-title">' +
         '<i class="' + icon + '" style="margin-right: 8px;"></i>' +
-        title +
+        displayTitle +
       '</div>' +
     '</div>' +
     '<div class="window-content">' +
@@ -1964,8 +2047,6 @@ document.addEventListener('click', function(e) {
     }
   }
 });
-
-// Open settings window with embedded content
 function openSettingsWindow() {
   if (!isAuthenticated) return;
   
@@ -2990,6 +3071,9 @@ function restartDesktop() {
 
 function logout() {
   if (confirm('Are you sure you want to logout? All unsaved work will be lost.')) {
+    // Stop ban checking
+    stopBanChecking();
+    
     // Clear all windows
     activeWindows.forEach((windowId) => {
       const windowEl = document.getElementById(windowId);
@@ -3142,6 +3226,193 @@ window.addEventListener('message', function(event) {
         }
     }
 });
+// Supabase initialization for ban checking
+let supabaseClient = null;
+
+// Initialize Supabase client
+function initSupabaseClient() {
+  try {
+    if (window.supabase && window.supabase.createClient) {
+      const { createClient } = window.supabase;
+      const supabaseUrl = 'https://rujvmtvozorylfzsqppc.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+      supabaseClient = createClient(supabaseUrl, supabaseKey);
+      console.log('Supabase client initialized');
+      return true;
+    } else {
+      console.error('Supabase library not loaded');
+      return false;
+    }
+  } catch (e) {
+    console.error('Error initializing Supabase:', e);
+    return false;
+  }
+}
+
+// Ban checking variables
+let banCheckInterval = null;
+
+// Check if account is banned or doesn't exist
+async function checkAccountBanStatus() {
+  try {
+    console.log('=== BAN CHECK START ===');
+    
+    // Initialize Supabase if not already done
+    if (!supabaseClient) {
+      console.log('Supabase client not initialized, initializing now...');
+      const initialized = initSupabaseClient();
+      if (!initialized) {
+        console.error('Cannot check ban status: Supabase not initialized');
+        return false;
+      }
+    }
+    
+    const authData = sessionStorage.getItem('xorbit_auth_session') || 
+                     localStorage.getItem('xorbit_auth_session');
+    
+    console.log('Auth data found:', !!authData);
+    
+    if (!authData) {
+      console.log('No auth data found for ban check');
+      return false;
+    }
+    
+    const authSession = JSON.parse(authData);
+    const email = authSession.email; // Using email instead of username
+    
+    console.log('Checking email:', email);
+    
+    if (!email) {
+      console.log('No email in session for ban check');
+      return false;
+    }
+    
+    console.log('Querying Supabase for email:', email);
+    
+    // Query Supabase to check if account exists and is banned
+    const { data, error } = await supabaseClient
+      .from('clients')
+      .select('blocked, ban_reason, name')
+      .eq('email', email)
+      .single();
+    
+    console.log('Supabase response - Data:', data);
+    console.log('Supabase response - Error:', error);
+    
+    // Handle errors - account doesn't exist or other database issues
+    if (error) {
+      console.error('Error checking ban status:', error);
+      console.log('Error code:', error.code);
+      console.log('Error message:', error.message);
+      
+      // If the error is because no rows were found, the account doesn't exist
+      if (error.code === 'PGRST116' || error.message.includes('No rows found') || error.message.includes('multiple')) {
+        console.log('Account does not exist in database - logging out');
+        
+        // Stop the interval check
+        if (banCheckInterval) {
+          clearInterval(banCheckInterval);
+        }
+        
+        // Store a generic message for account not found
+        sessionStorage.setItem('ban_reason', 'Your account could not be found in our system. Please contact support if you believe this is an error.');
+        sessionStorage.setItem('banned_username', email);
+        
+        // Redirect to blocked page
+        console.log('Redirecting to blocked.html (account not found)');
+        window.location.href = 'blocked.html';
+        return true;
+      }
+      
+      // For other errors, return false and continue checking
+      return false;
+    }
+    
+    // If no data returned, account doesn't exist
+    if (!data) {
+      console.log('No data returned - account does not exist in database - logging out');
+      
+      // Stop the interval check
+      if (banCheckInterval) {
+        clearInterval(banCheckInterval);
+      }
+      
+      // Store a generic message for account not found
+      sessionStorage.setItem('ban_reason', 'Your account could not be found in our system. Please contact support if you believe this is an error.');
+      sessionStorage.setItem('banned_username', email);
+      
+      // Redirect to blocked page
+      console.log('Redirecting to blocked.html (no data)');
+      window.location.href = 'blocked.html';
+      return true;
+    }
+    
+    console.log('Data.blocked value:', data.blocked);
+    console.log('Data.blocked type:', typeof data.blocked);
+    console.log('Checking if blocked === "true":', data.blocked === 'true');
+    console.log('Checking if blocked === true:', data.blocked === true);
+    
+    // Check if blocked is 'true' (string comparison) OR boolean true
+    if (data.blocked === 'true' || data.blocked === true) {
+      console.log('🚫 ACCOUNT IS BANNED! Ban reason:', data.ban_reason || 'No reason provided');
+      
+      // Stop the interval check
+      if (banCheckInterval) {
+        clearInterval(banCheckInterval);
+      }
+      
+      // Store ban reason and name in session storage
+      if (data.ban_reason) {
+        sessionStorage.setItem('ban_reason', data.ban_reason);
+        console.log('Stored ban reason in session');
+      }
+      if (data.name) {
+        sessionStorage.setItem('banned_username', data.name);
+        console.log('Stored username in session:', data.name);
+      }
+      
+      // Redirect to blocked page
+      console.log('🔴 Redirecting to blocked.html (account banned)');
+      window.location.href = 'blocked.html';
+      return true;
+    }
+    
+    console.log('✅ Account status: Active (not banned)');
+    console.log('=== BAN CHECK END ===');
+    return false;
+  } catch (e) {
+    console.error('💥 Error in checkAccountBanStatus:', e);
+    console.error('Error stack:', e.stack);
+    return false;
+  }
+}
+
+// Start periodic ban checking
+function startBanChecking() {
+  // Clear any existing interval
+  if (banCheckInterval) {
+    clearInterval(banCheckInterval);
+  }
+  
+  // Check immediately
+  checkAccountBanStatus();
+  
+  // Then check every 15 seconds
+  banCheckInterval = setInterval(() => {
+    checkAccountBanStatus();
+  }, 15000); // 15 seconds
+  
+  console.log('Ban checking started (every 15 seconds)');
+}
+
+// Stop ban checking (useful when logging out)
+function stopBanChecking() {
+  if (banCheckInterval) {
+    clearInterval(banCheckInterval);
+    banCheckInterval = null;
+    console.log('Ban checking stopped');
+  }
+}
 </script>
 </body>
 </html>

@@ -7,6 +7,8 @@
   <title>X-ORBIT Desktop</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <!-- Theme stylesheet will be loaded dynamically -->
+  <link id="theme-stylesheet" rel="stylesheet" href="theme-dark.css"/>
   <script src="https://unpkg.com/@supabase/supabase-js"></script>
   <style>
     * { 
@@ -27,6 +29,8 @@
       position: relative;
       cursor: default;
       user-select: none;
+      margin: 0;
+      padding: 0;
     }
 
     body::before {
@@ -42,6 +46,23 @@
         radial-gradient(circle at 40% 80%, rgba(180, 40, 255, 0.1) 0%, transparent 50%);
       pointer-events: none;
       z-index: 0;
+    }
+
+    body::after {
+      content: '\f57d'; /* Font Awesome globe icon */
+      font-family: 'Font Awesome 6 Free';
+      font-weight: 900;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 25rem;
+      color: rgba(120, 80, 255, 0.08);
+      pointer-events: none;
+      z-index: 0;
+      text-shadow: 
+        0 0 100px rgba(120, 80, 255, 0.3),
+        0 0 200px rgba(120, 80, 255, 0.2);
     }
 
     .menu-bar {
@@ -158,6 +179,8 @@
       position: absolute;
       min-width: 400px;
       min-height: 300px;
+      max-width: calc(100vw - 40px) !important;
+      max-height: calc(100vh - 112px) !important;
       background: rgba(20, 15, 40, 0.4);
       backdrop-filter: blur(40px) saturate(1.8) brightness(1.1);
       -webkit-backdrop-filter: blur(40px) saturate(1.8) brightness(1.1);
@@ -172,6 +195,17 @@
       z-index: 100;
       resize: both;
       overflow: hidden;
+      opacity: 0;
+      transform: translateY(20px) scale(0.95);
+      transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      left: clamp(20px, var(--window-x, 100px), calc(100vw - var(--window-width, 600px) - 20px)) !important;
+      top: clamp(52px, var(--window-y, 100px), calc(100vh - var(--window-height, 450px) - 100px)) !important;
+    }
+
+    .window.window-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
     }
 
     .window.active {
@@ -180,6 +214,26 @@
         0 0 80px rgba(120, 80, 255, 0.3),
         0 25px 50px rgba(0, 0, 0, 0.5),
         0 1px 0 rgba(255, 255, 255, 0.2) inset;
+    }
+
+    .window.fullscreen {
+      position: fixed !important;
+      top: 32px !important;
+      left: 0 !important;
+      min-width: 100vw;
+      min-height: calc(100vh - 32px);
+      resize: none;
+      border-radius: 0 !important;
+      border-top: none !important;
+      margin-top: 0 !important;
+    }
+
+    .window.fullscreen .window-titlebar {
+      border-radius: 0 !important;
+    }
+
+    .window.fullscreen .window-content {
+      border-radius: 0 !important;
     }
 
     .window-titlebar {
@@ -280,7 +334,6 @@
       position: relative;
       background: rgba(120, 80, 255, 0.1);
       border: 1px solid rgba(120, 80, 255, 0.2);
-      overflow: hidden;
     }
 
     .dock-item:hover {
@@ -328,12 +381,237 @@
       pointer-events: none;
       transition: all 0.3s ease;
       border: 1px solid rgba(120, 80, 255, 0.2);
-      z-index: 1001;
+      z-index: 10002;
+      margin-bottom: 8px;
     }
 
     .dock-item:hover .tooltip {
       opacity: 1;
-      transform: translateX(-50%) translateY(-16px);
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* Startup Screen */
+    #startupScreen {
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(ellipse at center, #1a0033 0%, #0d001a 50%, #000014 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 1;
+      transition: opacity 0.8s ease;
+    }
+
+    #startupScreen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .startup-content {
+      text-align: center;
+      animation: startupFadeIn 1s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .startup-icon {
+      font-size: 5rem;
+      color: #7d5cff;
+      margin-bottom: 24px;
+      display: block;
+      animation: startupPulse 2s ease-in-out infinite, startupRotate 20s linear infinite;
+      text-shadow: 
+        0 0 30px rgba(120, 80, 255, 0.6),
+        0 0 60px rgba(120, 80, 255, 0.4);
+    }
+
+    .startup-text {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: #e8f0ff;
+      margin-bottom: 8px;
+      letter-spacing: 4px;
+      text-shadow: 0 0 20px rgba(120, 80, 255, 0.5);
+    }
+
+    .startup-version {
+      font-size: 1rem;
+      color: #a8b4d9;
+      margin-bottom: 40px;
+      letter-spacing: 2px;
+    }
+
+    .startup-progress-container {
+      width: 300px;
+      height: 4px;
+      background: rgba(120, 80, 255, 0.2);
+      border-radius: 2px;
+      margin: 0 auto 16px;
+      overflow: hidden;
+      box-shadow: 0 0 10px rgba(120, 80, 255, 0.3) inset;
+    }
+
+    .startup-progress-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #7d5cff 0%, #3c82ff 100%);
+      border-radius: 2px;
+      transition: width 0.3s ease;
+      box-shadow: 
+        0 0 20px rgba(120, 80, 255, 0.8),
+        0 0 40px rgba(120, 80, 255, 0.4);
+      animation: progressGlow 1.5s ease-in-out infinite;
+    }
+
+    .startup-status {
+      font-size: 0.9rem;
+      color: #a8b4d9;
+      margin-top: 16px;
+      animation: statusBlink 1.5s ease-in-out infinite;
+    }
+
+    .startup-continue-btn {
+      width: 70px;
+      height: 70px;
+      border-radius: 50%;
+      background: rgba(120, 80, 255, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border: 3px solid rgba(120, 80, 255, 0.4);
+      color: #e8f0ff;
+      font-size: 1.8rem;
+      cursor: pointer;
+      margin-top: 32px;
+      align-self: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease;
+      box-shadow: 
+        0 0 30px rgba(120, 80, 255, 0.3),
+        0 8px 20px rgba(0, 0, 0, 0.2);
+      animation: continueButtonPulse 2s ease-in-out infinite;
+    }
+
+    .startup-continue-btn:hover {
+      transform: scale(1.15);
+      background: rgba(120, 80, 255, 0.2);
+      border-color: rgba(120, 80, 255, 0.7);
+      box-shadow: 
+        0 0 50px rgba(120, 80, 255, 0.6),
+        0 12px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .startup-continue-btn:active {
+      transform: scale(1.05);
+    }
+
+    @keyframes continueButtonPulse {
+      0%, 100% {
+        box-shadow: 
+          0 0 30px rgba(120, 80, 255, 0.3),
+          0 8px 20px rgba(0, 0, 0, 0.2);
+        border-color: rgba(120, 80, 255, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 0 50px rgba(120, 80, 255, 0.5),
+          0 12px 25px rgba(0, 0, 0, 0.3);
+        border-color: rgba(120, 80, 255, 0.7);
+      }
+    }
+
+    .fullscreen-prompt {
+      margin-top: 32px;
+      padding: 14px 28px;
+      background: linear-gradient(135deg, rgba(120, 80, 255, 0.3) 0%, rgba(60, 130, 255, 0.3) 100%);
+      border: 2px solid rgba(120, 80, 255, 0.5);
+      border-radius: 12px;
+      color: #e8f0ff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.3s ease;
+      animation: pulseGlow 2s ease-in-out infinite;
+    }
+
+    .fullscreen-prompt:hover {
+      background: linear-gradient(135deg, rgba(120, 80, 255, 0.5) 0%, rgba(60, 130, 255, 0.5) 100%);
+      border-color: rgba(120, 80, 255, 0.8);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(120, 80, 255, 0.4);
+    }
+
+    .fullscreen-prompt i {
+      font-size: 1.1rem;
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% {
+        box-shadow: 0 0 20px rgba(120, 80, 255, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 30px rgba(120, 80, 255, 0.6);
+      }
+    }
+
+    @keyframes startupFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes startupPulse {
+      0%, 100% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.05);
+      }
+    }
+
+    @keyframes startupRotate {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @keyframes progressGlow {
+      0%, 100% {
+        box-shadow: 
+          0 0 20px rgba(120, 80, 255, 0.8),
+          0 0 40px rgba(120, 80, 255, 0.4);
+      }
+      50% {
+        box-shadow: 
+          0 0 30px rgba(120, 80, 255, 1),
+          0 0 60px rgba(120, 80, 255, 0.6);
+      }
+    }
+
+    @keyframes statusBlink {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
     }
 
     #welcomeOverlay {
@@ -349,6 +627,12 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    #welcomeOverlay.fade-in {
+      opacity: 1;
     }
 
     @media (max-width: 768px) {
@@ -380,22 +664,36 @@
     @keyframes windowOpen {
       0% {
         opacity: 0;
-        transform: scale(0.8);
+        transform: translateY(20px) scale(0.95);
       }
       100% {
         opacity: 1;
-        transform: scale(1);
+        transform: translateY(0) scale(1);
       }
     }
 
     .window-opening {
-      animation: windowOpen 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      animation: windowOpen 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
 
     /* Light mode styles */
     body.light-mode {
       background: linear-gradient(135deg, #f8faff 0%, #e8f0ff 100%);
       color: #1a1a2e;
+    }
+
+    body.light-mode::after {
+      color: rgba(120, 80, 255, 0.12);
+      text-shadow: 
+        0 0 100px rgba(120, 80, 255, 0.2),
+        0 0 200px rgba(120, 80, 255, 0.1);
+    }
+
+    body.light-mode::before {
+      background: 
+        radial-gradient(circle at 20% 50%, rgba(120, 80, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 80% 20%, rgba(60, 130, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 40% 80%, rgba(180, 40, 255, 0.06) 0%, transparent 50%);
     }
 
     body.light-mode .menu-bar {
@@ -461,7 +759,48 @@
 
     /* Dock auto-hide styles */
     .dock.dock-autohide {
-      transition: all 0.3s ease;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    /* Hide dock based on position */
+    .dock.dock-autohide[style*="bottom"] {
+      transform: translateX(-50%) translateY(calc(100% + 20px));
+    }
+
+    .dock.dock-autohide[style*="top"] {
+      transform: translateX(-50%) translateY(calc(-100% - 20px));
+    }
+
+    .dock.dock-autohide[style*="left"][style*="column"] {
+      transform: translateY(-50%) translateX(calc(-100% - 20px));
+    }
+
+    .dock.dock-autohide[style*="right"][style*="column"] {
+      transform: translateY(-50%) translateX(calc(100% + 20px));
+    }
+
+    /* Show dock when visible */
+    .dock.dock-autohide.dock-visible {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .dock.dock-autohide.dock-visible[style*="bottom"] {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dock.dock-autohide.dock-visible[style*="top"] {
+      transform: translateX(-50%) translateY(0);
+    }
+
+    .dock.dock-autohide.dock-visible[style*="left"][style*="column"] {
+      transform: translateY(-50%) translateX(0);
+    }
+
+    .dock.dock-autohide.dock-visible[style*="right"][style*="column"] {
+      transform: translateY(-50%) translateX(0);
     }
 
     /* X-ORBIT Menu Dropdown */
@@ -925,6 +1264,41 @@
       box-shadow: 0 4px 15px rgba(120, 80, 255, 0.4);
     }
 
+    .tutorial-config-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: rgba(120, 80, 255, 0.15);
+      border: 2px solid rgba(120, 80, 255, 0.3);
+      border-radius: 12px;
+      color: #e8f0ff;
+      font-size: 0.95rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      width: 100%;
+      justify-content: center;
+    }
+
+    .tutorial-config-btn:hover {
+      background: rgba(120, 80, 255, 0.25);
+      border-color: rgba(120, 80, 255, 0.5);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(120, 80, 255, 0.3);
+    }
+
+    .tutorial-config-btn.selected {
+      background: rgba(120, 80, 255, 0.4);
+      border-color: rgba(120, 80, 255, 0.7);
+      box-shadow: 0 0 20px rgba(120, 80, 255, 0.4);
+    }
+
+    .tutorial-config-btn i {
+      font-size: 1.2rem;
+      color: #7d5cff;
+    }
+
     /* Tutorial highlighting effects */
     .tutorial-highlight-element {
       position: relative;
@@ -1044,6 +1418,22 @@
 </head>
 <body>
 
+<!-- Startup Screen -->
+<div id="startupScreen">
+  <div class="startup-content">
+    <i class="fas fa-globe startup-icon"></i>
+    <div class="startup-text">X-ORBIT</div>
+    <div class="startup-version">4.5.0 Astra</div>
+    <div class="startup-progress-container">
+      <div class="startup-progress-bar" id="startupProgress"></div>
+    </div>
+    <div class="startup-status" id="startupStatus">Initializing system...</div>
+    <button class="startup-continue-btn" id="startupContinueBtn" style="display: none;">
+      <i class="fas fa-arrow-right"></i>
+    </button>
+  </div>
+</div>
+
 <div id="welcomeOverlay">
   <iframe id="authFrame" src="auth.html" style="width: 100%; height: 100%; border: none;"></iframe>
 </div>
@@ -1053,6 +1443,11 @@
     <div class="menu-item xorbit-title" style="font-weight: 600;" id="xorbitMenu">
       X-ORBIT
       <div class="xorbit-menu" id="xorbitDropdown">
+        <div class="xorbit-menu-item" onclick="showAccountInfo()">
+          <i class="fas fa-user-circle"></i>
+          <span>Account Information</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
         <div class="xorbit-menu-item" onclick="showAboutDialog()">
           <i class="fas fa-info-circle"></i>
           <span>About X-ORBIT</span>
@@ -1096,6 +1491,78 @@
     <div class="menu-item">Help</div>
   </div>
   <div class="menu-right">
+    <div class="menu-item" id="userNameplate" style="cursor: pointer; position: relative;">
+      <i class="fas fa-user-circle" style="margin-right: 6px;"></i>
+      <span id="userNameDisplay">User</span>
+      <div class="xorbit-menu" id="userDropdown">
+        <div class="xorbit-menu-item" onclick="showAccountInfo()">
+          <i class="fas fa-id-card"></i>
+          <span>Account Information</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
+        <div class="xorbit-menu-item" onclick="openSettingsWindow()">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="logout()">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </div>
+      </div>
+    </div>
+    <div class="menu-item" id="wifiMenu" style="cursor: pointer; position: relative;">
+      <i class="fas fa-wifi" id="wifiIcon"></i>
+      <div class="xorbit-menu" id="wifiDropdown" style="min-width: 280px; left: auto; right: 0;">
+        <div style="padding: 16px; border-bottom: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; font-size: 0.95rem; margin-bottom: 12px;">
+            <i class="fas fa-network-wired" style="margin-right: 8px;"></i>
+            Network Status
+          </div>
+          <div style="color: #e8f0ff; font-size: 0.85rem; margin-bottom: 8px;">
+            <span style="color: #a8b4d9;">Connection:</span>
+            <span id="networkStatus" style="margin-left: 8px; color: #28ca42;">
+              <i class="fas fa-check-circle"></i> Online
+            </span>
+          </div>
+          <div style="color: #e8f0ff; font-size: 0.85rem;">
+            <span style="color: #a8b4d9;">Type:</span>
+            <span id="networkType" style="margin-left: 8px;">Unknown</span>
+          </div>
+        </div>
+        
+        <div style="padding: 16px; border-bottom: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; font-size: 0.95rem; margin-bottom: 12px;">
+            <i class="fas fa-server" style="margin-right: 8px;"></i>
+            X-ORBIT Server Status
+          </div>
+          <div style="display: grid; gap: 8px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #a8b4d9; font-size: 0.85rem;">Ping Latency:</span>
+              <span id="pingLatency" style="color: #e8f0ff; font-weight: 600; font-size: 0.9rem;">
+                <i class="fas fa-spinner fa-spin"></i> Testing...
+              </span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #a8b4d9; font-size: 0.85rem;">Jitter:</span>
+              <span id="jitterValue" style="color: #e8f0ff; font-weight: 600; font-size: 0.9rem;">
+                <i class="fas fa-spinner fa-spin"></i> Testing...
+              </span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #a8b4d9; font-size: 0.85rem;">Server Location:</span>
+              <span style="color: #e8f0ff; font-size: 0.85rem;">Cloudflare</span>
+            </div>
+          </div>
+        </div>
+        
+        <div style="padding: 12px 16px;">
+          <button class="wallpaper-button" onclick="testNetworkSpeed()" style="width: 100%; font-size: 0.85rem; padding: 8px;">
+            <i class="fas fa-sync-alt"></i>
+            Refresh Connection Test
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="menu-item time-item" id="timeMenu">
       <span id="currentTime"></span>
       <div class="time-menu" id="timeDropdown">
@@ -1139,8 +1606,37 @@
         </div>
       </div>
     </div>
-    <div class="menu-item"><i class="fas fa-wifi"></i></div>
-    <div class="menu-item"><i class="fas fa-battery-three-quarters"></i></div>
+    <div class="menu-item" id="utilitiesMenu" style="cursor: pointer; position: relative;">
+      <i class="fas fa-ellipsis-h"></i>
+      <div class="xorbit-menu" id="utilitiesDropdown" style="left: auto; right: 0;">
+        <div class="xorbit-menu-item" onclick="toggleFullscreen()">
+          <i class="fas fa-expand" id="fullscreenIcon"></i>
+          <span id="fullscreenText">Enter Fullscreen</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="refreshDesktop()">
+          <i class="fas fa-sync"></i>
+          <span>Refresh Desktop</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
+        <div class="xorbit-menu-item" onclick="openTaskManager()">
+          <i class="fas fa-tasks"></i>
+          <span>Task Manager</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="openSettingsWindow()">
+          <i class="fas fa-cog"></i>
+          <span>Settings</span>
+        </div>
+        <div class="xorbit-menu-divider"></div>
+        <div class="xorbit-menu-item" onclick="restartDesktop()">
+          <i class="fas fa-redo"></i>
+          <span>Restart Desktop</span>
+        </div>
+        <div class="xorbit-menu-item" onclick="logout()">
+          <i class="fas fa-power-off"></i>
+          <span>Shut Down</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1294,57 +1790,81 @@ let settings = {
   dockMagnification: true,
   dockTooltips: true,
   windowSnapping: true,
-  windowShadows: true
+  windowShadows: true,
+  launchFullscreen: false,
+  customWallpaper: null
 };
 
 // Tutorial system
 let currentTutorialStep = 0;
 let tutorialSteps = [
   {
-    icon: '🚀',
+    icon: 'fas fa-rocket',
     title: 'Welcome to X-ORBIT!',
-    description: 'Welcome to your new desktop environment! Let\'s take a quick tour to help you get started with X-ORBIT\'s powerful features.',
-    highlightTitle: '💡 Quick Tip',
+    description: 'Welcome to your new desktop environment! Let\'s take a quick tour to help you get started and personalize X-ORBIT to your preferences.',
+    highlightTitle: 'Quick Tip',
     highlightText: 'Use arrow keys or spacebar to navigate this tour. Press Escape to skip anytime.',
     highlightElement: null
   },
   {
-    icon: '🖱️',
+    icon: 'fas fa-palette',
+    title: 'Choose Your Theme',
+    description: 'X-ORBIT offers multiple beautiful themes. Which style do you prefer?',
+    highlightTitle: 'Available Themes',
+    highlightText: 'Dark Mode, Light Mode, or Halloween 2025. You can change this anytime in Settings.',
+    highlightElement: null,
+    isConfig: true,
+    configType: 'theme'
+  },
+  {
+    icon: 'fas fa-grip-horizontal',
+    title: 'Dock Configuration',
+    description: 'Customize how your dock behaves. Choose the position and whether it should auto-hide.',
+    highlightTitle: 'Dock Options',
+    highlightText: 'Bottom or Left position. Enable auto-hide to maximize screen space.',
+    highlightElement: null,
+    isConfig: true,
+    configType: 'dock'
+  },
+  {
+    icon: 'fas fa-expand',
+    title: 'Fullscreen Mode',
+    description: 'Would you like X-ORBIT to launch in fullscreen mode by default?',
+    highlightTitle: 'Immersive Experience',
+    highlightText: 'Fullscreen mode hides browser UI for a true desktop experience.',
+    highlightElement: null,
+    isConfig: true,
+    configType: 'fullscreen'
+  },
+  {
+    icon: 'fas fa-mouse-pointer',
     title: 'Desktop & Windows',
     description: 'This is your desktop workspace. You can open multiple windows, move them around, resize them, and organize your workspace however you like.',
-    highlightTitle: '✨ Try This',
+    highlightTitle: 'Try This',
     highlightText: 'Click and drag window titlebars to move them. Use the colored buttons to close, minimize, or maximize windows.',
     highlightElement: '.desktop'
   },
   {
-    icon: '⚙️',
+    icon: 'fas fa-bars',
     title: 'Menu Bar & Controls',
     description: 'The top menu bar gives you access to system controls. Click "X-ORBIT" for system options like logout and settings, or click the time for weather info.',
-    highlightTitle: '🕐 Time & Weather',
+    highlightTitle: 'Time & Weather',
     highlightText: 'Click the time to see detailed weather information and timezone data for your location.',
     highlightElement: '.menu-bar'
   },
   {
-    icon: '🚢',
+    icon: 'fas fa-th-large',
     title: 'The Dock',
-    description: 'Your dock at the bottom provides quick access to applications. Hover over icons to see names, and click to launch apps instantly.',
-    highlightTitle: '🎯 Pro Tips',
-    highlightText: 'Icons show a dot when apps are running. You can customize dock position and size in Settings.',
+    description: 'Your dock provides quick access to applications. Hover over icons to see names, and click to launch apps instantly.',
+    highlightTitle: 'Pro Tips',
+    highlightText: 'Icons show a dot when apps are running. You can customize dock settings anytime.',
     highlightElement: '.dock'
   },
   {
-    icon: '⚙️',
-    title: 'Settings & Customization',
-    description: 'Customize your desktop experience! Access settings from the dock or desktop icons to change themes, dock position, animations, and more.',
-    highlightTitle: '🎨 Personalize',
-    highlightText: 'Try switching between light and dark themes, or move your dock to different screen edges.',
-    highlightElement: '.dock-item[data-app="Settings"]'
-  },
-  {
-    icon: '🎉',
+    icon: 'fas fa-check-circle',
     title: 'You\'re All Set!',
     description: 'Congratulations! You now know the basics of X-ORBIT. Explore the applications, customize your settings, and make this desktop your own.',
-    highlightTitle: '🚀 Ready to Explore',
+    highlightTitle: 'Ready to Explore',
     highlightText: 'Your desktop is ready! Open some apps, try the settings, and enjoy your new workspace.',
     highlightElement: null
   }
@@ -1413,6 +1933,92 @@ function updateUserDisplay() {
   }
 }
 
+// Wallpaper management
+function handleWallpaperUpload(event) {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  const file = event.target.files[0];
+  if (!file) return;
+  
+  // Check if it's an image
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file');
+    return;
+  }
+  
+  // Read the file and convert to base64
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    const imageData = e.target.result;
+    
+    // Save to settings
+    settings.customWallpaper = imageData;
+    localStorage.setItem('xorbit-settings', JSON.stringify(settings));
+    
+    // Apply wallpaper
+    applyWallpaper(imageData);
+    
+    // Update preview in settings
+    updateWallpaperPreview(imageData);
+    
+    // Clear the file input
+    event.target.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetWallpaper() {
+  event.preventDefault();
+  event.stopPropagation();
+  
+  settings.customWallpaper = null;
+  localStorage.setItem('xorbit-settings', JSON.stringify(settings));
+  applyWallpaper(null);
+  
+  // Hide preview
+  const preview = document.getElementById('wallpaperPreview');
+  if (preview) preview.style.display = 'none';
+}
+
+function applyWallpaper(imageData) {
+  if (imageData) {
+    // Show custom wallpaper
+    document.body.style.backgroundImage = `url(${imageData})`;
+    document.body.style.backgroundSize = 'cover';
+    document.body.style.backgroundPosition = 'center';
+    document.body.style.backgroundRepeat = 'no-repeat';
+    
+    // Hide globe icon
+    const style = document.createElement('style');
+    style.id = 'custom-wallpaper-style';
+    style.textContent = 'body::after { display: none !important; }';
+    
+    // Remove old style if exists
+    const oldStyle = document.getElementById('custom-wallpaper-style');
+    if (oldStyle) oldStyle.remove();
+    
+    document.head.appendChild(style);
+  } else {
+    // Reset to default (globe background)
+    document.body.style.backgroundImage = '';
+    
+    // Remove hide globe style
+    const oldStyle = document.getElementById('custom-wallpaper-style');
+    if (oldStyle) oldStyle.remove();
+  }
+}
+
+function updateWallpaperPreview(imageData) {
+  const preview = document.getElementById('wallpaperPreview');
+  const previewImg = document.getElementById('wallpaperPreviewImg');
+  
+  if (preview && previewImg && imageData) {
+    previewImg.src = imageData;
+    preview.style.display = 'block';
+  }
+}
+
 // Load settings from localStorage
 function loadSettings() {
   const saved = localStorage.getItem('xorbit-settings');
@@ -1423,20 +2029,44 @@ function loadSettings() {
       console.warn('Failed to load settings');
     }
   }
+  // Load the theme stylesheet
+  loadTheme(settings.theme);
   applySettings();
+  
+  // Apply custom wallpaper if set
+  if (settings.customWallpaper) {
+    applyWallpaper(settings.customWallpaper);
+  }
+}
+
+// Load theme stylesheet dynamically
+function loadTheme(theme) {
+  const existingTheme = document.getElementById('theme-stylesheet');
+  if (existingTheme) {
+    existingTheme.remove();
+  }
+  
+  const link = document.createElement('link');
+  link.id = 'theme-stylesheet';
+  link.rel = 'stylesheet';
+  
+  // Select the appropriate theme file
+  if (theme === 'light') {
+    link.href = 'theme-light.css';
+  } else if (theme === 'orange') {
+    link.href = 'theme-orange.css';
+  } else {
+    link.href = 'theme-dark.css';
+  }
+  
+  document.head.appendChild(link);
+  
+  console.log('Theme loaded:', theme);
 }
 
 // Apply settings to the desktop
 function applySettings() {
-  // Apply theme
-  document.body.className = '';
-  if (settings.theme === 'light') {
-    document.body.classList.add('light-mode');
-  } else if (settings.theme === 'auto') {
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-      document.body.classList.add('light-mode');
-    }
-  }
+  // Theme is now handled by loadTheme() function with external stylesheets
 
   // Apply dock settings
   const dock = document.querySelector('.dock');
@@ -1508,22 +2138,96 @@ function setupDockAutohide() {
   if (!dock) return;
   
   let hideTimeout;
+  let showTimeout;
+  const PROXIMITY_THRESHOLD = 100; // pixels from edge to trigger show
+  const SHOW_DELAY = 1000; // ms to hover before showing (1 second)
+  const HIDE_DELAY = 1000; // ms before hiding
   
   function showDock() {
     clearTimeout(hideTimeout);
-    dock.style.opacity = '1';
+    clearTimeout(showTimeout);
+    dock.classList.add('dock-visible');
   }
   
-  function hideDock() {
+  function scheduleDockShow() {
+    clearTimeout(showTimeout);
+    showTimeout = setTimeout(() => {
+      dock.classList.add('dock-visible');
+    }, SHOW_DELAY);
+  }
+  
+  function cancelDockShow() {
+    clearTimeout(showTimeout);
+  }
+  
+  function scheduleDockHide() {
+    clearTimeout(hideTimeout);
+    clearTimeout(showTimeout);
     hideTimeout = setTimeout(() => {
-      dock.style.opacity = '0.3';
-    }, 2000);
+      dock.classList.remove('dock-visible');
+    }, HIDE_DELAY);
   }
   
-  dock.addEventListener('mouseenter', showDock);
-  dock.addEventListener('mouseleave', hideDock);
+  function checkMouseProximity(e) {
+    const mouseX = e.clientX;
+    const mouseY = e.clientY;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    
+    // Determine dock position from computed style
+    const dockStyle = dock.style;
+    const isBottom = dockStyle.bottom && dockStyle.bottom !== 'auto';
+    const isTop = dockStyle.top && dockStyle.top !== 'auto' && !isBottom;
+    const isLeft = dockStyle.left && dockStyle.flexDirection === 'column';
+    const isRight = dockStyle.right && dockStyle.flexDirection === 'column';
+    
+    let shouldShow = false;
+    
+    if (isBottom) {
+      // Mouse near bottom edge
+      shouldShow = mouseY > windowHeight - PROXIMITY_THRESHOLD;
+    } else if (isTop) {
+      // Mouse near top edge (below menu bar)
+      shouldShow = mouseY < PROXIMITY_THRESHOLD + 32; // 32px for menu bar
+    } else if (isLeft) {
+      // Mouse near left edge
+      shouldShow = mouseX < PROXIMITY_THRESHOLD;
+    } else if (isRight) {
+      // Mouse near right edge
+      shouldShow = mouseX > windowWidth - PROXIMITY_THRESHOLD;
+    } else {
+      // Default to bottom if position unclear
+      shouldShow = mouseY > windowHeight - PROXIMITY_THRESHOLD;
+    }
+    
+    if (shouldShow) {
+      // Mouse is in proximity zone - start the 2 second timer if not already showing
+      if (!dock.classList.contains('dock-visible')) {
+        scheduleDockShow();
+      } else {
+        // Already visible, keep it visible
+        clearTimeout(hideTimeout);
+      }
+    } else {
+      // Mouse left proximity zone
+      cancelDockShow();
+      if (dock.classList.contains('dock-visible')) {
+        scheduleDockHide();
+      }
+    }
+  }
   
-  hideDock();
+  // Listen for mouse movement globally
+  document.addEventListener('mousemove', checkMouseProximity);
+  
+  // Show dock immediately when hovering over it (override the 2 second delay)
+  dock.addEventListener('mouseenter', showDock);
+  
+  // Hide dock when leaving it
+  dock.addEventListener('mouseleave', scheduleDockHide);
+  
+  // Start with dock hidden
+  dock.classList.remove('dock-visible');
 }
 
 // Listen for messages
@@ -1736,15 +2440,30 @@ function updateTutorialStep() {
   const descEl = document.getElementById('tutorialDescription');
   const highlightTitleEl = document.getElementById('tutorialHighlightTitle');
   const highlightTextEl = document.getElementById('tutorialHighlightText');
+  const highlightBox = document.getElementById('tutorialHighlight');
   const nextBtn = document.getElementById('tutorialNext');
   const prevBtn = document.getElementById('tutorialPrev');
   
-  if (iconEl) iconEl.textContent = step.icon;
+  // Update icon to use Font Awesome
+  if (iconEl) {
+    iconEl.textContent = '';
+    iconEl.className = 'tutorial-icon ' + step.icon;
+  }
   if (titleEl) titleEl.textContent = step.title;
   if (stepEl) stepEl.textContent = `Step ${currentTutorialStep + 1} of ${tutorialSteps.length}`;
   if (descEl) descEl.textContent = step.description;
   if (highlightTitleEl) highlightTitleEl.textContent = step.highlightTitle;
   if (highlightTextEl) highlightTextEl.textContent = step.highlightText;
+  
+  // Show configuration UI if this is a config step
+  if (step.isConfig && highlightBox) {
+    highlightBox.innerHTML = renderConfigUI(step.configType);
+  } else if (highlightBox) {
+    highlightBox.innerHTML = `
+      <div class="tutorial-highlight-title">${step.highlightTitle}</div>
+      <div class="tutorial-highlight-text">${step.highlightText}</div>
+    `;
+  }
   
   // Update button text for last step
   if (nextBtn) {
@@ -1775,6 +2494,88 @@ function updateTutorialStep() {
   if (step.highlightElement) {
     highlightTutorialElement(step.highlightElement);
   }
+}
+
+function renderConfigUI(configType) {
+  switch(configType) {
+    case 'theme':
+      return `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-weight: 600; color: #e8f0ff; margin-bottom: 8px;">Select Your Theme:</div>
+          <button class="tutorial-config-btn" onclick="applyTutorialConfig('theme', 'dark')" data-theme="dark">
+            <i class="fas fa-moon"></i>
+            <span>Dark Mode</span>
+          </button>
+          <button class="tutorial-config-btn" onclick="applyTutorialConfig('theme', 'light')" data-theme="light">
+            <i class="fas fa-sun"></i>
+            <span>Light Mode</span>
+          </button>
+          <button class="tutorial-config-btn" onclick="applyTutorialConfig('theme', 'orange')" data-theme="orange">
+            <i class="fas fa-ghost"></i>
+            <span>Halloween 2025</span>
+          </button>
+        </div>
+      `;
+    case 'dock':
+      return `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-weight: 600; color: #e8f0ff; margin-bottom: 8px;">Dock Settings:</div>
+          <div style="display: flex; gap: 12px;">
+            <button class="tutorial-config-btn" onclick="applyTutorialConfig('dockPosition', 'bottom')" data-dock="bottom">
+              <i class="fas fa-arrows-alt-h"></i>
+              <span>Bottom</span>
+            </button>
+            <button class="tutorial-config-btn" onclick="applyTutorialConfig('dockPosition', 'left')" data-dock="left">
+              <i class="fas fa-arrows-alt-v"></i>
+              <span>Left</span>
+            </button>
+          </div>
+          <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(120, 80, 255, 0.1); border-radius: 10px; cursor: pointer;">
+            <input type="checkbox" id="tutorialAutohide" onchange="applyTutorialConfig('dockAutohide', this.checked)" style="width: 18px; height: 18px; cursor: pointer;">
+            <span style="color: #e8f0ff;">Enable Auto-hide Dock</span>
+          </label>
+        </div>
+      `;
+    case 'fullscreen':
+      return `
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="font-weight: 600; color: #e8f0ff; margin-bottom: 8px;">Fullscreen Launch:</div>
+          <button class="tutorial-config-btn" onclick="applyTutorialConfig('launchFullscreen', true)" data-fullscreen="true">
+            <i class="fas fa-expand"></i>
+            <span>Yes, Launch Fullscreen</span>
+          </button>
+          <button class="tutorial-config-btn" onclick="applyTutorialConfig('launchFullscreen', false)" data-fullscreen="false">
+            <i class="fas fa-compress"></i>
+            <span>No, Normal Window</span>
+          </button>
+        </div>
+      `;
+    default:
+      return '';
+  }
+}
+
+function applyTutorialConfig(setting, value) {
+  // Apply the setting immediately
+  if (setting === 'theme') {
+    settings.theme = value;
+    loadTheme(value);
+  } else if (setting === 'dockPosition') {
+    settings.dockPosition = value;
+  } else if (setting === 'dockAutohide') {
+    settings.dockAutohide = value;
+  } else if (setting === 'launchFullscreen') {
+    settings.launchFullscreen = value;
+  }
+  
+  // Save settings
+  localStorage.setItem('xorbit-settings', JSON.stringify(settings));
+  applySettings();
+  
+  // Visual feedback on button
+  const buttons = document.querySelectorAll('.tutorial-config-btn');
+  buttons.forEach(btn => btn.classList.remove('selected'));
+  event.target.closest('.tutorial-config-btn')?.classList.add('selected');
 }
 
 function highlightTutorialElement(selector) {
@@ -1886,13 +2687,57 @@ function openWindow(title, src, icon) {
   }
   windowEl.id = windowId;
   
-  const x = Math.random() * (window.innerWidth - 600) + 50;
-  const y = Math.random() * (window.innerHeight - 500) + 80;
+  // Calculate safe position to prevent overflow - ULTRA CONSERVATIVE
+  const windowWidth = 600;
+  const windowHeight = 450;
   
-  windowEl.style.left = x + 'px';
-  windowEl.style.top = y + 'px';
-  windowEl.style.width = '600px';
-  windowEl.style.height = '450px';
+  // Get viewport size
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  
+  // Ultra-safe margins
+  const leftMargin = 50;
+  const rightMargin = 50;
+  const topMargin = 80;
+  const bottomMargin = 120;
+  
+  // Calculate actual available space
+  const availableWidth = vw - leftMargin - rightMargin;
+  const availableHeight = vh - topMargin - bottomMargin;
+  
+  // Reduce window size if it won't fit
+  const actualWidth = Math.min(windowWidth, availableWidth - 100);
+  const actualHeight = Math.min(windowHeight, availableHeight - 100);
+  
+  // Calculate safe position range
+  const minX = leftMargin;
+  const maxX = vw - actualWidth - rightMargin;
+  const minY = topMargin;
+  const maxY = vh - actualHeight - bottomMargin;
+  
+  // Generate position (centered with slight randomness)
+  const centerX = (vw - actualWidth) / 2;
+  const centerY = (vh - actualHeight) / 2;
+  const randomOffsetX = (Math.random() - 0.5) * 100;
+  const randomOffsetY = (Math.random() - 0.5) * 100;
+  
+  let x = centerX + randomOffsetX;
+  let y = centerY + randomOffsetY;
+  
+  // Absolute clamp - cannot exceed these bounds
+  x = Math.max(minX, Math.min(x, maxX));
+  y = Math.max(minY, Math.min(y, maxY));
+  
+  // Set CSS variables for clamp
+  windowEl.style.setProperty('--window-width', actualWidth + 'px');
+  windowEl.style.setProperty('--window-height', actualHeight + 'px');
+  windowEl.style.setProperty('--window-x', x + 'px');
+  windowEl.style.setProperty('--window-y', y + 'px');
+  
+  windowEl.style.left = Math.floor(x) + 'px';
+  windowEl.style.top = Math.floor(y) + 'px';
+  windowEl.style.width = Math.floor(actualWidth) + 'px';
+  windowEl.style.height = Math.floor(actualHeight) + 'px';
   
   // Get username and update window title if it's the Browser
   let displayTitle = title;
@@ -1926,6 +2771,16 @@ function openWindow(title, src, icon) {
   focusWindow(windowId);
   
   setupWindowEvents(windowEl, windowId, title);
+  
+  // Add resize observer to prevent overflow
+  constrainWindowSize(windowEl);
+  
+  // Force immediate position check
+  setTimeout(() => {
+    forceWindowInBounds(windowEl);
+    // Trigger smooth animation like weather UI
+    windowEl.classList.add('window-visible');
+  }, 0);
 }
 
 // Setup window events
@@ -1938,11 +2793,11 @@ function setupWindowEvents(windowEl, windowId, title) {
   if (closeBtn) {
     closeBtn.onclick = function() {
       if (settings.animations) {
-        windowEl.style.animation = 'windowOpen 0.2s reverse';
+        windowEl.classList.remove('window-visible');
         setTimeout(function() {
           windowEl.remove();
           activeWindows.delete(title);
-        }, 200);
+        }, 400);
       } else {
         windowEl.remove();
         activeWindows.delete(title);
@@ -1958,16 +2813,28 @@ function setupWindowEvents(windowEl, windowId, title) {
   
   if (maxBtn) {
     maxBtn.onclick = function() {
-      if (windowEl.style.width === '100vw') {
-        windowEl.style.left = '100px';
-        windowEl.style.top = '100px';
-        windowEl.style.width = '600px';
-        windowEl.style.height = '450px';
+      // Check if already fullscreen
+      if (windowEl.classList.contains('fullscreen')) {
+        // Restore to previous size
+        windowEl.classList.remove('fullscreen');
+        windowEl.style.position = 'absolute';
+        windowEl.style.left = windowEl.dataset.prevLeft || '100px';
+        windowEl.style.top = windowEl.dataset.prevTop || '100px';
+        windowEl.style.width = windowEl.dataset.prevWidth || '600px';
+        windowEl.style.height = windowEl.dataset.prevHeight || '450px';
+        windowEl.style.borderRadius = '16px';
       } else {
-        windowEl.style.left = '0';
-        windowEl.style.top = '32px';
+        // Save current position/size
+        windowEl.dataset.prevLeft = windowEl.style.left;
+        windowEl.dataset.prevTop = windowEl.style.top;
+        windowEl.dataset.prevWidth = windowEl.style.width;
+        windowEl.dataset.prevHeight = windowEl.style.height;
+        
+        // Go fullscreen (CSS handles positioning)
+        windowEl.classList.add('fullscreen');
         windowEl.style.width = '100vw';
         windowEl.style.height = 'calc(100vh - 32px)';
+        windowEl.style.borderRadius = '0';
       }
     };
   }
@@ -1979,6 +2846,9 @@ function setupWindowEvents(windowEl, windowId, title) {
   if (titlebar) {
     titlebar.onmousedown = function(e) {
       if (e.target.closest('.window-control')) return;
+      // Don't allow dragging if fullscreen
+      if (windowEl.classList.contains('fullscreen')) return;
+      
       isDragging = true;
       focusWindow(windowId);
       
@@ -1988,8 +2858,22 @@ function setupWindowEvents(windowEl, windowId, title) {
       
       document.onmousemove = function(e) {
         if (!isDragging) return;
-        const newX = e.clientX - dragOffset.x;
-        const newY = Math.max(32, e.clientY - dragOffset.y);
+        
+        const rect = windowEl.getBoundingClientRect();
+        const windowWidth = rect.width;
+        const windowHeight = rect.height;
+        
+        let newX = e.clientX - dragOffset.x;
+        let newY = e.clientY - dragOffset.y;
+        
+        // Constrain to screen bounds
+        const minX = 0;
+        const minY = 32; // Below menu bar
+        const maxX = window.innerWidth - windowWidth;
+        const maxY = window.innerHeight - 50; // Keep some visible at bottom
+        
+        newX = Math.max(minX, Math.min(newX, maxX));
+        newY = Math.max(minY, Math.min(newY, maxY));
         
         windowEl.style.left = newX + 'px';
         windowEl.style.top = newY + 'px';
@@ -2135,8 +3019,8 @@ function createSettingsContent() {
         
         .setting-item {
           display: flex;
-          justify-content: space-between;
-          align-items: center;
+          flex-direction: column;
+          align-items: flex-start;
           padding: 16px 20px;
           margin-bottom: 12px;
           background: rgba(255, 255, 255, 0.03);
@@ -2152,7 +3036,8 @@ function createSettingsContent() {
         }
         
         .setting-info {
-          flex: 1;
+          width: 100%;
+          margin-bottom: 12px;
         }
         
         .setting-label {
@@ -2169,7 +3054,8 @@ function createSettingsContent() {
         }
         
         .setting-control {
-          margin-left: 20px;
+          width: 100%;
+          margin-left: 0;
         }
         
         .toggle-switch {
@@ -2207,7 +3093,7 @@ function createSettingsContent() {
         
         .select-control {
           position: relative;
-          min-width: 140px;
+          width: 100%;
         }
         
         .select-dropdown {
@@ -2242,7 +3128,7 @@ function createSettingsContent() {
         }
         
         .range-control {
-          width: 140px;
+          width: 100%;
         }
         
         .range-slider {
@@ -2329,6 +3215,38 @@ function createSettingsContent() {
           border-color: rgba(255, 87, 87, 0.6);
           transform: translateY(-1px);
         }
+
+        .wallpaper-button {
+          padding: 10px 16px;
+          background: rgba(120, 80, 255, 0.15);
+          border: 2px solid rgba(120, 80, 255, 0.3);
+          border-radius: 8px;
+          color: #e8f0ff;
+          font-size: 0.9rem;
+          font-weight: 500;
+          cursor: pointer;
+          transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+
+        .wallpaper-button:hover {
+          background: rgba(120, 80, 255, 0.25);
+          border-color: rgba(120, 80, 255, 0.5);
+          transform: translateY(-1px);
+        }
+
+        .wallpaper-button.reset-wallpaper {
+          background: rgba(255, 87, 87, 0.1);
+          border-color: rgba(255, 87, 87, 0.3);
+        }
+
+        .wallpaper-button.reset-wallpaper:hover {
+          background: rgba(255, 87, 87, 0.2);
+          border-color: rgba(255, 87, 87, 0.5);
+        }
       </style>
       
       <!-- Display Settings -->
@@ -2340,16 +3258,42 @@ function createSettingsContent() {
         
         <div class="setting-item">
           <div class="setting-info">
+            <div class="setting-info">
             <div class="setting-label">Theme</div>
-            <div class="setting-description">Choose between light and dark mode</div>
+            <div class="setting-description">Choose your desktop theme</div>
           </div>
           <div class="setting-control">
             <div class="select-control">
               <select class="select-dropdown" id="themeSelect">
                 <option value="dark">Dark Mode</option>
                 <option value="light">Light Mode</option>
+                <option value="orange">Halloween 2025</option>
                 <option value="auto">Auto (System)</option>
               </select>
+            </div>
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Desktop Wallpaper</div>
+            <div class="setting-description">Upload custom background or use default globe</div>
+          </div>
+          <div class="setting-control">
+            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+              <input type="file" id="wallpaperUpload" accept="image/*" style="display: none;">
+              <button class="wallpaper-button" type="button" onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('wallpaperUpload').click();">
+                <i class="fas fa-upload"></i>
+                Choose Image
+              </button>
+              <button class="wallpaper-button reset-wallpaper" type="button" onclick="event.preventDefault(); event.stopPropagation(); resetWallpaper();">
+                <i class="fas fa-undo"></i>
+                Reset to Default
+              </button>
+              <div id="wallpaperPreview" style="display: none; margin-top: 8px;">
+                <div style="color: #7d5cff; font-size: 0.75rem; margin-bottom: 4px;">Current wallpaper:</div>
+                <img id="wallpaperPreviewImg" style="width: 100px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(120, 80, 255, 0.3);">
+              </div>
             </div>
           </div>
         </div>
@@ -2414,9 +3358,7 @@ function createSettingsContent() {
             <div class="select-control">
               <select class="select-dropdown" id="dockPositionSelect">
                 <option value="bottom">Bottom</option>
-                <option value="top">Top</option>
                 <option value="left">Left</option>
-                <option value="right">Right</option>
               </select>
             </div>
           </div>
@@ -2482,6 +3424,16 @@ function createSettingsContent() {
             <div class="toggle-switch active" id="minimizeAnimToggle"></div>
           </div>
         </div>
+        
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-label">Launch in Fullscreen</div>
+            <div class="setting-description">Start X-ORBIT in fullscreen mode</div>
+          </div>
+          <div class="setting-control">
+            <div class="toggle-switch" id="launchFullscreenToggle"></div>
+          </div>
+        </div>
       </div>
       
       <button class="reset-button" id="resetButton">
@@ -2516,6 +3468,7 @@ function setupSettingsEvents(windowEl) {
     const snappingToggle = settingsContent.querySelector('#snappingToggle');
     const shadowsToggle = settingsContent.querySelector('#shadowsToggle');
     const minimizeAnimToggle = settingsContent.querySelector('#minimizeAnimToggle');
+    const launchFullscreenToggle = settingsContent.querySelector('#launchFullscreenToggle');
     
     if (themeSelect) themeSelect.value = settings.theme;
     if (transparencyToggle) transparencyToggle.classList.toggle('active', settings.transparency);
@@ -2534,6 +3487,12 @@ function setupSettingsEvents(windowEl) {
     if (snappingToggle) snappingToggle.classList.toggle('active', settings.windowSnapping);
     if (shadowsToggle) shadowsToggle.classList.toggle('active', settings.windowShadows);
     if (minimizeAnimToggle) minimizeAnimToggle.classList.toggle('active', settings.minimizeAnimation !== false);
+    if (launchFullscreenToggle) launchFullscreenToggle.classList.toggle('active', settings.launchFullscreen);
+    
+    // Update wallpaper preview if custom wallpaper is set
+    if (settings.customWallpaper) {
+      updateWallpaperPreview(settings.customWallpaper);
+    }
   }
   
   // Save settings
@@ -2562,6 +3521,7 @@ function setupSettingsEvents(windowEl) {
   if (themeSelect) {
     themeSelect.addEventListener('change', function() {
       settings.theme = this.value;
+      loadTheme(this.value);
       saveSettings();
     });
   }
@@ -2594,6 +3554,9 @@ function setupSettingsEvents(windowEl) {
           break;
         case 'minimizeAnim':
           settings.minimizeAnimation = !isActive;
+          break;
+        case 'launchFullscreen':
+          settings.launchFullscreen = !isActive;
           break;
       }
       
@@ -2655,17 +3618,231 @@ function setupSettingsEvents(windowEl) {
       }
     });
   }
+  
+  // Wallpaper upload listener
+  const wallpaperUpload = settingsContent.querySelector('#wallpaperUpload');
+  if (wallpaperUpload) {
+    wallpaperUpload.addEventListener('change', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      handleWallpaperUpload(event);
+    });
+  }
+}
+
+// Helper function to enter fullscreen with browser compatibility
+function enterFullscreen() {
+  const elem = document.documentElement;
+  
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen().catch(err => {
+      console.log('Fullscreen request failed:', err);
+    });
+  } else if (elem.webkitRequestFullscreen) { // Safari
+    elem.webkitRequestFullscreen().catch(err => {
+      console.log('Webkit fullscreen request failed:', err);
+    });
+  } else if (elem.msRequestFullscreen) { // IE11
+    elem.msRequestFullscreen().catch(err => {
+      console.log('MS fullscreen request failed:', err);
+    });
+  } else if (elem.mozRequestFullScreen) { // Firefox
+    elem.mozRequestFullScreen().catch(err => {
+      console.log('Moz fullscreen request failed:', err);
+    });
+  } else {
+    console.log('Fullscreen API not supported by this browser');
+  }
+}
+
+// Startup Sequence
+function playStartupSequence() {
+  const startupScreen = document.getElementById('startupScreen');
+  const welcomeOverlay = document.getElementById('welcomeOverlay');
+  const progressBar = document.getElementById('startupProgress');
+  const statusText = document.getElementById('startupStatus');
+  
+  // Show startup screen
+  if (startupScreen) startupScreen.style.display = 'flex';
+  if (welcomeOverlay) welcomeOverlay.style.display = 'none';
+  
+  // Create audio elements for startup sounds
+  // Replace these URLs with your actual audio file URLs, or leave as-is to use generated sounds
+  const STARTUP_SOUND_URL = 'https://codehs.com/uploads/a65c34b976260e021c991377c09738d7';
+  const COMPLETION_SOUND_URL = 'https://codehs.com/uploads/08141181768ff6fbd3e7d9afe655e00b';
+  
+  const useGeneratedSounds = STARTUP_SOUND_URL.includes('your-audio-url.com');
+  
+  // Web Audio API for generated sounds (fallback)
+  const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  
+  function playGeneratedStartupSound() {
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.setValueAtTime(440, audioContext.currentTime); // A4
+    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.5); // A5
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 1.2);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 1.2);
+  }
+  
+  function playGeneratedCompletionSound() {
+    // Create a pleasant three-note chime
+    const times = [0, 0.15, 0.3];
+    const frequencies = [523.25, 659.25, 783.99]; // C5, E5, G5
+    
+    times.forEach((time, i) => {
+      const oscillator = audioContext.createOscillator();
+      const gainNode = audioContext.createGain();
+      
+      oscillator.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+      
+      oscillator.frequency.setValueAtTime(frequencies[i], audioContext.currentTime + time);
+      
+      gainNode.gain.setValueAtTime(0.2, audioContext.currentTime + time);
+      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + time + 0.4);
+      
+      oscillator.start(audioContext.currentTime + time);
+      oscillator.stop(audioContext.currentTime + time + 0.4);
+    });
+  }
+  
+  // Play startup sound
+  if (useGeneratedSounds) {
+    // Use generated sound
+    try {
+      playGeneratedStartupSound();
+    } catch (e) {
+      console.log('Generated audio playback failed:', e);
+    }
+  } else {
+    // Use MP3 files
+    const startupAudio = new Audio(STARTUP_SOUND_URL);
+    startupAudio.volume = 0.5;
+    startupAudio.onerror = function() {
+      console.log('Failed to load startup audio from:', STARTUP_SOUND_URL);
+      // Fallback to generated sound
+      try {
+        playGeneratedStartupSound();
+      } catch (e) {
+        console.log('Fallback audio also failed:', e);
+      }
+    };
+    startupAudio.play().catch(e => {
+      console.log('Startup audio playback failed:', e);
+    });
+  }
+  
+  // Simulate loading sequence (minimum 5 seconds, max 30 seconds)
+  const loadingSteps = [
+    { progress: 10, text: 'Initializing system...', delay: 500 },
+    { progress: 20, text: 'Loading core systems...', delay: 600 },
+    { progress: 35, text: 'Initializing graphics engine...', delay: 700 },
+    { progress: 50, text: 'Loading user interface...', delay: 800 },
+    { progress: 65, text: 'Configuring desktop environment...', delay: 700 },
+    { progress: 80, text: 'Loading applications...', delay: 600 },
+    { progress: 95, text: 'Finalizing startup...', delay: 500 },
+    { progress: 100, text: 'Ready!', delay: 600 }
+  ];
+  
+  let currentStep = 0;
+  
+  function nextStep() {
+    if (currentStep >= loadingSteps.length) {
+      // Startup complete - play completion sound and show continue button
+      setTimeout(() => {
+        if (useGeneratedSounds) {
+          // Use generated sound
+          try {
+            playGeneratedCompletionSound();
+          } catch (e) {
+            console.log('Generated completion audio failed:', e);
+          }
+        } else {
+          // Use MP3 file
+          const completionAudio = new Audio(COMPLETION_SOUND_URL);
+          completionAudio.volume = 0.5;
+          completionAudio.onerror = function() {
+            console.log('Failed to load completion audio from:', COMPLETION_SOUND_URL);
+            // Fallback to generated sound
+            try {
+              playGeneratedCompletionSound();
+            } catch (e) {
+              console.log('Fallback audio also failed:', e);
+            }
+          };
+          completionAudio.play().catch(e => {
+            console.log('Completion audio playback failed:', e);
+          });
+        }
+        
+        // Show the continue button
+        const continueBtn = document.getElementById('startupContinueBtn');
+        if (continueBtn) {
+          statusText.textContent = 'System ready!';
+          setTimeout(() => {
+            continueBtn.style.display = 'flex';
+          }, 300);
+        }
+        
+        // Set up continue button click handler
+        continueBtn.onclick = function() {
+          // Enter fullscreen with user interaction
+          enterFullscreen();
+          
+          // Fade out startup screen
+          startupScreen.classList.add('fade-out');
+          
+          setTimeout(() => {
+            startupScreen.style.display = 'none';
+            
+            // Show and fade in the login page
+            if (welcomeOverlay) {
+              welcomeOverlay.style.display = 'flex';
+              
+              // Trigger fade-in after a brief delay
+              setTimeout(() => {
+                welcomeOverlay.classList.add('fade-in');
+              }, 50);
+            }
+          }, 800);
+        };
+      }, 500);
+      return;
+    }
+    
+    const step = loadingSteps[currentStep];
+    progressBar.style.width = step.progress + '%';
+    statusText.textContent = step.text;
+    
+    currentStep++;
+    setTimeout(nextStep, step.delay);
+  }
+  
+  // Start loading sequence after a brief delay
+  setTimeout(nextStep, 800);
 }
 
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
-  const welcomeOverlay = document.getElementById('welcomeOverlay');
-  if (welcomeOverlay) {
-    welcomeOverlay.style.display = 'flex';
-  }
-  
+  // Load settings first
   loadSettings();
+  
+  // Start startup sequence
+  playStartupSequence();
+  
   setupXORBITMenu();
+  setupUserMenu();
+  setupWifiMenu();
+  setupUtilitiesMenu();
   setupTimeMenu();
   getUserLocation();
   
@@ -2879,6 +4056,279 @@ function updateWeatherDisplay() {
   if (elements.uvIndex) elements.uvIndex.textContent = weatherData.uvIndex;
 }
 
+function setupWifiMenu() {
+  const wifiMenuButton = document.getElementById('wifiMenu');
+  const wifiDropdown = document.getElementById('wifiDropdown');
+  
+  if (wifiMenuButton && wifiDropdown) {
+    wifiMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = wifiDropdown.classList.contains('show');
+      
+      // Hide all other menus first
+      document.querySelectorAll('.xorbit-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      document.querySelectorAll('.time-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      
+      if (!isVisible) {
+        wifiDropdown.classList.add('show');
+        // Test network speed when menu opens
+        testNetworkSpeed();
+      }
+    });
+    
+    // Prevent menu from closing when clicking inside
+    wifiDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+  
+  // Update network type
+  updateNetworkType();
+  
+  // Monitor online/offline status
+  window.addEventListener('online', updateNetworkStatus);
+  window.addEventListener('offline', updateNetworkStatus);
+  updateNetworkStatus();
+}
+
+function updateNetworkType() {
+  const networkType = document.getElementById('networkType');
+  if (!networkType) return;
+  
+  const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  if (connection && connection.effectiveType) {
+    const typeMap = {
+      'slow-2g': '2G (Slow)',
+      '2g': '2G',
+      '3g': '3G',
+      '4g': '4G',
+      '5g': '5G'
+    };
+    networkType.textContent = typeMap[connection.effectiveType] || connection.effectiveType.toUpperCase();
+  } else {
+    networkType.textContent = 'WiFi/Ethernet';
+  }
+}
+
+function updateNetworkStatus() {
+  const networkStatus = document.getElementById('networkStatus');
+  const wifiIcon = document.getElementById('wifiIcon');
+  
+  if (!networkStatus || !wifiIcon) return;
+  
+  if (navigator.onLine) {
+    networkStatus.innerHTML = '<i class="fas fa-check-circle"></i> Online';
+    networkStatus.style.color = '#28ca42';
+    wifiIcon.className = 'fas fa-wifi';
+    wifiIcon.style.color = '';
+  } else {
+    networkStatus.innerHTML = '<i class="fas fa-times-circle"></i> Offline';
+    networkStatus.style.color = '#ff5757';
+    wifiIcon.className = 'fas fa-wifi-slash';
+    wifiIcon.style.color = '#ff5757';
+  }
+}
+
+async function testNetworkSpeed() {
+  const pingLatency = document.getElementById('pingLatency');
+  const jitterValue = document.getElementById('jitterValue');
+  
+  if (!pingLatency || !jitterValue) return;
+  
+  // Show loading state
+  pingLatency.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+  jitterValue.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Testing...';
+  
+  // Cloudflare's 1.1.1.1 DNS (use their speed test endpoint)
+  const testUrl = 'https://1.1.1.1/cdn-cgi/trace';
+  const pingTests = 5;
+  const results = [];
+  
+  try {
+    for (let i = 0; i < pingTests; i++) {
+      const startTime = performance.now();
+      
+      try {
+        const response = await fetch(testUrl, {
+          method: 'GET',
+          cache: 'no-cache'
+        });
+        
+        if (response.ok) {
+          const endTime = performance.now();
+          const latency = Math.round(endTime - startTime);
+          results.push(latency);
+        }
+      } catch (err) {
+        console.warn('Ping test failed:', err);
+      }
+      
+      // Small delay between tests
+      if (i < pingTests - 1) {
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    }
+    
+    if (results.length > 0) {
+      // Calculate average ping
+      const avgPing = Math.round(results.reduce((a, b) => a + b, 0) / results.length);
+      
+      // Calculate jitter (average deviation from mean)
+      const jitter = results.length > 1 
+        ? Math.round(results.reduce((sum, val) => sum + Math.abs(val - avgPing), 0) / results.length)
+        : 0;
+      
+      // Display results with color coding
+      const pingColor = avgPing < 50 ? '#28ca42' : avgPing < 100 ? '#ffd700' : '#ff5757';
+      const jitterColor = jitter < 10 ? '#28ca42' : jitter < 30 ? '#ffd700' : '#ff5757';
+      
+      pingLatency.innerHTML = `<span style="color: ${pingColor};">${avgPing} ms</span>`;
+      jitterValue.innerHTML = `<span style="color: ${jitterColor};">${jitter} ms</span>`;
+    } else {
+      pingLatency.innerHTML = '<span style="color: #ff5757;">Failed</span>';
+      jitterValue.innerHTML = '<span style="color: #ff5757;">Failed</span>';
+    }
+  } catch (error) {
+    console.error('Network test error:', error);
+    pingLatency.innerHTML = '<span style="color: #ff5757;">Error</span>';
+    jitterValue.innerHTML = '<span style="color: #ff5757;">Error</span>';
+  }
+}
+
+function setupUtilitiesMenu() {
+  const utilitiesMenuButton = document.getElementById('utilitiesMenu');
+  const utilitiesDropdown = document.getElementById('utilitiesDropdown');
+  
+  if (utilitiesMenuButton && utilitiesDropdown) {
+    utilitiesMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = utilitiesDropdown.classList.contains('show');
+      
+      // Hide all other menus first
+      document.querySelectorAll('.xorbit-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      document.querySelectorAll('.time-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      
+      if (!isVisible) {
+        utilitiesDropdown.classList.add('show');
+        updateFullscreenText();
+      }
+    });
+    
+    // Prevent menu from closing when clicking inside
+    utilitiesDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+  
+  // Listen for fullscreen changes
+  document.addEventListener('fullscreenchange', updateFullscreenText);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenText);
+  document.addEventListener('mozfullscreenchange', updateFullscreenText);
+  document.addEventListener('MSFullscreenChange', updateFullscreenText);
+}
+
+function toggleFullscreen() {
+  if (!document.fullscreenElement && !document.webkitFullscreenElement && 
+      !document.mozFullScreenElement && !document.msFullscreenElement) {
+    // Enter fullscreen
+    enterFullscreen();
+  } else {
+    // Exit fullscreen
+    exitFullscreen();
+  }
+  
+  // Close menu
+  const dropdown = document.getElementById('utilitiesDropdown');
+  if (dropdown) dropdown.classList.remove('show');
+}
+
+function exitFullscreen() {
+  if (document.exitFullscreen) {
+    document.exitFullscreen();
+  } else if (document.webkitExitFullscreen) {
+    document.webkitExitFullscreen();
+  } else if (document.mozCancelFullScreen) {
+    document.mozCancelFullScreen();
+  } else if (document.msExitFullscreen) {
+    document.msExitFullscreen();
+  }
+}
+
+function updateFullscreenText() {
+  const fullscreenIcon = document.getElementById('fullscreenIcon');
+  const fullscreenText = document.getElementById('fullscreenText');
+  
+  if (!fullscreenIcon || !fullscreenText) return;
+  
+  const isFullscreen = document.fullscreenElement || document.webkitFullscreenElement || 
+                       document.mozFullScreenElement || document.msFullscreenElement;
+  
+  if (isFullscreen) {
+    fullscreenIcon.className = 'fas fa-compress';
+    fullscreenText.textContent = 'Exit Fullscreen';
+  } else {
+    fullscreenIcon.className = 'fas fa-expand';
+    fullscreenText.textContent = 'Enter Fullscreen';
+  }
+}
+
+function refreshDesktop() {
+  // Close menu
+  const dropdown = document.getElementById('utilitiesDropdown');
+  if (dropdown) dropdown.classList.remove('show');
+  
+  // Reload the page
+  location.reload();
+}
+
+function openTaskManager() {
+  // Close menu
+  const dropdown = document.getElementById('utilitiesDropdown');
+  if (dropdown) dropdown.classList.remove('show');
+  
+  // Create task manager content
+  const taskContent = `
+    <div style="padding: 24px;">
+      <h2 style="color: #e8f0ff; margin-bottom: 24px; font-size: 1.4rem;">
+        <i class="fas fa-tasks" style="margin-right: 12px; color: #7d5cff;"></i>
+        Task Manager
+      </h2>
+      
+      <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+        <div style="color: #7d5cff; font-weight: 600; margin-bottom: 12px;">Active Windows</div>
+        <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 8px;">
+          Open Windows: <strong>${activeWindows.size}</strong>
+        </div>
+        <div style="color: #a8b4d9; font-size: 0.85rem;">
+          Click on a window in the dock or desktop to focus it
+        </div>
+      </div>
+      
+      <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2); margin-top: 16px;">
+        <div style="color: #7d5cff; font-weight: 600; margin-bottom: 12px;">System Resources</div>
+        <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">
+          Browser: ${navigator.userAgent.split(' ').pop()}
+        </div>
+        <div style="color: #a8b4d9; font-size: 0.85rem;">
+          Platform: ${navigator.platform}
+        </div>
+      </div>
+    </div>
+  `;
+  
+  openCustomWindow('Task Manager', taskContent, 'fas fa-tasks', 500, 400);
+}
+
+
+
 // Update location function
 function updateLocation() {
   const locationUpdate = document.querySelector('.location-update');
@@ -2933,7 +4383,168 @@ function setupXORBITMenu() {
   }
 }
 
+function setupUserMenu() {
+  const userMenuButton = document.getElementById('userNameplate');
+  const userDropdown = document.getElementById('userDropdown');
+  
+  if (userMenuButton && userDropdown) {
+    userMenuButton.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isVisible = userDropdown.classList.contains('show');
+      
+      // Hide all other menus first
+      document.querySelectorAll('.xorbit-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      document.querySelectorAll('.time-menu.show').forEach(menu => {
+        menu.classList.remove('show');
+      });
+      
+      if (!isVisible) {
+        userDropdown.classList.add('show');
+      }
+    });
+    
+    // Prevent menu from closing when clicking inside
+    userDropdown.addEventListener('click', function(e) {
+      e.stopPropagation();
+    });
+  }
+  
+  // Update user display name
+  updateUserDisplay();
+}
+
+function updateUserDisplay() {
+  const userNameDisplay = document.getElementById('userNameDisplay');
+  if (!userNameDisplay) return;
+  
+  const authData = sessionStorage.getItem('xorbit_auth_session') || 
+                   localStorage.getItem('xorbit_auth_session');
+  
+  if (authData) {
+    try {
+      const authSession = JSON.parse(authData);
+      const username = authSession.username || authSession.name || 'User';
+      userNameDisplay.textContent = username;
+    } catch (e) {
+      console.warn('Could not parse auth data');
+      userNameDisplay.textContent = 'User';
+    }
+  } else {
+    userNameDisplay.textContent = 'Guest';
+  }
+}
+
 // X-ORBIT Menu Functions
+// Global variable to store session start time
+let sessionStartTime = new Date();
+
+function showAccountInfo() {
+  const authData = sessionStorage.getItem('xorbit_auth_session') || 
+                   localStorage.getItem('xorbit_auth_session');
+  
+  let username = 'Guest';
+  let email = 'Not logged in';
+  
+  if (authData) {
+    try {
+      const authSession = JSON.parse(authData);
+      username = authSession.username || authSession.name || 'User';
+      email = authSession.email || 'No email on file';
+    } catch (e) {
+      console.warn('Could not parse auth data');
+    }
+  }
+  
+  // Format last login time
+  const lastLogin = sessionStartTime.toLocaleString('en-US', {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+  
+  // Calculate session duration
+  const now = new Date();
+  const sessionDuration = Math.floor((now - sessionStartTime) / 1000); // in seconds
+  const hours = Math.floor(sessionDuration / 3600);
+  const minutes = Math.floor((sessionDuration % 3600) / 60);
+  const seconds = sessionDuration % 60;
+  const sessionTime = `${hours}h ${minutes}m ${seconds}s`;
+  
+  const accountContent = `
+    <div style="padding: 24px;">
+      <h2 style="color: #e8f0ff; margin-bottom: 24px; font-size: 1.4rem;">
+        <i class="fas fa-user-circle" style="margin-right: 12px; color: #7d5cff;"></i>
+        Account Information
+      </h2>
+      
+      <div style="display: grid; gap: 16px;">
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">User Profile</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">
+            <i class="fas fa-user" style="margin-right: 8px; color: #7d5cff;"></i>
+            Username: <strong>${username}</strong>
+          </div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">
+            <i class="fas fa-envelope" style="margin-right: 8px; color: #7d5cff;"></i>
+            Email: ${email}
+          </div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">Session Information</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">
+            <i class="fas fa-clock" style="margin-right: 8px; color: #7d5cff;"></i>
+            Last Login: ${lastLogin}
+          </div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">
+            <i class="fas fa-hourglass-half" style="margin-right: 8px; color: #7d5cff;"></i>
+            Session Duration: ${sessionTime}
+          </div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">Location Information</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">
+            <i class="fas fa-map-marker-alt" style="margin-right: 8px; color: #7d5cff;"></i>
+            Location: ${userLocation.city}, ${userLocation.state}
+          </div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">
+            <i class="fas fa-globe" style="margin-right: 8px; color: #7d5cff;"></i>
+            Timezone: ${userLocation.timezone}
+          </div>
+        </div>
+        
+        <div style="background: rgba(120, 80, 255, 0.1); padding: 16px; border-radius: 12px; border: 1px solid rgba(120, 80, 255, 0.2);">
+          <div style="color: #7d5cff; font-weight: 600; margin-bottom: 8px;">System Status</div>
+          <div style="color: #e8f0ff; font-size: 0.9rem; margin-bottom: 4px;">
+            <i class="fas fa-check-circle" style="margin-right: 8px; color: #28ca42;"></i>
+            Status: ${isAuthenticated ? 'Authenticated' : 'Guest Mode'}
+          </div>
+          <div style="color: #a8b4d9; font-size: 0.85rem;">
+            <i class="fas fa-window-restore" style="margin-right: 8px; color: #7d5cff;"></i>
+            Active Windows: ${activeWindows.size}
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  
+  openCustomWindow('Account Information', accountContent, 'fas fa-user-circle', 600, 500);
+  
+  // Close both possible dropdowns
+  const xorbitDropdown = document.getElementById('xorbitDropdown');
+  if (xorbitDropdown) xorbitDropdown.classList.remove('show');
+  
+  const userDropdown = document.getElementById('userDropdown');
+  if (userDropdown) userDropdown.classList.remove('show');
+}
+
 function showAboutDialog() {
   openWindow('Build Information', 'build-info.html', 'fas fa-info-circle');
   document.getElementById('xorbitDropdown').classList.remove('show');
@@ -3140,13 +4751,54 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   }
   windowEl.id = windowId;
   
-  const x = Math.random() * (window.innerWidth - width) + 50;
-  const y = Math.random() * (window.innerHeight - height) + 80;
+  // Calculate safe position to prevent overflow - ULTRA CONSERVATIVE
+  // Get viewport size
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
   
-  windowEl.style.left = x + 'px';
-  windowEl.style.top = y + 'px';
-  windowEl.style.width = width + 'px';
-  windowEl.style.height = height + 'px';
+  // Ultra-safe margins
+  const leftMargin = 50;
+  const rightMargin = 50;
+  const topMargin = 80;
+  const bottomMargin = 120;
+  
+  // Calculate actual available space
+  const availableWidth = vw - leftMargin - rightMargin;
+  const availableHeight = vh - topMargin - bottomMargin;
+  
+  // Reduce window size if it won't fit
+  const actualWidth = Math.min(width, availableWidth - 100);
+  const actualHeight = Math.min(height, availableHeight - 100);
+  
+  // Calculate safe position range
+  const minX = leftMargin;
+  const maxX = vw - actualWidth - rightMargin;
+  const minY = topMargin;
+  const maxY = vh - actualHeight - bottomMargin;
+  
+  // Generate position (centered with slight randomness)
+  const centerX = (vw - actualWidth) / 2;
+  const centerY = (vh - actualHeight) / 2;
+  const randomOffsetX = (Math.random() - 0.5) * 100;
+  const randomOffsetY = (Math.random() - 0.5) * 100;
+  
+  let x = centerX + randomOffsetX;
+  let y = centerY + randomOffsetY;
+  
+  // Absolute clamp - cannot exceed these bounds
+  x = Math.max(minX, Math.min(x, maxX));
+  y = Math.max(minY, Math.min(y, maxY));
+  
+  // Set CSS variables for clamp
+  windowEl.style.setProperty('--window-width', actualWidth + 'px');
+  windowEl.style.setProperty('--window-height', actualHeight + 'px');
+  windowEl.style.setProperty('--window-x', x + 'px');
+  windowEl.style.setProperty('--window-y', y + 'px');
+  
+  windowEl.style.left = Math.floor(x) + 'px';
+  windowEl.style.top = Math.floor(y) + 'px';
+  windowEl.style.width = Math.floor(actualWidth) + 'px';
+  windowEl.style.height = Math.floor(actualHeight) + 'px';
   
   windowEl.innerHTML = 
     '<div class="window-titlebar">' +
@@ -3173,7 +4825,132 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   
   setupWindowEvents(windowEl, windowId, title);
   
+  // Add resize observer to prevent overflow
+  constrainWindowSize(windowEl);
+  
+  // Force immediate position check
+  setTimeout(() => {
+    forceWindowInBounds(windowEl);
+    // Trigger smooth animation like weather UI
+    windowEl.classList.add('window-visible');
+  }, 0);
+  
   return windowEl;
+}
+
+function forceWindowInBounds(windowEl) {
+  const rect = windowEl.getBoundingClientRect();
+  const menuBarHeight = 32;
+  const margin = 10;
+  
+  let needsUpdate = false;
+  let newLeft = parseFloat(windowEl.style.left);
+  let newTop = parseFloat(windowEl.style.top);
+  let newWidth = parseFloat(windowEl.style.width);
+  let newHeight = parseFloat(windowEl.style.height);
+  
+  // Check right overflow
+  if (rect.right > window.innerWidth - margin) {
+    newLeft = window.innerWidth - rect.width - margin;
+    needsUpdate = true;
+  }
+  
+  // Check bottom overflow
+  if (rect.bottom > window.innerHeight - margin) {
+    newTop = window.innerHeight - rect.height - margin;
+    needsUpdate = true;
+  }
+  
+  // Check left overflow
+  if (rect.left < margin) {
+    newLeft = margin;
+    needsUpdate = true;
+  }
+  
+  // Check top overflow
+  if (rect.top < menuBarHeight + margin) {
+    newTop = menuBarHeight + margin;
+    needsUpdate = true;
+  }
+  
+  // Check if window is too wide
+  if (rect.width > window.innerWidth - (2 * margin)) {
+    newWidth = window.innerWidth - (2 * margin);
+    newLeft = margin;
+    needsUpdate = true;
+  }
+  
+  // Check if window is too tall
+  if (rect.height > window.innerHeight - menuBarHeight - (2 * margin)) {
+    newHeight = window.innerHeight - menuBarHeight - (2 * margin);
+    newTop = menuBarHeight + margin;
+    needsUpdate = true;
+  }
+  
+  if (needsUpdate) {
+    windowEl.style.left = Math.round(newLeft) + 'px';
+    windowEl.style.top = Math.round(newTop) + 'px';
+    windowEl.style.width = Math.round(newWidth) + 'px';
+    windowEl.style.height = Math.round(newHeight) + 'px';
+  }
+}
+
+function constrainWindowSize(windowEl) {
+  const resizeObserver = new ResizeObserver(entries => {
+    for (let entry of entries) {
+      const rect = entry.target.getBoundingClientRect();
+      const menuBarHeight = 32;
+      const dockHeight = 70;
+      const margin = 20;
+      
+      let needsAdjustment = false;
+      let newWidth = rect.width;
+      let newHeight = rect.height;
+      let newLeft = parseFloat(windowEl.style.left) || rect.left;
+      let newTop = parseFloat(windowEl.style.top) || rect.top;
+      
+      // Check if window extends beyond right edge
+      if (rect.right > window.innerWidth - margin) {
+        newWidth = window.innerWidth - newLeft - margin;
+        needsAdjustment = true;
+      }
+      
+      // Check if window extends beyond bottom edge
+      if (rect.bottom > window.innerHeight - dockHeight - margin) {
+        newHeight = window.innerHeight - dockHeight - newTop - margin;
+        needsAdjustment = true;
+      }
+      
+      // Check if window position needs adjustment
+      if (newLeft < margin) {
+        newLeft = margin;
+        needsAdjustment = true;
+      }
+      
+      if (newTop < menuBarHeight + margin) {
+        newTop = menuBarHeight + margin;
+        needsAdjustment = true;
+      }
+      
+      // Apply constraints
+      if (needsAdjustment) {
+        if (newWidth !== rect.width) {
+          windowEl.style.width = Math.max(400, newWidth) + 'px';
+        }
+        if (newHeight !== rect.height) {
+          windowEl.style.height = Math.max(300, newHeight) + 'px';
+        }
+        if (newLeft !== rect.left) {
+          windowEl.style.left = newLeft + 'px';
+        }
+        if (newTop !== rect.top) {
+          windowEl.style.top = newTop + 'px';
+        }
+      }
+    }
+  });
+  
+  resizeObserver.observe(windowEl);
 }
 
 // Terminal communication handler

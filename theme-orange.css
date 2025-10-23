@@ -1,0 +1,364 @@
+/* Orange Theme for X-ORBIT Desktop */
+:root {
+  --bg-gradient-start: #2a1000;
+  --bg-gradient-middle: #1a0a00;
+  --bg-gradient-end: #0f0500;
+  --bg-overlay-1: rgba(255, 140, 40, 0.15);
+  --bg-overlay-2: rgba(255, 100, 30, 0.15);
+  --bg-overlay-3: rgba(255, 165, 60, 0.1);
+  
+  --menu-bg: rgba(35, 20, 10, 0.6);
+  --menu-border: rgba(255, 140, 40, 0.3);
+  --menu-text: #ffe8d0;
+  --menu-hover: rgba(255, 140, 40, 0.25);
+  
+  --window-bg: rgba(40, 25, 15, 0.4);
+  --window-border: rgba(255, 140, 40, 0.2);
+  --window-shadow: rgba(0, 0, 0, 0.4);
+  --window-glow: rgba(255, 140, 40, 0.25);
+  --window-active-glow: rgba(255, 140, 40, 0.35);
+  
+  --titlebar-bg: rgba(50, 30, 15, 0.6);
+  --titlebar-border: rgba(255, 140, 40, 0.15);
+  --titlebar-text: #ffe8d0;
+  
+  --dock-bg: rgba(40, 25, 15, 0.5);
+  --dock-border: rgba(255, 140, 40, 0.3);
+  --dock-shadow: rgba(0, 0, 0, 0.4);
+  --dock-glow: rgba(255, 140, 40, 0.35);
+  
+  --dock-item-hover: rgba(255, 140, 40, 0.25);
+  --dock-item-active: rgba(255, 140, 40, 0.4);
+  
+  --desktop-icon-text: #ffe8d0;
+  --desktop-icon-hover: rgba(255, 140, 40, 0.25);
+  --desktop-icon-shadow: rgba(255, 140, 40, 0.4);
+  
+  --text-primary: #fff5e8;
+  --text-secondary: #ffd8a8;
+  --text-bright: #ffffff;
+  
+  --content-bg: rgba(25, 15, 8, 0.3);
+  
+  --settings-bg: rgba(30, 18, 10, 0.95);
+  --settings-text: #ffe8d0;
+  --settings-border: rgba(255, 140, 40, 0.2);
+  --settings-hover: rgba(255, 140, 40, 0.15);
+  --settings-label: #ffcfa0;
+  --settings-select-bg: rgba(50, 30, 15, 0.8);
+  --settings-select-border: rgba(255, 140, 40, 0.3);
+  
+  --button-primary: rgba(255, 120, 30, 0.85);
+  --button-primary-hover: rgba(255, 140, 50, 1);
+  --button-secondary: rgba(200, 100, 30, 0.8);
+  --button-secondary-hover: rgba(220, 120, 40, 1);
+}
+
+body {
+  background: radial-gradient(ellipse at top, var(--bg-gradient-start) 0%, var(--bg-gradient-middle) 50%, var(--bg-gradient-end) 100%) !important;
+  color: var(--text-primary) !important;
+}
+
+body::before {
+  background: 
+    radial-gradient(circle at 20% 50%, var(--bg-overlay-1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, var(--bg-overlay-2) 0%, transparent 50%),
+    radial-gradient(circle at 40% 80%, var(--bg-overlay-3) 0%, transparent 50%) !important;
+}
+
+.menu-bar {
+  background: var(--menu-bg) !important;
+  color: var(--menu-text) !important;
+  border-bottom: 1px solid var(--menu-border) !important;
+  box-shadow: 
+    0 1px 0 0 rgba(255, 140, 40, 0.15) inset,
+    0 4px 16px var(--window-shadow) !important;
+}
+
+.menu-item:hover {
+  background: var(--menu-hover) !important;
+}
+
+.window {
+  background: var(--window-bg) !important;
+  border: 1px solid var(--window-border) !important;
+  box-shadow: 
+    0 0 60px var(--window-glow),
+    0 20px 40px var(--window-shadow),
+    0 1px 0 rgba(255, 140, 40, 0.2) inset !important;
+}
+
+.window.active {
+  box-shadow: 
+    0 0 80px var(--window-active-glow),
+    0 25px 50px var(--window-shadow),
+    0 1px 0 rgba(255, 140, 40, 0.3) inset !important;
+}
+
+.window-titlebar {
+  background: var(--titlebar-bg) !important;
+  border-bottom: 1px solid var(--titlebar-border) !important;
+}
+
+.window-title {
+  color: var(--titlebar-text) !important;
+}
+
+.window-content {
+  background: var(--content-bg) !important;
+}
+
+.dock {
+  background: var(--dock-bg) !important;
+  border: 1px solid var(--dock-border) !important;
+  box-shadow: 
+    0 0 60px var(--dock-glow),
+    0 20px 40px var(--dock-shadow),
+    0 1px 0 rgba(255, 140, 40, 0.25) inset !important;
+}
+
+.dock-item {
+  background: transparent !important;
+}
+
+.dock-item:hover {
+  background: var(--dock-item-hover) !important;
+}
+
+.dock-item.active {
+  background: var(--dock-item-active) !important;
+}
+
+.desktop-icon {
+  color: var(--desktop-icon-text) !important;
+}
+
+.desktop-icon:hover {
+  background: var(--desktop-icon-hover) !important;
+  box-shadow: 0 8px 32px var(--desktop-icon-shadow) !important;
+}
+
+.desktop-icon i {
+  color: var(--text-secondary) !important;
+  filter: drop-shadow(0 2px 8px var(--desktop-icon-shadow)) !important;
+}
+
+.desktop-icon:hover i {
+  color: var(--text-bright) !important;
+  filter: drop-shadow(0 4px 12px var(--desktop-icon-shadow)) !important;
+}
+
+.desktop-icon span {
+  color: var(--desktop-icon-text) !important;
+}
+
+.desktop-icon:hover span {
+  color: var(--text-bright) !important;
+}
+
+/* Settings specific styles */
+.settings-container {
+  background: var(--settings-bg) !important;
+  color: var(--settings-text) !important;
+}
+
+.settings-section {
+  border-bottom: 1px solid var(--settings-border) !important;
+}
+
+.settings-section:hover {
+  background: var(--settings-hover) !important;
+}
+
+.section-title {
+  color: var(--settings-text) !important;
+  border-bottom: 1px solid rgba(255, 140, 40, 0.3) !important;
+}
+
+.section-title i {
+  color: #ff8c28 !important;
+}
+
+.setting-item {
+  background: rgba(255, 140, 40, 0.05) !important;
+  border: 1px solid rgba(255, 140, 40, 0.15) !important;
+}
+
+.setting-item:hover {
+  background: rgba(255, 140, 40, 0.12) !important;
+  border-color: rgba(255, 140, 40, 0.25) !important;
+}
+
+.setting-label {
+  color: var(--settings-text) !important;
+}
+
+.setting-description {
+  color: var(--settings-label) !important;
+}
+
+.toggle-switch {
+  background: rgba(255, 140, 40, 0.15) !important;
+  border: 1px solid rgba(255, 140, 40, 0.3) !important;
+}
+
+.toggle-switch.active {
+  background: linear-gradient(135deg, rgba(255, 120, 30, 0.85) 0%, rgba(255, 165, 60, 0.85) 100%) !important;
+  box-shadow: 0 0 15px rgba(255, 140, 40, 0.5) !important;
+}
+
+.select-dropdown {
+  background: var(--settings-select-bg) !important;
+  border: 1px solid var(--settings-select-border) !important;
+  color: var(--settings-text) !important;
+}
+
+.select-dropdown:focus {
+  border-color: rgba(255, 140, 40, 0.6) !important;
+  box-shadow: 0 0 0 3px rgba(255, 140, 40, 0.1) !important;
+}
+
+.range-slider {
+  background: rgba(255, 140, 40, 0.2) !important;
+}
+
+.range-slider::-webkit-slider-thumb {
+  background: linear-gradient(135deg, #ff8c28 0%, #ffa53c 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 140, 40, 0.4) !important;
+}
+
+.range-slider::-moz-range-thumb {
+  background: linear-gradient(135deg, #ff8c28 0%, #ffa53c 100%) !important;
+  box-shadow: 0 2px 8px rgba(255, 140, 40, 0.4) !important;
+}
+
+.range-value {
+  color: #ff8c28 !important;
+}
+
+.reset-button {
+  background: rgba(255, 87, 87, 0.15) !important;
+  border: 1px solid rgba(255, 87, 87, 0.4) !important;
+}
+
+.reset-button:hover {
+  background: rgba(255, 87, 87, 0.25) !important;
+}
+
+/* X-ORBIT Menu Styles */
+.xorbit-menu {
+  background: rgba(40, 25, 15, 0.9) !important;
+  border: 1px solid rgba(255, 140, 40, 0.3) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 140, 40, 0.15) inset !important;
+}
+
+.xorbit-menu-item {
+  color: var(--text-primary) !important;
+}
+
+.xorbit-menu-item:hover {
+  background: rgba(255, 140, 40, 0.25) !important;
+  color: var(--text-bright) !important;
+}
+
+.xorbit-menu-item i {
+  color: var(--text-secondary) !important;
+}
+
+.xorbit-menu-item:hover i {
+  color: #ff8c28 !important;
+}
+
+.xorbit-menu-divider {
+  background: rgba(255, 140, 40, 0.3) !important;
+}
+
+/* Weather/Time Menu Styles */
+.time-menu {
+  background: rgba(40, 25, 15, 0.9) !important;
+  border: 1px solid rgba(255, 140, 40, 0.3) !important;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 140, 40, 0.15) inset !important;
+}
+
+.time-header {
+  border-bottom: 1px solid rgba(255, 140, 40, 0.3) !important;
+}
+
+.time-display {
+  color: var(--text-primary) !important;
+}
+
+.date-display {
+  color: var(--text-secondary) !important;
+}
+
+.timezone-display {
+  color: #ff8c28 !important;
+}
+
+.weather-section {
+  background: rgba(255, 140, 40, 0.15) !important;
+  border: 1px solid rgba(255, 140, 40, 0.25) !important;
+}
+
+.weather-temp {
+  color: var(--text-primary) !important;
+}
+
+.weather-desc {
+  color: var(--text-secondary) !important;
+}
+
+.weather-location {
+  color: #ff8c28 !important;
+}
+
+.weather-detail {
+  background: rgba(255, 140, 40, 0.08) !important;
+  border: 1px solid rgba(255, 140, 40, 0.15) !important;
+}
+
+.weather-detail-label {
+  color: var(--text-secondary) !important;
+}
+
+.weather-detail-value {
+  color: var(--text-primary) !important;
+}
+
+.location-section {
+  border-top: 1px solid rgba(255, 140, 40, 0.3) !important;
+}
+
+.location-text {
+  color: var(--text-secondary) !important;
+}
+
+.location-update {
+  color: #ff8c28 !important;
+}
+
+.location-update:hover {
+  color: #ffa53c !important;
+}
+
+.settings-button {
+  background: var(--button-primary) !important;
+  color: white !important;
+}
+
+.settings-button:hover {
+  background: var(--button-primary-hover) !important;
+}
+
+.settings-button.secondary {
+  background: var(--button-secondary) !important;
+}
+
+.settings-button.secondary:hover {
+  background: var(--button-secondary-hover) !important;
+}

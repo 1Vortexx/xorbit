@@ -199,8 +199,6 @@
       transform: translateY(20px) scale(0.95);
       transition: opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1),
                   transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-      left: clamp(20px, var(--window-x, 100px), calc(100vw - var(--window-width, 600px) - 20px)) !important;
-      top: clamp(52px, var(--window-y, 100px), calc(100vh - var(--window-height, 450px) - 100px)) !important;
     }
 
     .window.window-visible {
@@ -2687,7 +2685,7 @@ function openWindow(title, src, icon) {
   }
   windowEl.id = windowId;
   
-  // Calculate safe position to prevent overflow - ULTRA CONSERVATIVE
+  // Calculate safe position to prevent overflow - SIMPLIFIED
   const windowWidth = 600;
   const windowHeight = 450;
   
@@ -2695,7 +2693,7 @@ function openWindow(title, src, icon) {
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   
-  // Ultra-safe margins
+  // Safe margins
   const leftMargin = 50;
   const rightMargin = 50;
   const topMargin = 80;
@@ -2706,8 +2704,8 @@ function openWindow(title, src, icon) {
   const availableHeight = vh - topMargin - bottomMargin;
   
   // Reduce window size if it won't fit
-  const actualWidth = Math.min(windowWidth, availableWidth - 100);
-  const actualHeight = Math.min(windowHeight, availableHeight - 100);
+  const actualWidth = Math.min(windowWidth, availableWidth);
+  const actualHeight = Math.min(windowHeight, availableHeight);
   
   // Calculate safe position range
   const minX = leftMargin;
@@ -2724,15 +2722,9 @@ function openWindow(title, src, icon) {
   let x = centerX + randomOffsetX;
   let y = centerY + randomOffsetY;
   
-  // Absolute clamp - cannot exceed these bounds
+  // Clamp to bounds
   x = Math.max(minX, Math.min(x, maxX));
   y = Math.max(minY, Math.min(y, maxY));
-  
-  // Set CSS variables for clamp
-  windowEl.style.setProperty('--window-width', actualWidth + 'px');
-  windowEl.style.setProperty('--window-height', actualHeight + 'px');
-  windowEl.style.setProperty('--window-x', x + 'px');
-  windowEl.style.setProperty('--window-y', y + 'px');
   
   windowEl.style.left = Math.floor(x) + 'px';
   windowEl.style.top = Math.floor(y) + 'px';
@@ -4751,12 +4743,12 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   }
   windowEl.id = windowId;
   
-  // Calculate safe position to prevent overflow - ULTRA CONSERVATIVE
+  // Calculate safe position to prevent overflow - SIMPLIFIED
   // Get viewport size
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   
-  // Ultra-safe margins
+  // Safe margins
   const leftMargin = 50;
   const rightMargin = 50;
   const topMargin = 80;
@@ -4767,8 +4759,8 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   const availableHeight = vh - topMargin - bottomMargin;
   
   // Reduce window size if it won't fit
-  const actualWidth = Math.min(width, availableWidth - 100);
-  const actualHeight = Math.min(height, availableHeight - 100);
+  const actualWidth = Math.min(width, availableWidth);
+  const actualHeight = Math.min(height, availableHeight);
   
   // Calculate safe position range
   const minX = leftMargin;
@@ -4785,15 +4777,9 @@ function openCustomWindow(title, content, icon, width = 600, height = 450) {
   let x = centerX + randomOffsetX;
   let y = centerY + randomOffsetY;
   
-  // Absolute clamp - cannot exceed these bounds
+  // Clamp to bounds
   x = Math.max(minX, Math.min(x, maxX));
   y = Math.max(minY, Math.min(y, maxY));
-  
-  // Set CSS variables for clamp
-  windowEl.style.setProperty('--window-width', actualWidth + 'px');
-  windowEl.style.setProperty('--window-height', actualHeight + 'px');
-  windowEl.style.setProperty('--window-x', x + 'px');
-  windowEl.style.setProperty('--window-y', y + 'px');
   
   windowEl.style.left = Math.floor(x) + 'px';
   windowEl.style.top = Math.floor(y) + 'px';

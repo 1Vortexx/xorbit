@@ -1332,13 +1332,70 @@
             }
         }
 
+        // Profanity and inappropriate name filter
+        function containsInappropriateContent(text) {
+            // List of blocked words/phrases (you can add more)
+            const blockedWords = [
+                // System/Staff names
+                'admin', 'administrator', 'moderator', 'support', 'staff',
+                'xorbit', 'system', 'bot', 'test', 'demitri', 'dmitri', 'demetri',
+                
+                // Profanity
+                'fuck', 'fucking', 'fucker', 'fck', 'fuk',
+                'shit', 'shit', 'crap',
+                'ass', 'asshole', 'arse',
+                'bitch', 'bastard',
+                'damn', 'dammit',
+                'hell',
+                'piss', 'pissed',
+                'cock', 'dick', 'penis',
+                'pussy', 'vagina', 'cunt',
+                'motherfucker', 'mofo',
+                'whore', 'slut',
+                'nigger', 'nigga', 'faggot', 'fag',
+                'retard', 'retarded',
+                'sex', 'sexy', 'porn', 'xxx',
+                'kill', 'die', 'death', 'suicide',
+                'nazi', 'hitler'
+                // Add more words as needed
+            ];
+            
+            const lowerText = text.toLowerCase();
+            
+            // Check for exact matches and partial matches
+            for (const word of blockedWords) {
+                if (lowerText.includes(word)) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
         async function handleGuestServices(event) {
             event.preventDefault();
+            
+            // Check if a guest account has already been created on this device
+            const hasGuestAccount = localStorage.getItem('xorbit_guest_account_created');
+            const errorMsg = document.getElementById('guestError');
+            
+            if (hasGuestAccount === 'true') {
+                errorMsg.textContent = 'You have already created a guest account. Only one guest account is allowed per device. Please use "Returning Guest" to log in.';
+                errorMsg.classList.add('show');
+                return;
+            }
+            
             const firstName = document.getElementById('guestFirstName').value.trim();
             const lastName = document.getElementById('guestLastName').value.trim();
             const email = document.getElementById('guestEmail').value.trim();
             const guestBtn = document.getElementById('guestBtn');
-            const errorMsg = document.getElementById('guestError');
+
+            // Check for inappropriate content in names
+            if (containsInappropriateContent(firstName) || containsInappropriateContent(lastName)) {
+                errorMsg.textContent = 'Please use appropriate language in your name.';
+                errorMsg.classList.add('show');
+                return;
+            }
 
             guestBtn.disabled = true;
             guestBtn.textContent = 'Processing...';
@@ -1380,6 +1437,9 @@
 
                     if (error) throw error;
                     guestUser = data;
+                    
+                    // Mark that a guest account has been created on this device
+                    localStorage.setItem('xorbit_guest_account_created', 'true');
                 }
 
                 currentUser = {
@@ -1411,6 +1471,13 @@
             const email = document.getElementById('guestLoginEmail').value.trim();
             const guestLoginBtn = document.getElementById('guestLoginBtn');
             const errorMsg = document.getElementById('guestLoginError');
+
+            // Check for inappropriate content in names
+            if (containsInappropriateContent(firstName) || containsInappropriateContent(lastName)) {
+                errorMsg.textContent = 'Please use appropriate language in your name.';
+                errorMsg.classList.add('show');
+                return;
+            }
 
             guestLoginBtn.disabled = true;
             guestLoginBtn.textContent = 'Accessing...';

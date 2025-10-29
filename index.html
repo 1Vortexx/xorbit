@@ -2987,13 +2987,13 @@ function openSettingsWindow() {
   }
   windowEl.id = windowId;
   
-  const x = Math.random() * (window.innerWidth - 700) + 50;
-  const y = Math.random() * (window.innerHeight - 600) + 80;
+  const x = Math.random() * (window.innerWidth - 800) + 50;
+  const y = Math.random() * (window.innerHeight - 700) + 80;
   
   windowEl.style.left = x + 'px';
   windowEl.style.top = y + 'px';
-  windowEl.style.width = '700px';
-  windowEl.style.height = '600px';
+  windowEl.style.width = '800px';
+  windowEl.style.height = '700px';
   
   windowEl.innerHTML = 
     '<div class="window-titlebar">' +
@@ -3022,484 +3022,858 @@ function openSettingsWindow() {
   setupSettingsEvents(windowEl);
 }
 
-// Create settings content
+// Create settings content - REDESIGNED UNIQUE UI
 function createSettingsContent() {
   return `
-    <div style="
-      height: 100%; 
-      overflow-y: auto; 
-      padding: 24px;
-      background: rgba(10, 10, 25, 0.3);
-      border-radius: 0 0 16px 16px;
-    ">
-      <style>
-        .settings-section {
-          margin-bottom: 32px;
-        }
-        
-        .section-title {
-          font-size: 1.3rem;
-          font-weight: 600;
-          margin-bottom: 20px;
-          color: #e8f0ff;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          border-bottom: 1px solid rgba(120, 80, 255, 0.2);
-          padding-bottom: 12px;
-        }
-        
-        .section-title i {
-          color: #7d5cff;
-          font-size: 1.1rem;
-        }
-        
-        .setting-item {
-          display: flex;
-          flex-direction: column;
-          align-items: flex-start;
-          padding: 16px 20px;
-          margin-bottom: 12px;
-          background: rgba(255, 255, 255, 0.03);
-          border: 1px solid rgba(120, 80, 255, 0.1);
-          border-radius: 12px;
-          transition: all 0.3s ease;
-        }
-        
-        .setting-item:hover {
-          background: rgba(120, 80, 255, 0.08);
-          border-color: rgba(120, 80, 255, 0.2);
-          transform: translateY(-1px);
-        }
-        
-        .setting-info {
-          width: 100%;
-          margin-bottom: 12px;
-        }
-        
-        .setting-label {
-          font-size: 1rem;
-          font-weight: 500;
-          color: #e8f0ff;
-          margin-bottom: 4px;
-        }
-        
-        .setting-description {
-          font-size: 0.85rem;
-          color: #a8b4d9;
-          line-height: 1.3;
-        }
-        
-        .setting-control {
-          width: 100%;
-          margin-left: 0;
-        }
-        
-        .toggle-switch {
-          position: relative;
-          width: 50px;
-          height: 26px;
-          background: rgba(255, 255, 255, 0.1);
-          border-radius: 13px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          border: 1px solid rgba(120, 80, 255, 0.3);
-        }
-        
-        .toggle-switch.active {
-          background: linear-gradient(135deg, rgba(120, 80, 255, 0.8) 0%, rgba(60, 130, 255, 0.8) 100%);
-          box-shadow: 0 0 15px rgba(120, 80, 255, 0.4);
-        }
-        
-        .toggle-switch::before {
-          content: '';
-          position: absolute;
-          top: 2px;
-          left: 2px;
-          width: 20px;
-          height: 20px;
-          background: #ffffff;
-          border-radius: 50%;
-          transition: all 0.3s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        
-        .toggle-switch.active::before {
-          transform: translateX(24px);
-        }
-        
-        .select-control {
-          position: relative;
-          width: 100%;
-        }
-        
-        .select-dropdown {
-          width: 100%;
-          padding: 10px 14px;
-          background: rgba(255, 255, 255, 0.06);
-          border: 1px solid rgba(120, 80, 255, 0.3);
-          border-radius: 10px;
-          color: #e8f0ff;
-          font-size: 0.9rem;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          appearance: none;
-          -webkit-appearance: none;
-        }
-        
-        .select-dropdown:focus {
-          outline: none;
-          border-color: rgba(120, 80, 255, 0.6);
-          box-shadow: 0 0 15px rgba(120, 80, 255, 0.3);
-        }
-        
-        .select-control::after {
-          content: '▼';
-          position: absolute;
-          right: 12px;
-          top: 50%;
-          transform: translateY(-50%);
-          color: #a8b4d9;
-          pointer-events: none;
-          font-size: 0.8rem;
-        }
-        
-        .range-control {
-          width: 100%;
-        }
-        
-        .range-slider {
-          width: 100%;
-          height: 5px;
-          border-radius: 3px;
-          background: rgba(255, 255, 255, 0.1);
-          outline: none;
-          appearance: none;
-          -webkit-appearance: none;
-          cursor: pointer;
-        }
-        
-        .range-slider::-webkit-slider-thumb {
-          appearance: none;
-          -webkit-appearance: none;
-          width: 18px;
-          height: 18px;
-          border-radius: 50%;
-          background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
-          cursor: pointer;
-          box-shadow: 0 0 10px rgba(120, 80, 255, 0.5), 0 3px 6px rgba(0, 0, 0, 0.3);
-          transition: all 0.2s ease;
-        }
-        
-        .range-slider::-webkit-slider-thumb:hover {
-          transform: scale(1.1);
-          box-shadow: 0 0 15px rgba(120, 80, 255, 0.7), 0 4px 8px rgba(0, 0, 0, 0.4);
-        }
-        
-        .range-value {
-          font-size: 0.85rem;
-          color: #d0d8ff;
-          margin-top: 6px;
-          text-align: center;
-          font-weight: 500;
-        }
-        
-        .save-indicator {
-          position: fixed;
-          top: 20px;
-          right: 20px;
-          background: rgba(40, 202, 66, 0.9);
-          color: white;
-          padding: 10px 16px;
-          border-radius: 10px;
-          font-size: 0.85rem;
-          font-weight: 500;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          opacity: 0;
-          transform: translateX(100px);
-          transition: all 0.3s ease;
-          z-index: 10000;
-          pointer-events: none;
-        }
-        
-        .save-indicator.show {
-          opacity: 1;
-          transform: translateX(0);
-        }
-        
-        .reset-button {
-          width: 100%;
-          padding: 14px 20px;
-          background: rgba(255, 87, 87, 0.1);
-          border: 1px solid rgba(255, 87, 87, 0.4);
-          border-radius: 12px;
-          color: #ff6b6b;
-          font-size: 0.95rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 10px;
-          margin-top: 24px;
-        }
-        
-        .reset-button:hover {
-          background: rgba(255, 87, 87, 0.2);
-          border-color: rgba(255, 87, 87, 0.6);
-          transform: translateY(-1px);
-        }
-
-        .wallpaper-button {
-          padding: 10px 16px;
-          background: rgba(120, 80, 255, 0.15);
-          border: 2px solid rgba(120, 80, 255, 0.3);
-          border-radius: 8px;
-          color: #e8f0ff;
-          font-size: 0.9rem;
-          font-weight: 500;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-        }
-
-        .wallpaper-button:hover {
-          background: rgba(120, 80, 255, 0.25);
-          border-color: rgba(120, 80, 255, 0.5);
-          transform: translateY(-1px);
-        }
-
-        .wallpaper-button.reset-wallpaper {
-          background: rgba(255, 87, 87, 0.1);
-          border-color: rgba(255, 87, 87, 0.3);
-        }
-
-        .wallpaper-button.reset-wallpaper:hover {
-          background: rgba(255, 87, 87, 0.2);
-          border-color: rgba(255, 87, 87, 0.5);
-        }
-      </style>
+    <style>
+      /* X-ORBIT Unique Settings UI */
+      .xorbit-settings-container {
+        height: 100%;
+        display: flex;
+        background: linear-gradient(135deg, rgba(10, 5, 30, 0.95) 0%, rgba(15, 10, 40, 0.95) 100%);
+        overflow: hidden;
+      }
       
-      <!-- Display Settings -->
-      <div class="settings-section">
-        <h2 class="section-title">
-          <i class="fas fa-palette"></i>
-          Display Settings
-        </h2>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-info">
-            <div class="setting-label">Theme</div>
-            <div class="setting-description">Choose your desktop theme</div>
-          </div>
-          <div class="setting-control">
-            <div class="select-control">
-              <select class="select-dropdown" id="themeSelect">
-                <option value="dark">Dark Mode</option>
-                <option value="light">Light Mode</option>
-                <option value="orange">Halloween 2025</option>
-                <option value="auto">Auto (System)</option>
-              </select>
-            </div>
-          </div>
+      /* Sidebar Navigation */
+      .settings-sidebar {
+        width: 240px;
+        background: rgba(20, 15, 40, 0.6);
+        border-right: 1px solid rgba(120, 80, 255, 0.15);
+        padding: 24px 16px;
+        overflow-y: auto;
+      }
+      
+      .settings-logo {
+        text-align: center;
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid rgba(120, 80, 255, 0.2);
+      }
+      
+      .settings-logo i {
+        font-size: 2.5rem;
+        color: #7d5cff;
+        margin-bottom: 12px;
+        display: block;
+        animation: settingsLogoSpin 8s linear infinite;
+      }
+      
+      @keyframes settingsLogoSpin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      
+      .settings-logo-text {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #e8f0ff;
+        letter-spacing: 2px;
+      }
+      
+      .settings-nav-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        color: #a8b4d9;
+        font-size: 0.95rem;
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .settings-nav-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #7d5cff 0%, #3c82ff 100%);
+        transform: scaleY(0);
+        transition: transform 0.3s ease;
+      }
+      
+      .settings-nav-item:hover {
+        background: rgba(120, 80, 255, 0.15);
+        color: #e8f0ff;
+        transform: translateX(4px);
+      }
+      
+      .settings-nav-item.active {
+        background: rgba(120, 80, 255, 0.25);
+        color: #ffffff;
+        box-shadow: 0 4px 16px rgba(120, 80, 255, 0.3);
+      }
+      
+      .settings-nav-item.active::before {
+        transform: scaleY(1);
+      }
+      
+      .settings-nav-item i {
+        font-size: 1.1rem;
+        width: 24px;
+        text-align: center;
+      }
+      
+      /* Main Content Area */
+      .settings-main {
+        flex: 1;
+        padding: 32px 40px;
+        overflow-y: auto;
+      }
+      
+      .settings-header {
+        margin-bottom: 32px;
+        padding-bottom: 24px;
+        border-bottom: 2px solid rgba(120, 80, 255, 0.2);
+      }
+      
+      .settings-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #e8f0ff;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      
+      .settings-header h1 i {
+        color: #7d5cff;
+        font-size: 1.8rem;
+      }
+      
+      .settings-header p {
+        color: #a8b4d9;
+        font-size: 0.95rem;
+        margin-left: 52px;
+      }
+      
+      /* Settings Grid */
+      .settings-grid {
+        display: grid;
+        gap: 24px;
+      }
+      
+      /* Setting Card */
+      .setting-card {
+        background: rgba(30, 25, 50, 0.4);
+        border: 1px solid rgba(120, 80, 255, 0.2);
+        border-radius: 16px;
+        padding: 24px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+      }
+      
+      .setting-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #7d5cff 0%, #3c82ff 100%);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 0.3s ease;
+      }
+      
+      .setting-card:hover {
+        border-color: rgba(120, 80, 255, 0.4);
+        box-shadow: 0 8px 32px rgba(120, 80, 255, 0.2);
+        transform: translateY(-2px);
+      }
+      
+      .setting-card:hover::before {
+        transform: scaleX(1);
+      }
+      
+      .setting-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+      
+      .setting-card-title {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      
+      .setting-card-icon {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, rgba(120, 80, 255, 0.2) 0%, rgba(60, 130, 255, 0.2) 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #7d5cff;
+        font-size: 1.2rem;
+      }
+      
+      .setting-card-label {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #e8f0ff;
+      }
+      
+      .setting-card-desc {
+        color: #a8b4d9;
+        font-size: 0.9rem;
+        line-height: 1.5;
+        margin-bottom: 20px;
+      }
+      
+      /* Modern Toggle Switch */
+      .xorbit-toggle {
+        position: relative;
+        width: 56px;
+        height: 32px;
+        background: rgba(120, 80, 255, 0.2);
+        border: 2px solid rgba(120, 80, 255, 0.3);
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      
+      .xorbit-toggle::before {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 22px;
+        height: 22px;
+        background: #ffffff;
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+      
+      .xorbit-toggle.active {
+        background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+        border-color: rgba(120, 80, 255, 0.6);
+        box-shadow: 0 0 20px rgba(120, 80, 255, 0.4);
+      }
+      
+      .xorbit-toggle.active::before {
+        transform: translateX(24px);
+      }
+      
+      /* Modern Select Dropdown */
+      .xorbit-select {
+        position: relative;
+        width: 100%;
+      }
+      
+      .xorbit-select select {
+        width: 100%;
+        padding: 12px 16px;
+        background: rgba(120, 80, 255, 0.1);
+        border: 2px solid rgba(120, 80, 255, 0.3);
+        border-radius: 12px;
+        color: #e8f0ff;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        appearance: none;
+      }
+      
+      .xorbit-select select:hover {
+        border-color: rgba(120, 80, 255, 0.5);
+        background: rgba(120, 80, 255, 0.15);
+      }
+      
+      .xorbit-select select:focus {
+        outline: none;
+        border-color: rgba(120, 80, 255, 0.7);
+        box-shadow: 0 0 20px rgba(120, 80, 255, 0.3);
+      }
+      
+      .xorbit-select::after {
+        content: '\\f078';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #7d5cff;
+        pointer-events: none;
+      }
+      
+      /* Modern Slider */
+      .xorbit-slider-container {
+        width: 100%;
+      }
+      
+      .xorbit-slider {
+        width: 100%;
+        height: 6px;
+        border-radius: 3px;
+        background: rgba(120, 80, 255, 0.2);
+        outline: none;
+        appearance: none;
+        cursor: pointer;
+        position: relative;
+      }
+      
+      .xorbit-slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #7d5cff 0%, #3c82ff 100%);
+        cursor: pointer;
+        box-shadow: 0 0 15px rgba(120, 80, 255, 0.6), 0 4px 8px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s ease;
+      }
+      
+      .xorbit-slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+        box-shadow: 0 0 25px rgba(120, 80, 255, 0.8), 0 6px 12px rgba(0, 0, 0, 0.4);
+      }
+      
+      .xorbit-slider-value {
+        text-align: center;
+        margin-top: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #7d5cff;
+      }
+      
+      /* Wallpaper Controls */
+      .wallpaper-controls {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      
+      .xorbit-button {
+        padding: 12px 20px;
+        background: rgba(120, 80, 255, 0.15);
+        border: 2px solid rgba(120, 80, 255, 0.3);
+        border-radius: 12px;
+        color: #e8f0ff;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      
+      .xorbit-button:hover {
+        background: rgba(120, 80, 255, 0.25);
+        border-color: rgba(120, 80, 255, 0.5);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(120, 80, 255, 0.3);
+      }
+      
+      .xorbit-button.danger {
+        background: rgba(255, 87, 87, 0.15);
+        border-color: rgba(255, 87, 87, 0.3);
+        color: #ff6b6b;
+      }
+      
+      .xorbit-button.danger:hover {
+        background: rgba(255, 87, 87, 0.25);
+        border-color: rgba(255, 87, 87, 0.5);
+      }
+      
+      /* Wallpaper Preview */
+      .wallpaper-preview {
+        margin-top: 16px;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid rgba(120, 80, 255, 0.3);
+        display: none;
+      }
+      
+      .wallpaper-preview img {
+        width: 100%;
+        height: auto;
+        display: block;
+      }
+      
+      /* Reset Button */
+      .reset-all-button {
+        width: 100%;
+        padding: 16px 24px;
+        background: rgba(255, 87, 87, 0.1);
+        border: 2px solid rgba(255, 87, 87, 0.4);
+        border-radius: 12px;
+        color: #ff6b6b;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 32px;
+      }
+      
+      .reset-all-button:hover {
+        background: rgba(255, 87, 87, 0.2);
+        border-color: rgba(255, 87, 87, 0.6);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(255, 87, 87, 0.3);
+      }
+      
+      /* Save Indicator */
+      .xorbit-save-indicator {
+        position: fixed;
+        top: 80px;
+        right: 40px;
+        background: rgba(40, 202, 66, 0.95);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        opacity: 0;
+        transform: translateX(200px);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 10000;
+        pointer-events: none;
+        box-shadow: 0 8px 32px rgba(40, 202, 66, 0.4);
+      }
+      
+      .xorbit-save-indicator.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      
+      /* Section Visibility */
+      .settings-section {
+        display: none;
+      }
+      
+      .settings-section.active {
+        display: block;
+        animation: settingsFadeIn 0.4s ease;
+      }
+      
+      @keyframes settingsFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      
+      /* Scrollbar Styling */
+      .settings-sidebar::-webkit-scrollbar,
+      .settings-main::-webkit-scrollbar {
+        width: 8px;
+      }
+      
+      .settings-sidebar::-webkit-scrollbar-track,
+      .settings-main::-webkit-scrollbar-track {
+        background: rgba(120, 80, 255, 0.1);
+        border-radius: 4px;
+      }
+      
+      .settings-sidebar::-webkit-scrollbar-thumb,
+      .settings-main::-webkit-scrollbar-thumb {
+        background: rgba(120, 80, 255, 0.4);
+        border-radius: 4px;
+      }
+      
+      .settings-sidebar::-webkit-scrollbar-thumb:hover,
+      .settings-main::-webkit-scrollbar-thumb:hover {
+        background: rgba(120, 80, 255, 0.6);
+      }
+    </style>
+    
+    <div class="xorbit-settings-container">
+      <!-- Sidebar Navigation -->
+      <div class="settings-sidebar">
+        <div class="settings-logo">
+          <i class="fas fa-cog"></i>
+          <div class="settings-logo-text">X-ORBIT</div>
         </div>
         
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Desktop Wallpaper</div>
-            <div class="setting-description">Upload custom background or use default globe</div>
+        <div class="settings-nav-item active" data-section="appearance">
+          <i class="fas fa-palette"></i>
+          <span>Appearance</span>
+        </div>
+        
+        <div class="settings-nav-item" data-section="dock">
+          <i class="fas fa-grip-horizontal"></i>
+          <span>Dock</span>
+        </div>
+        
+        <div class="settings-nav-item" data-section="windows">
+          <i class="fas fa-window-restore"></i>
+          <span>Windows</span>
+        </div>
+        
+        <div class="settings-nav-item" data-section="system">
+          <i class="fas fa-sliders-h"></i>
+          <span>System</span>
+        </div>
+      </div>
+      
+      <!-- Main Content -->
+      <div class="settings-main">
+        <!-- Appearance Section -->
+        <div class="settings-section active" id="appearance-section">
+          <div class="settings-header">
+            <h1><i class="fas fa-palette"></i> Appearance</h1>
+            <p>Customize the look and feel of your X-ORBIT desktop</p>
           </div>
-          <div class="setting-control">
-            <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+          
+          <div class="settings-grid">
+            <!-- Theme -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-moon"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Theme</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Choose your preferred color scheme for the desktop environment
+              </div>
+              <div class="xorbit-select">
+                <select id="themeSelect">
+                  <option value="dark">Dark Mode</option>
+                  <option value="light">Light Mode</option>
+                  <option value="orange">Halloween 2025</option>
+                  <option value="auto">Auto (System)</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Desktop Wallpaper -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-image"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Desktop Wallpaper</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Upload a custom background image or use the default X-ORBIT globe
+              </div>
               <input type="file" id="wallpaperUpload" accept="image/*" style="display: none;">
-              <button class="wallpaper-button" type="button" onclick="event.preventDefault(); event.stopPropagation(); document.getElementById('wallpaperUpload').click();">
-                <i class="fas fa-upload"></i>
-                Choose Image
-              </button>
-              <button class="wallpaper-button reset-wallpaper" type="button" onclick="event.preventDefault(); event.stopPropagation(); resetWallpaper();">
-                <i class="fas fa-undo"></i>
-                Reset to Default
-              </button>
-              <div id="wallpaperPreview" style="display: none; margin-top: 8px;">
-                <div style="color: #7d5cff; font-size: 0.75rem; margin-bottom: 4px;">Current wallpaper:</div>
-                <img id="wallpaperPreviewImg" style="width: 100px; height: 60px; object-fit: cover; border-radius: 8px; border: 2px solid rgba(120, 80, 255, 0.3);">
+              <div class="wallpaper-controls">
+                <button class="xorbit-button" onclick="document.getElementById('wallpaperUpload').click();">
+                  <i class="fas fa-upload"></i>
+                  Choose Image
+                </button>
+                <button class="xorbit-button danger" onclick="resetWallpaper();">
+                  <i class="fas fa-undo"></i>
+                  Reset Default
+                </button>
+              </div>
+              <div class="wallpaper-preview" id="wallpaperPreview">
+                <img id="wallpaperPreviewImg" alt="Wallpaper preview">
+              </div>
+            </div>
+            
+            <!-- Transparency -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-adjust"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Transparency Effects</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle active" id="transparencyToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Enable glass morphism and backdrop blur effects for windows and dock
+              </div>
+            </div>
+            
+            <!-- Animations -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-magic"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Animations</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle active" id="animationsToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Enable smooth animations and transitions throughout the interface
+              </div>
+            </div>
+            
+            <!-- Background Opacity -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-tint"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Background Opacity</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Adjust the transparency level of window backgrounds
+              </div>
+              <div class="xorbit-slider-container">
+                <input type="range" class="xorbit-slider" id="opacityRange" min="20" max="100" value="80">
+                <div class="xorbit-slider-value" id="opacityValue">80%</div>
               </div>
             </div>
           </div>
         </div>
         
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Transparency Effects</div>
-            <div class="setting-description">Enable glass morphism and backdrop blur</div>
+        <!-- Dock Section -->
+        <div class="settings-section" id="dock-section">
+          <div class="settings-header">
+            <h1><i class="fas fa-grip-horizontal"></i> Dock</h1>
+            <p>Configure your application dock behavior and appearance</p>
           </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="transparencyToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Animations</div>
-            <div class="setting-description">Enable smooth animations and transitions</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="animationsToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Background Opacity</div>
-            <div class="setting-description">Adjust window background transparency</div>
-          </div>
-          <div class="setting-control">
-            <div class="range-control">
-              <input type="range" class="range-slider" id="opacityRange" min="20" max="100" value="80">
-              <div class="range-value" id="opacityValue">80%</div>
+          
+          <div class="settings-grid">
+            <!-- Auto-hide -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-eye-slash"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Auto-hide Dock</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle" id="autohideToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Automatically hide the dock when not in use to maximize screen space
+              </div>
+            </div>
+            
+            <!-- Position -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-arrows-alt"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Dock Position</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Choose where the dock appears on your screen
+              </div>
+              <div class="xorbit-select">
+                <select id="dockPositionSelect">
+                  <option value="bottom">Bottom</option>
+                  <option value="left">Left</option>
+                </select>
+              </div>
+            </div>
+            
+            <!-- Size -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-expand-arrows-alt"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Dock Size</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Adjust the size of dock icons
+              </div>
+              <div class="xorbit-slider-container">
+                <input type="range" class="xorbit-slider" id="dockSizeRange" min="40" max="80" value="56">
+                <div class="xorbit-slider-value" id="dockSizeValue">56px</div>
+              </div>
+            </div>
+            
+            <!-- Magnification -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-search-plus"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Hover Magnification</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle active" id="magnificationToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Enable zoom effect when hovering over dock icons
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      
-      <!-- Dock Settings -->
-      <div class="settings-section">
-        <h2 class="section-title">
-          <i class="fas fa-grip-horizontal"></i>
-          Dock Settings
-        </h2>
         
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Auto-hide Dock</div>
-            <div class="setting-description">Hide dock when not in use</div>
+        <!-- Windows Section -->
+        <div class="settings-section" id="windows-section">
+          <div class="settings-header">
+            <h1><i class="fas fa-window-restore"></i> Windows</h1>
+            <p>Manage window behavior and startup preferences</p>
           </div>
-          <div class="setting-control">
-            <div class="toggle-switch" id="autohideToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Dock Position</div>
-            <div class="setting-description">Choose dock placement on screen</div>
-          </div>
-          <div class="setting-control">
-            <div class="select-control">
-              <select class="select-dropdown" id="dockPositionSelect">
-                <option value="bottom">Bottom</option>
-                <option value="left">Left</option>
-              </select>
+          
+          <div class="settings-grid">
+            <!-- Window Snapping -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-th-large"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Window Snapping</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle active" id="snappingToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Snap windows to screen edges for organized workspace management
+              </div>
+            </div>
+            
+            <!-- Window Shadows -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-cube"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Window Shadows</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle active" id="shadowsToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Enable drop shadows to add depth to window elements
+              </div>
+            </div>
+            
+            <!-- Launch Fullscreen -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-expand"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Launch in Fullscreen</div>
+                  </div>
+                </div>
+                <div class="xorbit-toggle" id="launchFullscreenToggle"></div>
+              </div>
+              <div class="setting-card-desc">
+                Start X-ORBIT in fullscreen mode for an immersive experience
+              </div>
+            </div>
+            
+            <!-- Startup Window -->
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-rocket"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">Startup Window</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Choose which window opens automatically when X-ORBIT starts
+              </div>
+              <div class="xorbit-select">
+                <select id="startupWindowsSelect">
+                  <option value="welcome">Welcome Screen</option>
+                  <option value="none">None (Disabled)</option>
+                  <option value="browser">Browser</option>
+                  <option value="terminal">Terminal</option>
+                  <option value="settings">Settings</option>
+                  <option value="files">File Manager</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
         
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Dock Size</div>
-            <div class="setting-description">Adjust dock icon size</div>
+        <!-- System Section -->
+        <div class="settings-section" id="system-section">
+          <div class="settings-header">
+            <h1><i class="fas fa-sliders-h"></i> System</h1>
+            <p>Advanced system settings and configurations</p>
           </div>
-          <div class="setting-control">
-            <div class="range-control">
-              <input type="range" class="range-slider" id="dockSizeRange" min="40" max="80" value="56">
-              <div class="range-value" id="dockSizeValue">56px</div>
+          
+          <div class="settings-grid">
+            <div class="setting-card">
+              <div class="setting-card-header">
+                <div class="setting-card-title">
+                  <div class="setting-card-icon">
+                    <i class="fas fa-info-circle"></i>
+                  </div>
+                  <div>
+                    <div class="setting-card-label">About X-ORBIT</div>
+                  </div>
+                </div>
+              </div>
+              <div class="setting-card-desc">
+                Version 4.5.0 Astra • Built with ❤️ by the X-ORBIT Team
+              </div>
             </div>
+            
+            <button class="reset-all-button" id="resetButton">
+              <i class="fas fa-undo-alt"></i>
+              Reset All Settings to Default
+            </button>
           </div>
         </div>
         
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Magnification</div>
-            <div class="setting-description">Enable hover zoom effect</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="magnificationToggle"></div>
-          </div>
+        <div class="xorbit-save-indicator" id="saveIndicator">
+          <i class="fas fa-check-circle"></i>
+          Settings saved!
         </div>
-      </div>
-      
-      <!-- Window Settings -->
-      <div class="settings-section">
-        <h2 class="section-title">
-          <i class="fas fa-window-restore"></i>
-          Window Settings
-        </h2>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Window Snapping</div>
-            <div class="setting-description">Snap windows to screen edges</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="snappingToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Window Shadows</div>
-            <div class="setting-description">Enable drop shadows</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="shadowsToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Minimize Animation</div>
-            <div class="setting-description">Animate window minimize/restore</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch active" id="minimizeAnimToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Launch in Fullscreen</div>
-            <div class="setting-description">Start X-ORBIT in fullscreen mode</div>
-          </div>
-          <div class="setting-control">
-            <div class="toggle-switch" id="launchFullscreenToggle"></div>
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <div class="setting-info">
-            <div class="setting-label">Startup Window</div>
-            <div class="setting-description">Choose which window opens on startup</div>
-          </div>
-          <div class="setting-control">
-            <div class="select-control">
-              <select class="select-dropdown" id="startupWindowsSelect">
-                <option value="welcome">Welcome Screen</option>
-                <option value="none">None (Disabled)</option>
-                <option value="browser">Browser</option>
-                <option value="terminal">Terminal</option>
-                <option value="settings">Settings</option>
-                <option value="files">File Manager</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <button class="reset-button" id="resetButton">
-        <i class="fas fa-undo"></i>
-        Reset All Settings to Default
-      </button>
-      
-      <div class="save-indicator" id="saveIndicator">
-        <i class="fas fa-check"></i>
-        Settings saved!
       </div>
     </div>
   `;
@@ -3508,6 +3882,22 @@ function createSettingsContent() {
 // Setup settings event handlers
 function setupSettingsEvents(windowEl) {
   const settingsContent = windowEl.querySelector('.window-content');
+  
+  // Navigation
+  const navItems = settingsContent.querySelectorAll('.settings-nav-item');
+  navItems.forEach(item => {
+    item.addEventListener('click', function() {
+      // Update active state
+      navItems.forEach(nav => nav.classList.remove('active'));
+      this.classList.add('active');
+      
+      // Show corresponding section
+      const section = this.dataset.section;
+      const sections = settingsContent.querySelectorAll('.settings-section');
+      sections.forEach(sec => sec.classList.remove('active'));
+      settingsContent.querySelector(`#${section}-section`).classList.add('active');
+    });
+  });
   
   // Load current settings into UI
   function loadSettingsUI() {
@@ -3523,7 +3913,6 @@ function setupSettingsEvents(windowEl) {
     const magnificationToggle = settingsContent.querySelector('#magnificationToggle');
     const snappingToggle = settingsContent.querySelector('#snappingToggle');
     const shadowsToggle = settingsContent.querySelector('#shadowsToggle');
-    const minimizeAnimToggle = settingsContent.querySelector('#minimizeAnimToggle');
     const launchFullscreenToggle = settingsContent.querySelector('#launchFullscreenToggle');
     const startupWindowsSelect = settingsContent.querySelector('#startupWindowsSelect');
     
@@ -3543,7 +3932,6 @@ function setupSettingsEvents(windowEl) {
     if (magnificationToggle) magnificationToggle.classList.toggle('active', settings.dockMagnification);
     if (snappingToggle) snappingToggle.classList.toggle('active', settings.windowSnapping);
     if (shadowsToggle) shadowsToggle.classList.toggle('active', settings.windowShadows);
-    if (minimizeAnimToggle) minimizeAnimToggle.classList.toggle('active', settings.minimizeAnimation !== false);
     if (launchFullscreenToggle) launchFullscreenToggle.classList.toggle('active', settings.launchFullscreen);
     if (startupWindowsSelect) startupWindowsSelect.value = settings.startupWindows || 'welcome';
     
@@ -3585,7 +3973,7 @@ function setupSettingsEvents(windowEl) {
   }
   
   // Toggle switches
-  settingsContent.querySelectorAll('.toggle-switch').forEach(toggle => {
+  settingsContent.querySelectorAll('.xorbit-toggle').forEach(toggle => {
     toggle.addEventListener('click', function() {
       const isActive = this.classList.contains('active');
       this.classList.toggle('active', !isActive);
@@ -3609,9 +3997,6 @@ function setupSettingsEvents(windowEl) {
           break;
         case 'shadows':
           settings.windowShadows = !isActive;
-          break;
-        case 'minimizeAnim':
-          settings.minimizeAnimation = !isActive;
           break;
         case 'launchFullscreen':
           settings.launchFullscreen = !isActive;
@@ -3678,7 +4063,8 @@ function setupSettingsEvents(windowEl) {
           dockTooltips: true,
           windowSnapping: true,
           windowShadows: true,
-          minimizeAnimation: true,
+          launchFullscreen: false,
+          customWallpaper: null,
           startupWindows: 'welcome'
         };
         loadSettingsUI();

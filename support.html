@@ -707,6 +707,7 @@
             justify-content: space-between;
             align-items: center;
             background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
         }
 
         .chat-header h3 {
@@ -752,6 +753,7 @@
             overflow-y: auto;
             padding: 25px;
             background: rgba(0, 0, 0, 0.2);
+            min-height: 0;
         }
 
         .messages-container::-webkit-scrollbar {
@@ -854,6 +856,15 @@
             padding: 20px;
             border-top: 1px solid var(--card-border);
             background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        #chatMessagesArea {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
         }
 
         .message-input-container {
@@ -1186,7 +1197,7 @@
                     </div>
                 </div>
 
-                <div id="chatMessagesArea" style="display: flex; flex-direction: column; flex: 1;">
+                <div id="chatMessagesArea" style="display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden;">
                     <div class="messages-container" id="messagesContainer"></div>
 
                     <div class="message-input-area">
@@ -1639,6 +1650,7 @@
                         'This ticket has been closed. You can reopen it to continue the conversation or delete it.';
                 }
             } else {
+                // FIXED: Ensure the chat interface is properly displayed for open tickets
                 document.getElementById('ticketClosedMessage').style.display = 'none';
                 document.getElementById('chatMessagesArea').style.display = 'flex';
                 await loadMessages(ticketId);
@@ -1661,6 +1673,26 @@
 
         async function loadMessages(ticketId) {
             try {
+                // Fetch fresh ticket data to get current status
+                const { data: ticketData, error: ticketError } = await supabaseClient
+                    .from('support_tickets')
+                    .select('status')
+                    .eq('id', ticketId)
+                    .single();
+
+                if (ticketError) {
+                    console.error('Ticket error:', ticketError);
+                }
+
+                // Update currentTicket status if we got fresh data
+                if (ticketData && currentTicket) {
+                    currentTicket.status = ticketData.status;
+                    
+                    // Update the status badge in the UI
+                    document.getElementById('chatTicketStatus').textContent = ticketData.status.replace('_', ' ').toUpperCase();
+                    document.getElementById('chatTicketStatus').className = `ticket-status status-${ticketData.status}`;
+                }
+
                 const { data: conversation, error: convError } = await supabaseClient
                     .from('conversations')
                     .select('id')
@@ -1687,6 +1719,35 @@
                 
                 console.log('Messages loaded:', messages);
                 displayMessages(messages || []);
+                
+                // CRITICAL FIX: Always ensure chat area is visible for open tickets
+                // Check the fresh ticket status, not stale data
+                if (currentTicket && ticketData && ticketData.status !== 'resolved' && ticketData.status !== 'closed') {
+                    document.getElementById('ticketClosedMessage').style.display = 'none';
+                    document.getElementById('chatMessagesArea').style.display = 'flex';
+                } else if (currentTicket && ticketData && (ticketData.status === 'resolved' || ticketData.status === 'closed')) {
+                    // Ticket was closed/resolved, show the closed message
+                    document.getElementById('ticketClosedMessage').style.display = 'flex';
+                    document.getElementById('chatMessagesArea').style.display = 'none';
+                    
+                    document.getElementById('modalTicketNumber').textContent = currentTicket.ticket_number;
+                    const modalContent = document.getElementById('closedModalContent');
+                    const icon = document.getElementById('closedIcon');
+                    
+                    if (ticketData.status === 'resolved') {
+                        modalContent.classList.remove('closed-status');
+                        icon.className = 'fas fa-check-circle status-icon';
+                        document.getElementById('closedTitle').textContent = 'Ticket Resolved';
+                        document.getElementById('closedMessage').textContent = 
+                            'This ticket has been marked as resolved. If you\'re still experiencing issues, you can reopen it below.';
+                    } else {
+                        modalContent.classList.add('closed-status');
+                        icon.className = 'fas fa-lock status-icon';
+                        document.getElementById('closedTitle').textContent = 'Ticket Closed';
+                        document.getElementById('closedMessage').textContent = 
+                            'This ticket has been closed. You can reopen it to continue the conversation or delete it.';
+                    }
+                }
             } catch (error) {
                 console.error('Error loading messages:', error);
                 const container = document.getElementById('messagesContainer');
@@ -1783,6 +1844,8 @@
                 }]);
 
                 messageInput.value = '';
+                
+                // Reload messages - loadMessages will ensure the chat area stays visible
                 await loadMessages(currentTicket.id);
             } catch (error) {
                 console.error('Error sending message:', error);

@@ -1791,153 +1791,154 @@
     </div>
     
     <script>
-    console.log('🚀 X-ORBIT Login System Starting...');
+console.log('🚀 X-ORBIT Login System Starting...');
+
+// Global state
+let rememberedUser = null;
+let supabaseClient = null; // RENAMED FROM supabase TO supabaseClient
+let pendingUserData = null;
+
+// Help Menu Toggle
+function toggleHelpMenu() {
+    const menu = document.getElementById('helpMenu');
+    menu.classList.toggle('show');
+}
+
+// Close help menu when clicking outside
+document.addEventListener('click', function(e) {
+    const helpContainer = document.querySelector('.help-menu-container');
+    const helpMenu = document.getElementById('helpMenu');
     
-    // Global state
-    let rememberedUser = null;
-    let supabase = null;
-    let pendingUserData = null;
-    
-    // Help Menu Toggle
-    function toggleHelpMenu() {
-        const menu = document.getElementById('helpMenu');
-        menu.classList.toggle('show');
+    if (helpContainer && !helpContainer.contains(e.target)) {
+        helpMenu.classList.remove('show');
     }
-    
-    // Close help menu when clicking outside
-    document.addEventListener('click', function(e) {
-        const helpContainer = document.querySelector('.help-menu-container');
-        const helpMenu = document.getElementById('helpMenu');
-        
-        if (helpContainer && !helpContainer.contains(e.target)) {
-            helpMenu.classList.remove('show');
+});
+
+// Registration Modal functions
+function showRegistrationModal() {
+    console.log('📝 Showing registration modal');
+    const overlay = document.getElementById('registrationOverlay');
+    overlay.classList.add('show');
+}
+
+function hideRegistrationModal() {
+    console.log('✅ Hiding registration modal');
+    const overlay = document.getElementById('registrationOverlay');
+    overlay.classList.remove('show');
+}
+
+function openSupportPortal() {
+    console.log('🌐 Opening support portal in new tab');
+    window.open('https://xorbit.org/support', '_blank');
+}
+
+// Survey and Solaris Alert functions
+function openSurvey() {
+    console.log('📊 Opening survey');
+    window.open('https://forms.gle/H56VPQmS5omvzbRq7', '_blank');
+    dismissSolarisAlert();
+}
+
+function dismissSolarisAlert() {
+    console.log('👋 Dismissing survey notification');
+    const alert = document.getElementById('solarisAlert');
+    if (alert) {
+        alert.classList.add('hidden');
+        try {
+            localStorage.setItem('xorbit_survey_2025_shown', 'true');
+            console.log('💾 Survey notification dismissal saved to localStorage');
+        } catch (error) {
+            console.warn('⚠️ Could not save survey notification dismissal state:', error);
         }
-    });
-    
-    // Registration Modal functions
-    function showRegistrationModal() {
-        console.log('📝 Showing registration modal');
-        const overlay = document.getElementById('registrationOverlay');
-        overlay.classList.add('show');
     }
-    
-    function hideRegistrationModal() {
-        console.log('✅ Hiding registration modal');
-        const overlay = document.getElementById('registrationOverlay');
-        overlay.classList.remove('show');
-    }
-    
-    function openSupportPortal() {
-        console.log('🌐 Opening support portal in new tab');
-        window.open('https://xorbit.org/support', '_blank');
-    }
-    // Survey and Solaris Alert functions
-    function openSurvey() {
-        console.log('📊 Opening survey');
-        window.open('https://forms.gle/H56VPQmS5omvzbRq7', '_blank');
-        dismissSolarisAlert();
-    }
-    
-    function dismissSolarisAlert() {
-        console.log('👋 Dismissing survey notification');
-        const alert = document.getElementById('solarisAlert');
-        if (alert) {
-            alert.classList.add('hidden');
-            try {
-                localStorage.setItem('xorbit_survey_2025_shown', 'true');
-                console.log('💾 Survey notification dismissal saved to localStorage');
-            } catch (error) {
-                console.warn('⚠️ Could not save survey notification dismissal state:', error);
+}
+
+function checkSolarisAlertState() {
+    try {
+        const dismissed = localStorage.getItem('xorbit_survey_2025_shown');
+        if (dismissed === 'true') {
+            console.log('📂 Survey notification previously shown, hiding automatically');
+            const alert = document.getElementById('solarisAlert');
+            if (alert) {
+                alert.classList.add('hidden');
             }
+        } else {
+            console.log('🆕 First time showing survey notification');
         }
+    } catch (error) {
+        console.warn('⚠️ Could not check survey notification state:', error);
     }
+}
+
+// Warning Modal functions
+function showWarningModal(warningText) {
+    console.log('⚠️ Showing warning modal');
+    const overlay = document.getElementById('warningOverlay');
+    const message = document.getElementById('warningMessage');
     
-    function checkSolarisAlertState() {
-        try {
-            const dismissed = localStorage.getItem('xorbit_survey_2025_shown');
-            if (dismissed === 'true') {
-                console.log('📂 Survey notification previously shown, hiding automatically');
-                const alert = document.getElementById('solarisAlert');
-                if (alert) {
-                    alert.classList.add('hidden');
-                }
-            } else {
-                console.log('🆕 First time showing survey notification');
-            }
-        } catch (error) {
-            console.warn('⚠️ Could not check survey notification state:', error);
+    message.textContent = warningText;
+    overlay.classList.add('show');
+}
+
+function hideWarningModal() {
+    console.log('✅ Hiding warning modal');
+    const overlay = document.getElementById('warningOverlay');
+    overlay.classList.remove('show');
+}
+
+function acknowledgeWarning() {
+    console.log('✅ User acknowledged warning');
+    hideWarningModal();
+    
+    if (pendingUserData) {
+        console.log('🔄 Completing login after warning acknowledgment');
+        completeLogin(pendingUserData);
+        pendingUserData = null;
+    }
+}
+
+// localStorage functions
+function saveRememberedUser(userData) {
+    try {
+        const userToSave = {
+            username: userData.username,
+            email: userData.email,
+            id: userData.id,
+            savedAt: new Date().toISOString()
+        };
+        localStorage.setItem('xorbit_remembered_user', JSON.stringify(userToSave));
+        console.log('💾 User saved to localStorage:', userData.username);
+        return true;
+    } catch (error) {
+        console.warn('⚠️ Could not save to localStorage:', error);
+        return false;
+    }
+}
+
+function loadRememberedUser() {
+    try {
+        const saved = localStorage.getItem('xorbit_remembered_user');
+        if (saved) {
+            const userData = JSON.parse(saved);
+            console.log('📂 Loaded remembered user from localStorage:', userData.username);
+            return userData;
         }
+    } catch (error) {
+        console.warn('⚠️ Could not load from localStorage:', error);
     }
-    
-    // Warning Modal functions
-    function showWarningModal(warningText) {
-        console.log('⚠️ Showing warning modal');
-        const overlay = document.getElementById('warningOverlay');
-        const message = document.getElementById('warningMessage');
-        
-        message.textContent = warningText;
-        overlay.classList.add('show');
+    return null;
+}
+
+function clearRememberedUser() {
+    try {
+        localStorage.removeItem('xorbit_remembered_user');
+        console.log('🗑️ Cleared remembered user from localStorage');
+    } catch (error) {
+        console.warn('⚠️ Could not clear localStorage:', error);
     }
-    
-    function hideWarningModal() {
-        console.log('✅ Hiding warning modal');
-        const overlay = document.getElementById('warningOverlay');
-        overlay.classList.remove('show');
-    }
-    
-    function acknowledgeWarning() {
-        console.log('✅ User acknowledged warning');
-        hideWarningModal();
-        
-        if (pendingUserData) {
-            console.log('🔄 Completing login after warning acknowledgment');
-            completeLogin(pendingUserData);
-            pendingUserData = null;
-        }
-    }
-    
-    // localStorage functions
-    function saveRememberedUser(userData) {
-        try {
-            const userToSave = {
-                username: userData.username,
-                email: userData.email,
-                id: userData.id,
-                savedAt: new Date().toISOString()
-            };
-            localStorage.setItem('xorbit_remembered_user', JSON.stringify(userToSave));
-            console.log('💾 User saved to localStorage:', userData.username);
-            return true;
-        } catch (error) {
-            console.warn('⚠️ Could not save to localStorage:', error);
-            return false;
-        }
-    }
-    
-    function loadRememberedUser() {
-        try {
-            const saved = localStorage.getItem('xorbit_remembered_user');
-            if (saved) {
-                const userData = JSON.parse(saved);
-                console.log('📂 Loaded remembered user from localStorage:', userData.username);
-                return userData;
-            }
-        } catch (error) {
-            console.warn('⚠️ Could not load from localStorage:', error);
-        }
-        return null;
-    }
-    
-    function clearRememberedUser() {
-        try {
-            localStorage.removeItem('xorbit_remembered_user');
-            console.log('🗑️ Cleared remembered user from localStorage');
-        } catch (error) {
-            console.warn('⚠️ Could not clear localStorage:', error);
-        }
-    }
-    
-    async function initSupabase() {
+}
+
+async function initSupabase() {
     console.log('📡 Loading Supabase client...');
     try {
         // Give the script time to load
@@ -1955,7 +1956,8 @@
         const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
         
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // FIXED: Changed from 'supabase' to 'supabaseClient'
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         console.log('✅ Supabase client initialized successfully');
         return true;
@@ -1965,327 +1967,313 @@
         return false;
     }
 }
+
+// Create visual effects
+function createStars() {
+    console.log('⭐ Creating stars...');
+    const starsContainer = document.querySelector('.stars');
+    if (!starsContainer) return;
     
-    // Create visual effects
-    function createStars() {
-        console.log('⭐ Creating stars...');
-        const starsContainer = document.querySelector('.stars');
-        if (!starsContainer) return;
-        
-        for (let i = 0; i < 50; i++) {
-            const star = document.createElement('div');
-            star.className = 'star';
-            star.style.left = Math.random() * 100 + '%';
-            star.style.top = Math.random() * 100 + '%';
-            star.style.width = Math.random() * 3 + 1 + 'px';
-            star.style.height = star.style.width;
-            star.style.animationDelay = Math.random() * 3 + 's';
-            starsContainer.appendChild(star);
+    for (let i = 0; i < 50; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.width = Math.random() * 3 + 1 + 'px';
+        star.style.height = star.style.width;
+        star.style.animationDelay = Math.random() * 3 + 's';
+        starsContainer.appendChild(star);
+    }
+}
+
+function createParticles() {
+    console.log('🌌 Creating particles...');
+    for (let i = 0; i < 8; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.width = Math.random() * 4 + 2 + 'px';
+        particle.style.height = particle.style.width;
+        particle.style.animationDelay = Math.random() * 20 + 's';
+        particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
+        document.body.appendChild(particle);
+    }
+}
+
+// Show/Hide views
+function showOSMode(userData) {
+    console.log('🖥️ Switching to macOS-style login for user:', userData.username);
+    
+    const container = document.getElementById('loginContainer');
+    const regularView = document.getElementById('regularView');
+    const osView = document.getElementById('osView');
+    const backNav = document.getElementById('backNav');
+    const savedUsername = document.getElementById('savedUsername');
+    const savedEmail = document.getElementById('savedEmail');
+    
+    savedUsername.textContent = userData.username;
+    savedEmail.textContent = userData.email;
+    
+    rememberedUser = userData;
+    
+    regularView.classList.add('hidden');
+    osView.classList.add('active');
+    container.classList.add('os-mode');
+    backNav.classList.remove('show');
+    
+    setTimeout(() => {
+        const passwordInput = document.getElementById('osPassword');
+        if (passwordInput) {
+            passwordInput.focus();
         }
+    }, 300);
+    
+    console.log('✅ Successfully switched to macOS login mode');
+}
+
+function showRegularMode(showBackButton = false) {
+    console.log('📝 Switching back to regular login mode');
+    
+    const container = document.getElementById('loginContainer');
+    const regularView = document.getElementById('regularView');
+    const osView = document.getElementById('osView');
+    const backNav = document.getElementById('backNav');
+    
+    if (!showBackButton) {
+        rememberedUser = null;
+        clearRememberedUser();
     }
     
-    function createParticles() {
-        console.log('🌌 Creating particles...');
-        for (let i = 0; i < 8; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            particle.style.left = Math.random() * 100 + '%';
-            particle.style.width = Math.random() * 4 + 2 + 'px';
-            particle.style.height = particle.style.width;
-            particle.style.animationDelay = Math.random() * 20 + 's';
-            particle.style.animationDuration = (Math.random() * 10 + 15) + 's';
-            document.body.appendChild(particle);
-        }
-    }
+    const inputs = ['usernameOrEmail', 'password', 'osPassword'];
+    inputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = '';
+    });
     
-    // Show/Hide views
-    function showOSMode(userData) {
-        console.log('🖥️ Switching to macOS-style login for user:', userData.username);
-        
-        const container = document.getElementById('loginContainer');
-        const regularView = document.getElementById('regularView');
-        const osView = document.getElementById('osView');
-        const backNav = document.getElementById('backNav');
-        const savedUsername = document.getElementById('savedUsername');
-        const savedEmail = document.getElementById('savedEmail');
-        
-        savedUsername.textContent = userData.username;
-        savedEmail.textContent = userData.email;
-        
-        rememberedUser = userData;
-        
-        regularView.classList.add('hidden');
-        osView.classList.add('active');
-        container.classList.add('os-mode');
+    const rememberCheckbox = document.getElementById('rememberMe');
+    if (rememberCheckbox) rememberCheckbox.checked = false;
+    
+    const statusElements = ['loginStatus', 'osLoginStatus'];
+    statusElements.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) element.innerHTML = '';
+    });
+    
+    const banModals = ['banModal', 'osBanModal'];
+    banModals.forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) modal.classList.remove('show');
+    });
+    
+    const buttons = ['loginButton', 'osLoginButton'];
+    buttons.forEach(id => {
+        const button = document.getElementById(id);
+        if (button) {
+            button.disabled = false;
+            button.classList.remove('banned');
+            if (id === 'loginButton') button.innerHTML = 'Authenticate';
+            if (id === 'osLoginButton') button.innerHTML = 'Sign In';
+        }
+    });
+    
+    osView.classList.remove('active');
+    regularView.classList.remove('hidden');
+    container.classList.remove('os-mode');
+    
+    if (showBackButton && rememberedUser) {
+        backNav.classList.add('show');
+        console.log('🔙 Back button shown');
+    } else {
         backNav.classList.remove('show');
-        
-        setTimeout(() => {
-            const passwordInput = document.getElementById('osPassword');
-            if (passwordInput) {
-                passwordInput.focus();
-            }
-        }, 300);
-        
-        console.log('✅ Successfully switched to macOS login mode');
+        console.log('🔙 Back button hidden');
     }
     
-    function showRegularMode(showBackButton = false) {
-        console.log('📝 Switching back to regular login mode');
-        
-        const container = document.getElementById('loginContainer');
-        const regularView = document.getElementById('regularView');
-        const osView = document.getElementById('osView');
-        const backNav = document.getElementById('backNav');
-        
-        if (!showBackButton) {
-            rememberedUser = null;
-            clearRememberedUser();
-        }
-        
-        const inputs = ['usernameOrEmail', 'password', 'osPassword'];
-        inputs.forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.value = '';
-        });
-        
-        const rememberCheckbox = document.getElementById('rememberMe');
-        if (rememberCheckbox) rememberCheckbox.checked = false;
-        
-        const statusElements = ['loginStatus', 'osLoginStatus'];
-        statusElements.forEach(id => {
-            const element = document.getElementById(id);
-            if (element) element.innerHTML = '';
-        });
-        
-        const banModals = ['banModal', 'osBanModal'];
-        banModals.forEach(id => {
-            const modal = document.getElementById(id);
-            if (modal) modal.classList.remove('show');
-        });
-        
-        const buttons = ['loginButton', 'osLoginButton'];
-        buttons.forEach(id => {
-            const button = document.getElementById(id);
-            if (button) {
-                button.disabled = false;
-                button.classList.remove('banned');
-                if (id === 'loginButton') button.innerHTML = 'Authenticate';
-                if (id === 'osLoginButton') button.innerHTML = 'Sign In';
-            }
-        });
-        
-        osView.classList.remove('active');
-        regularView.classList.remove('hidden');
-        container.classList.remove('os-mode');
-        
-        if (showBackButton && rememberedUser) {
-            backNav.classList.add('show');
-            console.log('🔙 Back button shown');
-        } else {
-            backNav.classList.remove('show');
-            console.log('🔙 Back button hidden');
-        }
-        
-        setTimeout(() => {
-            const usernameInput = document.getElementById('usernameOrEmail');
-            if (usernameInput) {
-                usernameInput.focus();
-            }
-        }, 300);
-        
-        console.log('✅ Successfully switched back to regular login mode');
-    }
-    
-    function goBackToOSMode() {
-        console.log('🔙 Returning to macOS login mode');
-        if (rememberedUser) {
-            showOSMode(rememberedUser);
-        } else {
-            console.warn('⚠️ No remembered user to go back to');
-            showRegularMode(false);
-        }
-    }
-    
-    function completeLogin(userData) {
-        console.log('✅ Completing login for user:', userData.username);
-        
-        if (userData.rememberMe) {
-            console.log('💾 Saving user to localStorage for future logins');
-            const userDataToSave = {
-                username: userData.username,
-                email: userData.email,
-                id: userData.id
-            };
-            
-            const saved = saveRememberedUser(userDataToSave);
-            if (saved) {
-                console.log('✅ User successfully saved to localStorage');
-                rememberedUser = userDataToSave;
-            } else {
-                console.warn('⚠️ Failed to save user to localStorage, using memory only');
-                rememberedUser = userDataToSave;
-            }
-        } else {
-            console.log('📝 Remember me not checked, not saving user');
-        }
-        
-        const status = userData.isOSMode ? 
-            document.getElementById('osLoginStatus') : 
-            document.getElementById('loginStatus');
-        const button = userData.isOSMode ? 
-            document.getElementById('osLoginButton') : 
-            document.getElementById('loginButton');
-        
-        status.innerHTML = userData.isOSMode ? 
-            "✅ Welcome back! Redirecting..." : 
-            "✅ Authentication successful! Redirecting...";
-        button.innerHTML = "✅ Success";
-        
-        try {
-            const authSession = {
-                authenticated: true,
-                username: userData.username,
-                email: userData.email,
-                userId: userData.id,
-                timestamp: new Date().toISOString(),
-                expiresAt: new Date(Date.now() + 3600000).toISOString()
-            };
-            
-            localStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
-            sessionStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
-            
-            console.log('✅ Authentication session stored');
-        } catch (error) {
-            console.warn('⚠️ Could not store auth session:', error);
-        }
-        
-        setTimeout(() => {
-            console.log('📤 Sending postMessage to parent window...');
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage('auth-success', '*');
-            } else {
-                window.location.href = 'browser.html';
-            }
-        }, 1000);
-    }
-    
-    async function login() {
-        console.log('🚀 Login function called');
-        
-        if (!supabase) {
-            console.error('❌ Supabase not initialized');
-            document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
-            return;
-        }
-        
+    setTimeout(() => {
         const usernameInput = document.getElementById('usernameOrEmail');
-        const passwordInput = document.getElementById('password');
-        const rememberCheckbox = document.getElementById('rememberMe');
-        const loginButton = document.getElementById('loginButton');
-        const banModal = document.getElementById('banModal');
-        const banReason = document.getElementById('banReason');
-        const status = document.getElementById('loginStatus');
-        
-        const emailOrName = usernameInput.value.trim();
-        const pwd = passwordInput.value.trim();
-        const rememberMe = rememberCheckbox.checked;
-        
-        status.innerHTML = "";
-        banModal.classList.remove('show');
-        banReason.textContent = "";
-        usernameInput.classList.remove('error', 'banned');
-        passwordInput.classList.remove('error', 'banned');
-        loginButton.classList.remove('banned');
-        loginButton.innerHTML = "Authenticate";
-        loginButton.disabled = false;
-        
-        if (!emailOrName || !pwd) {
-            status.innerHTML = "❌ Please fill in both fields.";
-            if (!emailOrName) usernameInput.classList.add('error');
-            if (!pwd) passwordInput.classList.add('error');
-            return;
+        if (usernameInput) {
+            usernameInput.focus();
         }
+    }, 300);
+    
+    console.log('✅ Successfully switched back to regular login mode');
+}
+
+function goBackToOSMode() {
+    console.log('🔙 Returning to macOS login mode');
+    if (rememberedUser) {
+        showOSMode(rememberedUser);
+    } else {
+        console.warn('⚠️ No remembered user to go back to');
+        showRegularMode(false);
+    }
+}
+
+function completeLogin(userData) {
+    console.log('✅ Completing login for user:', userData.username);
+    
+    if (userData.rememberMe) {
+        console.log('💾 Saving user to localStorage for future logins');
+        const userDataToSave = {
+            username: userData.username,
+            email: userData.email,
+            id: userData.id
+        };
         
-        status.innerHTML = '<span class="loading"></span> Authenticating...';
-        loginButton.innerHTML = '<span class="loading"></span> Authenticating...';
-        loginButton.disabled = true;
+        const saved = saveRememberedUser(userDataToSave);
+        if (saved) {
+            console.log('✅ User successfully saved to localStorage');
+            rememberedUser = userDataToSave;
+        } else {
+            console.warn('⚠️ Failed to save user to localStorage, using memory only');
+            rememberedUser = userDataToSave;
+        }
+    } else {
+        console.log('📝 Remember me not checked, not saving user');
+    }
+    
+    const status = userData.isOSMode ? 
+        document.getElementById('osLoginStatus') : 
+        document.getElementById('loginStatus');
+    const button = userData.isOSMode ? 
+        document.getElementById('osLoginButton') : 
+        document.getElementById('loginButton');
+    
+    status.innerHTML = userData.isOSMode ? 
+        "✅ Welcome back! Redirecting..." : 
+        "✅ Authentication successful! Redirecting...";
+    button.innerHTML = "✅ Success";
+    
+    try {
+        const authSession = {
+            authenticated: true,
+            username: userData.username,
+            email: userData.email,
+            userId: userData.id,
+            timestamp: new Date().toISOString(),
+            expiresAt: new Date(Date.now() + 3600000).toISOString()
+        };
         
-        try {
-            const { data, error } = await supabase
-                .from('clients')
-                .select('id, name, email, blocked, ban_reason, warnings')
-                .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
-                .eq('password', pwd)
-                .single();
-            
-            const attemptLog = {
-                attempted_username: emailOrName,
-                attempted_email: emailOrName.includes('@') ? emailOrName : null,
-                success: !!(data && !error && !data.blocked),
-                attempt_timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            };
-            
-            if (data && !error) {
-                attemptLog.client_id = data.id;
-                attemptLog.client_name = data.name;
-                attemptLog.client_email = data.email;
-                
-                if (data.blocked) {
-                    attemptLog.success = false;
-                    attemptLog.failure_reason = 'Account blocked';
-                }
-            } else {
-                attemptLog.failure_reason = 'Invalid credentials';
-            }
-            
-            try {
-                await supabase.from('login_attempts').insert(attemptLog);
-            } catch (logErr) {
-                console.warn('⚠️ Error logging login attempt:', logErr);
-            }
-            
-            if (error || !data) {
-                status.innerHTML = "";
-                usernameInput.classList.add('error');
-                passwordInput.classList.add('error');
-                loginButton.innerHTML = "Authenticate";
-                loginButton.disabled = false;
-                banModal.classList.add('show');
-                banReason.textContent = "Invalid username/email or password. Please check your credentials and try again.";
-                return;
-            }
+        localStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
+        sessionStorage.setItem('xorbit_auth_session', JSON.stringify(authSession));
+        
+        console.log('✅ Authentication session stored');
+    } catch (error) {
+        console.warn('⚠️ Could not store auth session:', error);
+    }
+    
+    setTimeout(() => {
+        console.log('📤 Sending postMessage to parent window...');
+        if (window.parent && window.parent !== window) {
+            window.parent.postMessage('auth-success', '*');
+        } else {
+            window.location.href = 'browser.html';
+        }
+    }, 1000);
+}
+
+async function login() {
+    console.log('🚀 Login function called');
+    
+    if (!supabaseClient) { // FIXED: Changed from 'supabase' to 'supabaseClient'
+        console.error('❌ Supabase not initialized');
+        document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
+        return;
+    }
+    
+    const usernameInput = document.getElementById('usernameOrEmail');
+    const passwordInput = document.getElementById('password');
+    const rememberCheckbox = document.getElementById('rememberMe');
+    const loginButton = document.getElementById('loginButton');
+    const banModal = document.getElementById('banModal');
+    const banReason = document.getElementById('banReason');
+    const status = document.getElementById('loginStatus');
+    
+    const emailOrName = usernameInput.value.trim();
+    const pwd = passwordInput.value.trim();
+    const rememberMe = rememberCheckbox.checked;
+    
+    status.innerHTML = "";
+    banModal.classList.remove('show');
+    banReason.textContent = "";
+    usernameInput.classList.remove('error', 'banned');
+    passwordInput.classList.remove('error', 'banned');
+    loginButton.classList.remove('banned');
+    loginButton.innerHTML = "Authenticate";
+    loginButton.disabled = false;
+    
+    if (!emailOrName || !pwd) {
+        status.innerHTML = "❌ Please fill in both fields.";
+        if (!emailOrName) usernameInput.classList.add('error');
+        if (!pwd) passwordInput.classList.add('error');
+        return;
+    }
+    
+    status.innerHTML = '<span class="loading"></span> Authenticating...';
+    loginButton.innerHTML = '<span class="loading"></span> Authenticating...';
+    loginButton.disabled = true;
+    
+    try {
+        // FIXED: Changed from 'supabase' to 'supabaseClient'
+        const { data, error } = await supabaseClient
+            .from('clients')
+            .select('id, name, email, blocked, ban_reason, warnings')
+            .or(`email.eq.${emailOrName},name.eq.${emailOrName}`)
+            .eq('password', pwd)
+            .single();
+        
+        const attemptLog = {
+            attempted_username: emailOrName,
+            attempted_email: emailOrName.includes('@') ? emailOrName : null,
+            success: !!(data && !error && !data.blocked),
+            attempt_timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        };
+        
+        if (data && !error) {
+            attemptLog.client_id = data.id;
+            attemptLog.client_name = data.name;
+            attemptLog.client_email = data.email;
             
             if (data.blocked) {
-                usernameInput.classList.add('banned');
-                passwordInput.classList.add('banned');
-                loginButton.classList.add('banned');
-                loginButton.innerHTML = "Return to Login";
-                loginButton.onclick = () => location.href = 'index.html';
-                banModal.classList.add('show');
-                banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
-                status.innerHTML = "";
-                return;
+                attemptLog.success = false;
+                attemptLog.failure_reason = 'Account blocked';
             }
-            
-            if (data.warnings && data.warnings.trim() !== '') {
-                pendingUserData = {
-                    username: data.name,
-                    email: data.email,
-                    id: data.id,
-                    rememberMe: rememberMe,
-                    isOSMode: false
-                };
-                
-                status.innerHTML = "";
-                loginButton.innerHTML = "Authenticate";
-                loginButton.disabled = false;
-                
-                showWarningModal(data.warnings);
-                return;
-            }
-            
-            const userData = {
+        } else {
+            attemptLog.failure_reason = 'Invalid credentials';
+        }
+        
+        try {
+            // FIXED: Changed from 'supabase' to 'supabaseClient'
+            await supabaseClient.from('login_attempts').insert(attemptLog);
+        } catch (logErr) {
+            console.warn('⚠️ Error logging login attempt:', logErr);
+        }
+        
+        if (error || !data) {
+            status.innerHTML = "";
+            usernameInput.classList.add('error');
+            passwordInput.classList.add('error');
+            loginButton.innerHTML = "Authenticate";
+            loginButton.disabled = false;
+            banModal.classList.add('show');
+            banReason.textContent = "Invalid username/email or password. Please check your credentials and try again.";
+            return;
+        }
+        
+        if (data.blocked) {
+            usernameInput.classList.add('banned');
+            passwordInput.classList.add('banned');
+            loginButton.classList.add('banned');
+            loginButton.innerHTML = "Return to Login";
+            loginButton.onclick = () => location.href = 'index.html';
+            banModal.classList.add('show');
+            banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
+            status.innerHTML = "";
+            return;
+        }
+        
+        if (data.warnings && data.warnings.trim() !== '') {
+            pendingUserData = {
                 username: data.name,
                 email: data.email,
                 id: data.id,
@@ -2293,129 +2281,131 @@
                 isOSMode: false
             };
             
-            completeLogin(userData);
-            
-        } catch (err) {
-            console.error('💥 Critical error during login:', err);
-            status.innerHTML = "❌ Connection error. Please try again.";
+            status.innerHTML = "";
             loginButton.innerHTML = "Authenticate";
             loginButton.disabled = false;
+            
+            showWarningModal(data.warnings);
+            return;
         }
+        
+        const userData = {
+            username: data.name,
+            email: data.email,
+            id: data.id,
+            rememberMe: rememberMe,
+            isOSMode: false
+        };
+        
+        completeLogin(userData);
+        
+    } catch (err) {
+        console.error('💥 Critical error during login:', err);
+        status.innerHTML = "❌ Connection error. Please try again.";
+        loginButton.innerHTML = "Authenticate";
+        loginButton.disabled = false;
+    }
+}
+
+async function osLogin() {
+    console.log('🖥️ OS login function called');
+    
+    if (!supabaseClient || !rememberedUser) { // FIXED: Changed from 'supabase' to 'supabaseClient'
+        console.error('❌ Supabase or remembered user not available');
+        document.getElementById('osLoginStatus').innerHTML = "❌ Session expired. Please sign in again.";
+        showRegularMode();
+        return;
     }
     
-    async function osLogin() {
-        console.log('🖥️ OS login function called');
+    const passwordInput = document.getElementById('osPassword');
+    const loginButton = document.getElementById('osLoginButton');
+    const banModal = document.getElementById('osBanModal');
+    const banReason = document.getElementById('osBanReason');
+    const status = document.getElementById('osLoginStatus');
+    
+    const pwd = passwordInput.value.trim();
+    
+    status.innerHTML = "";
+    banModal.classList.remove('show');
+    banReason.textContent = "";
+    passwordInput.classList.remove('error', 'banned');
+    loginButton.classList.remove('banned');
+    loginButton.innerHTML = "Sign In";
+    loginButton.disabled = false;
+    
+    if (!pwd) {
+        status.innerHTML = "❌ Please enter your password.";
+        passwordInput.classList.add('error');
+        return;
+    }
+    
+    status.innerHTML = '<span class="loading"></span> Signing in...';
+    loginButton.innerHTML = '<span class="loading"></span> Signing in...';
+    loginButton.disabled = true;
+    
+    try {
+        // FIXED: Changed from 'supabase' to 'supabaseClient'
+        const { data, error } = await supabaseClient
+            .from('clients')
+            .select('id, name, email, blocked, ban_reason, warnings')
+            .or(`email.eq.${rememberedUser.email},name.eq.${rememberedUser.username}`)
+            .eq('password', pwd)
+            .single();
         
-        if (!supabase || !rememberedUser) {
-            console.error('❌ Supabase or remembered user not available');
-            document.getElementById('osLoginStatus').innerHTML = "❌ Session expired. Please sign in again.";
-            showRegularMode();
-            return;
-        }
+        const attemptLog = {
+            attempted_username: rememberedUser.username,
+            attempted_email: rememberedUser.email,
+            success: !!(data && !error && !data.blocked),
+            attempt_timestamp: new Date().toISOString(),
+            user_agent: navigator.userAgent
+        };
         
-        const passwordInput = document.getElementById('osPassword');
-        const loginButton = document.getElementById('osLoginButton');
-        const banModal = document.getElementById('osBanModal');
-        const banReason = document.getElementById('osBanReason');
-        const status = document.getElementById('osLoginStatus');
-        
-        const pwd = passwordInput.value.trim();
-        
-        status.innerHTML = "";
-        banModal.classList.remove('show');
-        banReason.textContent = "";
-        passwordInput.classList.remove('error', 'banned');
-        loginButton.classList.remove('banned');
-        loginButton.innerHTML = "Sign In";
-        loginButton.disabled = false;
-        
-        if (!pwd) {
-            status.innerHTML = "❌ Please enter your password.";
-            passwordInput.classList.add('error');
-            return;
-        }
-        
-        status.innerHTML = '<span class="loading"></span> Signing in...';
-        loginButton.innerHTML = '<span class="loading"></span> Signing in...';
-        loginButton.disabled = true;
-        
-        try {
-            const { data, error } = await supabase
-                .from('clients')
-                .select('id, name, email, blocked, ban_reason, warnings')
-                .or(`email.eq.${rememberedUser.email},name.eq.${rememberedUser.username}`)
-                .eq('password', pwd)
-                .single();
-            
-            const attemptLog = {
-                attempted_username: rememberedUser.username,
-                attempted_email: rememberedUser.email,
-                success: !!(data && !error && !data.blocked),
-                attempt_timestamp: new Date().toISOString(),
-                user_agent: navigator.userAgent
-            };
-            
-            if (data && !error) {
-                attemptLog.client_id = data.id;
-                attemptLog.client_name = data.name;
-                attemptLog.client_email = data.email;
-                
-                if (data.blocked) {
-                    attemptLog.success = false;
-                    attemptLog.failure_reason = 'Account blocked';
-                }
-            } else {
-                attemptLog.failure_reason = 'Invalid credentials';
-            }
-            
-            try {
-                await supabase.from('login_attempts').insert(attemptLog);
-            } catch (logErr) {
-                console.warn('⚠️ Error logging OS mode login attempt:', logErr);
-            }
-            
-            if (error || !data) {
-                status.innerHTML = "";
-                passwordInput.classList.add('error');
-                loginButton.innerHTML = "Sign In";
-                loginButton.disabled = false;
-                banModal.classList.add('show');
-                banReason.textContent = "Incorrect password. Please check your password and try again.";
-                return;
-            }
+        if (data && !error) {
+            attemptLog.client_id = data.id;
+            attemptLog.client_name = data.name;
+            attemptLog.client_email = data.email;
             
             if (data.blocked) {
-                passwordInput.classList.add('banned');
-                loginButton.classList.add('banned');
-                loginButton.innerHTML = "Return to Login";
-                loginButton.onclick = () => {
-                    showRegularMode();
-                    location.href = 'index.html';
-                };
-                banModal.classList.add('show');
-                banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
-                status.innerHTML = "";
-                return;
+                attemptLog.success = false;
+                attemptLog.failure_reason = 'Account blocked';
             }
-            
-            if (data.warnings && data.warnings.trim() !== '') {
-                pendingUserData = {
-                    username: data.name,
-                    email: data.email,
-                    id: data.id,
-                    rememberMe: true,
-                    isOSMode: true
-                };
-                
-                status.innerHTML = "";
-                loginButton.innerHTML = "Sign In";
-                loginButton.disabled = false;
-                
-                showWarningModal(data.warnings);
-                return;
-            }
-            
-            const userData = {
+        } else {
+            attemptLog.failure_reason = 'Invalid credentials';
+        }
+        
+        try {
+            // FIXED: Changed from 'supabase' to 'supabaseClient'
+            await supabaseClient.from('login_attempts').insert(attemptLog);
+        } catch (logErr) {
+            console.warn('⚠️ Error logging OS mode login attempt:', logErr);
+        }
+        
+        if (error || !data) {
+            status.innerHTML = "";
+            passwordInput.classList.add('error');
+            loginButton.innerHTML = "Sign In";
+            loginButton.disabled = false;
+            banModal.classList.add('show');
+            banReason.textContent = "Incorrect password. Please check your password and try again.";
+            return;
+        }
+        
+        if (data.blocked) {
+            passwordInput.classList.add('banned');
+            loginButton.classList.add('banned');
+            loginButton.innerHTML = "Return to Login";
+            loginButton.onclick = () => {
+                showRegularMode();
+                location.href = 'index.html';
+            };
+            banModal.classList.add('show');
+            banReason.textContent = data.ban_reason || "Account access has been restricted. Contact support for assistance.";
+            status.innerHTML = "";
+            return;
+        }
+        
+        if (data.warnings && data.warnings.trim() !== '') {
+            pendingUserData = {
                 username: data.name,
                 email: data.email,
                 id: data.id,
@@ -2423,189 +2413,205 @@
                 isOSMode: true
             };
             
-            completeLogin(userData);
-            
-        } catch (err) {
-            console.error('💥 Critical error during OS login:', err);
-            status.innerHTML = "❌ Connection error. Please try again.";
+            status.innerHTML = "";
             loginButton.innerHTML = "Sign In";
             loginButton.disabled = false;
-        }
-    }
-    
-    function handleKeyPress(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
             
-            const osView = document.getElementById('osView');
-            if (osView.classList.contains('active')) {
-                osLogin();
-            } else {
-                login();
-            }
-        }
-    }
-    
-    async function initApp() {
-        console.log('🔧 Initializing X-ORBIT Login System...');
-        
-        checkSolarisAlertState();
-        createStars();
-        createParticles();
-        startSessionTimer();
-        setupActivityListeners();
-        
-        const supabaseReady = await initSupabase();
-        if (!supabaseReady) {
-            document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
+            showWarningModal(data.warnings);
             return;
         }
         
-        const savedUser = loadRememberedUser();
-        if (savedUser) {
-            console.log('👤 Found remembered user:', savedUser.username);
-            rememberedUser = savedUser;
-            showOSMode(savedUser);
+        const userData = {
+            username: data.name,
+            email: data.email,
+            id: data.id,
+            rememberMe: true,
+            isOSMode: true
+        };
+        
+        completeLogin(userData);
+        
+    } catch (err) {
+        console.error('💥 Critical error during OS login:', err);
+        status.innerHTML = "❌ Connection error. Please try again.";
+        loginButton.innerHTML = "Sign In";
+        loginButton.disabled = false;
+    }
+}
+
+function handleKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        
+        const osView = document.getElementById('osView');
+        if (osView.classList.contains('active')) {
+            osLogin();
         } else {
-            console.log('ℹ️ No remembered user found');
+            login();
         }
-        
-        const loginButton = document.getElementById('loginButton');
-        const osLoginButton = document.getElementById('osLoginButton');
-        const switchUserButton = document.getElementById('switchUserButton');
-        const backNav = document.getElementById('backNav');
-        const acknowledgeBtn = document.getElementById('acknowledgeBtn');
-        const helpTrigger = document.getElementById('helpTrigger');
-        const registerBtn = document.getElementById('registerBtn');
-        const supportPortalBtn = document.getElementById('supportPortalBtn');
-        const closeRegistrationBtn = document.getElementById('closeRegistrationBtn');
-        
-        if (loginButton) {
-            loginButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                login();
-            });
-        }
-        
-        if (osLoginButton) {
-            osLoginButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                osLogin();
-            });
-        }
-        
-        if (switchUserButton) {
-            switchUserButton.addEventListener('click', (e) => {
-                e.preventDefault();
-                showRegularMode(true);
-            });
-        }
-        
-        if (backNav) {
-            backNav.addEventListener('click', (e) => {
-                e.preventDefault();
-                goBackToOSMode();
-            });
-        }
-        
-        if (acknowledgeBtn) {
-            acknowledgeBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                acknowledgeWarning();
-            });
-        }
-        
-        if (helpTrigger) {
-            helpTrigger.addEventListener('click', (e) => {
-                e.stopPropagation();
-                toggleHelpMenu();
-            });
-        }
-        
-        if (registerBtn) {
-            registerBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                showRegistrationModal();
-            });
-        }
-        
-        if (supportPortalBtn) {
-            supportPortalBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                openSupportPortal();
-            });
-        }
-        
-        if (closeRegistrationBtn) {
-            closeRegistrationBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                hideRegistrationModal();
-            });
-        }
-        
-        document.addEventListener('keydown', handleKeyPress);
-        
-        const inputs = document.querySelectorAll('.form-input');
-        inputs.forEach(input => {
-            input.addEventListener('focus', function() {
-                if (this.parentElement) {
-                    this.parentElement.style.transform = 'translateY(-2px)';
-                }
-            });
-            
-            input.addEventListener('blur', function() {
-                if (this.parentElement) {
-                    this.parentElement.style.transform = 'translateY(0)';
-                }
-            });
-        });
-        
-        console.log('✅ X-ORBIT Login System initialized');
+    }
+}
+
+async function initApp() {
+    console.log('🔧 Initializing X-ORBIT Login System...');
+    
+    checkSolarisAlertState();
+    createStars();
+    createParticles();
+    startSessionTimer();
+    setupActivityListeners();
+    
+    const supabaseReady = await initSupabase();
+    if (!supabaseReady) {
+        document.getElementById('loginStatus').innerHTML = "❌ System error. Please refresh the page.";
+        return;
     }
     
-    document.addEventListener('DOMContentLoaded', initApp);
-    
-    if (document.readyState === 'loading') {
-        console.log('⏳ DOM loading...');
+    const savedUser = loadRememberedUser();
+    if (savedUser) {
+        console.log('👤 Found remembered user:', savedUser.username);
+        rememberedUser = savedUser;
+        showOSMode(savedUser);
     } else {
-        console.log('⚡ DOM ready');
-        initApp();
+        console.log('ℹ️ No remembered user found');
     }
     
-    let sessionTimer = null;
+    const loginButton = document.getElementById('loginButton');
+    const osLoginButton = document.getElementById('osLoginButton');
+    const switchUserButton = document.getElementById('switchUserButton');
+    const backNav = document.getElementById('backNav');
+    const acknowledgeBtn = document.getElementById('acknowledgeBtn');
+    const helpTrigger = document.getElementById('helpTrigger');
+    const registerBtn = document.getElementById('registerBtn');
+    const supportPortalBtn = document.getElementById('supportPortalBtn');
+    const closeRegistrationBtn = document.getElementById('closeRegistrationBtn');
     
-    function startSessionTimer() {
-        if (sessionTimer) {
-            clearTimeout(sessionTimer);
-        }
-        
-        sessionTimer = setTimeout(() => {
-            handleSessionTimeout();
-        }, 3600000);
-    }
-    
-    function resetSessionTimer() {
-        startSessionTimer();
-    }
-    
-    function handleSessionTimeout() {
-        console.log('⏰ Session timed out');
-        
-        if (window.parent && window.parent !== window) {
-            window.parent.postMessage('session-timeout', '*');
-        } else {
-            window.location.href = 'timeout.html';
-        }
-    }
-    
-    function setupActivityListeners() {
-        const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
-        
-        events.forEach(event => {
-            document.addEventListener(event, resetSessionTimer, { passive: true });
+    if (loginButton) {
+        loginButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            login();
         });
     }
-    </script>
+    
+    if (osLoginButton) {
+        osLoginButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            osLogin();
+        });
+    }
+    
+    if (switchUserButton) {
+        switchUserButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegularMode(true);
+        });
+    }
+    
+    if (backNav) {
+        backNav.addEventListener('click', (e) => {
+            e.preventDefault();
+            goBackToOSMode();
+        });
+    }
+    
+    if (acknowledgeBtn) {
+        acknowledgeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            acknowledgeWarning();
+        });
+    }
+    
+    if (helpTrigger) {
+        helpTrigger.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleHelpMenu();
+        });
+    }
+    
+    if (registerBtn) {
+        registerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            showRegistrationModal();
+        });
+    }
+    
+    if (supportPortalBtn) {
+        supportPortalBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openSupportPortal();
+        });
+    }
+    
+    if (closeRegistrationBtn) {
+        closeRegistrationBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            hideRegistrationModal();
+        });
+    }
+    
+    document.addEventListener('keydown', handleKeyPress);
+    
+    const inputs = document.querySelectorAll('.form-input');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            if (this.parentElement) {
+                this.parentElement.style.transform = 'translateY(-2px)';
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            if (this.parentElement) {
+                this.parentElement.style.transform = 'translateY(0)';
+            }
+        });
+    });
+    
+    console.log('✅ X-ORBIT Login System initialized');
+}
+
+document.addEventListener('DOMContentLoaded', initApp);
+
+if (document.readyState === 'loading') {
+    console.log('⏳ DOM loading...');
+} else {
+    console.log('⚡ DOM ready');
+    initApp();
+}
+
+let sessionTimer = null;
+
+function startSessionTimer() {
+    if (sessionTimer) {
+        clearTimeout(sessionTimer);
+    }
+    
+    sessionTimer = setTimeout(() => {
+        handleSessionTimeout();
+    }, 3600000);
+}
+
+function resetSessionTimer() {
+    startSessionTimer();
+}
+
+function handleSessionTimeout() {
+    console.log('⏰ Session timed out');
+    
+    if (window.parent && window.parent !== window) {
+        window.parent.postMessage('session-timeout', '*');
+    } else {
+        window.location.href = 'timeout.html';
+    }
+}
+
+function setupActivityListeners() {
+    const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    events.forEach(event => {
+        document.addEventListener(event, resetSessionTimer, { passive: true });
+    });
+}
+</script>
     </body>
     </html>
     

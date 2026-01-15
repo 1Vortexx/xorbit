@@ -201,11 +201,12 @@
   </div>
 
   <script>
-    // Initialize Supabase client
+    // Initialize Supabase client - RENAMED to avoid conflicts
     const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
     
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // Use a different variable name to avoid conflicts
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // Browser URLs - CORRECTED
     const BROWSER_URLS = {
@@ -213,24 +214,50 @@
       orbix: 'https://browse.xorbit.org'         // ORBIX Browser (Premium - $2/m)
     };
 
+    // Function to get user email from auth session or remembered user
+    function getUserEmail() {
+      try {
+        // Try to get from auth session first
+        const authSession = localStorage.getItem('xorbit_auth_session') || 
+                          sessionStorage.getItem('xorbit_auth_session');
+        
+        if (authSession) {
+          const session = JSON.parse(authSession);
+          console.log('Found auth session email:', session.email);
+          return session.email;
+        }
+        
+        // Fallback to remembered user
+        const rememberedUser = localStorage.getItem('xorbit_remembered_user');
+        if (rememberedUser) {
+          const user = JSON.parse(rememberedUser);
+          console.log('Found remembered user email:', user.email);
+          return user.email;
+        }
+        
+        console.log('No user email found');
+        return null;
+      } catch (error) {
+        console.error('Error getting user email:', error);
+        return null;
+      }
+    }
+
     async function checkUserRole() {
       try {
-        // Get current user
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        // Get user email from localStorage
+        const userEmail = getUserEmail();
         
-        if (authError || !user) {
-          console.error('Auth error:', authError);
-          // Default to standard browser if not authenticated
+        if (!userEmail) {
+          console.log('No user email found, loading standard browser');
           loadBrowser('rammerhead');
           return;
         }
 
-        // Get user's email
-        const userEmail = user.email;
         console.log('Checking role for user:', userEmail);
 
-        // Query the clients table to get role
-        const { data: clientData, error: dbError } = await supabase
+        // Query the clients table to get role using the email
+        const { data: clientData, error: dbError } = await supabaseClient
           .from('clients')
           .select('role, blocked')
           .eq('email', userEmail)

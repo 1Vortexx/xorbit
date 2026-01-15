@@ -1,337 +1,692 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>X-ORBIT Browser</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <style>
-    /* Fullscreen page setup */
-    html, body {
-      margin: 0;
-      padding: 0;
-      width: 100%;
-      height: 100%;
-      font-family: 'Inter', sans-serif;
-      background: #000; /* fallback */
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
-    /* Background glow layer */
-    .background {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: url('https://i.imgur.com/Id6OMsw.png') no-repeat center center/cover;
-      filter: brightness(0.25) blur(8px);
-      z-index: -2;
-    }
-    /* Overlay tint */
-    .overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.25);
-      z-index: -1;
-    }
-    /* Fullscreen iframe container */
-    .iframe-container {
-      flex-grow: 1;
-      width: 100%;
-      height: 100%;
-      position: relative;
-      background: #ffffff; /* fallback background */
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: transparent !important;
-      color-scheme: light;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>X-ORBIT Browser</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+      /* Fullscreen page setup */
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        font-family: "Inter", sans-serif;
+        background: #000; /* fallback */
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+      }
+      /* Background glow layer */
+      .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("https://i.imgur.com/Id6OMsw.png") no-repeat center
+          center/cover;
+        filter: brightness(0.25) blur(8px);
+        z-index: -2;
+      }
+      /* Overlay tint */
+      .overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.25);
+        z-index: -1;
+      }
+      /* Fullscreen iframe container */
+      .iframe-container {
+        flex-grow: 1;
+        width: 100%;
+        height: 100%;
+        position: relative;
+        background: #ffffff; /* fallback background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+      iframe {
+        width: 100%;
+        height: 100%;
+        border: none;
+        background: transparent !important;
+        color-scheme: light;
+      }
 
-    /* Browser Selection Modal */
-    .modal-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(10px);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 1000;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s ease;
-    }
-    .modal-overlay.active {
-      opacity: 1;
-      pointer-events: all;
-    }
-    .modal {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-      border-radius: 20px;
-      padding: 40px;
-      max-width: 600px;
-      width: 90%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    .modal h2 {
-      margin: 0 0 10px 0;
-      color: #fff;
-      font-size: 28px;
-      font-weight: 700;
-    }
-    .modal p {
-      margin: 0 0 30px 0;
-      color: rgba(255, 255, 255, 0.7);
-      font-size: 14px;
-    }
-    .browser-options {
-      display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-    }
-    .browser-card {
-      flex: 1;
-      min-width: 200px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      border-radius: 15px;
-      padding: 25px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-align: center;
-    }
-    .browser-card:hover {
-      background: rgba(255, 255, 255, 0.1);
-      border-color: rgba(74, 144, 226, 0.6);
-      transform: translateY(-5px);
-      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
-    }
-    .browser-card h3 {
-      margin: 0 0 10px 0;
-      color: #fff;
-      font-size: 20px;
-      font-weight: 600;
-    }
-    .browser-card .subtitle {
-      color: rgba(255, 255, 255, 0.6);
-      font-size: 12px;
-      margin-bottom: 15px;
-      font-weight: 500;
-    }
-    .browser-card .description {
-      color: rgba(255, 255, 255, 0.5);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .premium-badge {
-      display: inline-block;
-      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-      color: #fff;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
-      margin-top: 10px;
-    }
-    .loading {
-      text-align: center;
-      color: #fff;
-      font-size: 18px;
-    }
-    
-    /* Error message styling */
-    .error-message {
-      background: rgba(239, 68, 68, 0.1);
-      border: 1px solid rgba(239, 68, 68, 0.3);
-      border-radius: 10px;
-      padding: 15px;
-      margin-top: 20px;
-      color: #ef4444;
-      font-size: 14px;
-      display: none;
-    }
-  </style>
-</head>
-<body>
-  <div class="background"></div>
-  <div class="overlay"></div>
+      /* Browser Selection Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+      .modal-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+      .modal {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 20px;
+        padding: 40px;
+        max-width: 600px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .modal h2 {
+        margin: 0 0 10px 0;
+        color: #fff;
+        font-size: 28px;
+        font-weight: 700;
+      }
+      .modal p {
+        margin: 0 0 30px 0;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 14px;
+      }
+      .browser-options {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+      }
+      .browser-card {
+        flex: 1;
+        min-width: 200px;
+        background: rgba(255, 255, 255, 0.05);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        border-radius: 15px;
+        padding: 25px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-align: center;
+        position: relative;
+      }
+      .browser-card:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(74, 144, 226, 0.6);
+        transform: translateY(-5px);
+        box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+      }
+      .browser-card h3 {
+        margin: 0 0 10px 0;
+        color: #fff;
+        font-size: 20px;
+        font-weight: 600;
+      }
+      .browser-card .subtitle {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        margin-bottom: 15px;
+        font-weight: 500;
+      }
+      .browser-card .description {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+      .premium-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: #fff;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        margin-top: 10px;
+      }
 
-  <!-- Browser Selection Modal (for premium users) -->
-  <div class="modal-overlay" id="browserModal">
-    <div class="modal">
-      <h2>Choose Your Browser</h2>
-      <p>Select which proxy browser you'd like to use</p>
-      <div class="browser-options">
-        <div class="browser-card" onclick="selectBrowser('rammerhead')">
-          <h3>Rammerhead</h3>
-          <div class="subtitle">Truncated & Basic</div>
-          <div class="description">Fast and reliable proxy browser with basic features. Perfect for everyday browsing.</div>
+      /* Your Plan Badge */
+      .your-plan-badge {
+        position: absolute;
+        top: -10px;
+        right: -10px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        animation: planBadgePulse 2s ease-in-out infinite;
+        z-index: 10;
+      }
+
+      @keyframes planBadgePulse {
+        0%,
+        100% {
+          box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 4px 20px rgba(16, 185, 129, 0.6);
+          transform: scale(1.05);
+        }
+      }
+
+      .loading {
+        text-align: center;
+        color: #fff;
+        font-size: 18px;
+      }
+
+      /* Error message styling */
+      .error-message {
+        background: rgba(239, 68, 68, 0.1);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 20px;
+        color: #ef4444;
+        font-size: 14px;
+        display: none;
+      }
+
+      /* Upgrade Modal */
+      .upgrade-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.9);
+        backdrop-filter: blur(15px);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2000;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+      }
+
+      .upgrade-overlay.active {
+        opacity: 1;
+        pointer-events: all;
+      }
+
+      .upgrade-modal {
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        border-radius: 24px;
+        padding: 3rem;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5),
+          0 0 100px rgba(147, 51, 234, 0.3),
+          inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        border: 2px solid rgba(147, 51, 234, 0.5);
+        animation: modalSlideIn 0.4s ease;
+        text-align: center;
+      }
+
+      @keyframes modalSlideIn {
+        from {
+          opacity: 0;
+          transform: translateY(-50px) scale(0.9);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0) scale(1);
+        }
+      }
+
+      .upgrade-icon {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f093fb, #f5576c);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 40px;
+        animation: upgradeIconPulse 2s ease-in-out infinite;
+        box-shadow: 0 0 40px rgba(240, 147, 251, 0.5);
+      }
+
+      @keyframes upgradeIconPulse {
+        0%,
+        100% {
+          box-shadow: 0 0 40px rgba(240, 147, 251, 0.5);
+          transform: scale(1);
+        }
+        50% {
+          box-shadow: 0 0 60px rgba(240, 147, 251, 0.7);
+          transform: scale(1.05);
+        }
+      }
+
+      .upgrade-modal h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 1rem;
+      }
+
+      .upgrade-content {
+        background: rgba(147, 51, 234, 0.1);
+        border: 1px solid rgba(147, 51, 234, 0.3);
+        border-radius: 16px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+      }
+
+      .upgrade-content p {
+        color: #cbd5e1;
+        line-height: 1.6;
+        margin: 0 0 1rem 0;
+      }
+
+      .upgrade-steps {
+        text-align: left;
+        color: #e2e8f0;
+        font-size: 0.95rem;
+        line-height: 1.8;
+      }
+
+      .upgrade-steps li {
+        margin-bottom: 0.5rem;
+      }
+
+      .upgrade-steps strong {
+        color: #00d4ff;
+      }
+
+      .upgrade-actions {
+        display: flex;
+        gap: 1rem;
+      }
+
+      .support-btn {
+        flex: 1;
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        border: none;
+        font-weight: 600;
+        font-size: 1rem;
+        color: #fff;
+        background: linear-gradient(
+          135deg,
+          #9333ea 0%,
+          #7c3aed 50%,
+          #00d4ff 100%
+        );
+        background-size: 200% 200%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        animation: buttonGradient 3s ease-in-out infinite;
+        box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+
+      .support-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(147, 51, 234, 0.5);
+      }
+
+      @keyframes buttonGradient {
+        0%,
+        100% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+      }
+
+      .cancel-btn {
+        flex: 1;
+        padding: 1rem 2rem;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.05);
+        color: #94a3b8;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .cancel-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #f8fafc;
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background"></div>
+    <div class="overlay"></div>
+
+    <!-- Browser Selection Modal (always shown) -->
+    <div class="modal-overlay active" id="browserModal">
+      <div class="modal">
+        <h2>Choose Your Browser</h2>
+        <p>Select which proxy browser you'd like to use</p>
+        <div class="browser-options">
+          <div
+            class="browser-card"
+            id="rammerheadCard"
+            onclick="selectBrowser('rammerhead')"
+          >
+            <div
+              class="your-plan-badge"
+              id="standardPlanBadge"
+              style="display: none"
+            >
+              Your Plan
+            </div>
+            <h3>Rammerhead</h3>
+            <div class="subtitle">Truncated & Basic</div>
+            <div class="description">
+              Fast and reliable proxy browser with basic features. Perfect for
+              everyday browsing.
+            </div>
+          </div>
+          <div
+            class="browser-card"
+            id="orbixCard"
+            onclick="selectBrowser('orbix')"
+          >
+            <div
+              class="your-plan-badge"
+              id="premiumPlanBadge"
+              style="display: none"
+            >
+              Your Plan
+            </div>
+            <h3>ORBIX Browser</h3>
+            <div class="subtitle">Based on Ultraviolet</div>
+            <div class="description">
+              Advanced proxy browser with enhanced features and performance.
+            </div>
+            <span class="premium-badge">PREMIUM - $2/m</span>
+          </div>
         </div>
-        <div class="browser-card" onclick="selectBrowser('orbix')">
-          <h3>ORBIX Browser</h3>
-          <div class="subtitle">Based on Ultraviolet</div>
-          <div class="description">Advanced proxy browser with enhanced features and performance.</div>
-          <span class="premium-badge">PREMIUM - $2/m</span>
+        <div class="error-message" id="errorMessage"></div>
+      </div>
+    </div>
+
+    <!-- Upgrade to Premium Modal -->
+    <div class="upgrade-overlay" id="upgradeOverlay">
+      <div class="upgrade-modal">
+        <div class="upgrade-icon">⭐</div>
+        <h2>Upgrade to Premium</h2>
+        <div class="upgrade-content">
+          <p>
+            ORBIX Browser is a premium feature available for only
+            <strong>$2/month</strong>.
+          </p>
+          <p><strong>To upgrade your account:</strong></p>
+          <ol class="upgrade-steps">
+            <li>Visit the <strong>X-ORBIT Support Portal</strong></li>
+            <li>
+              Submit a ticket requesting <strong>"Premium Upgrade"</strong>
+            </li>
+            <li>
+              Our team will process your request and send payment instructions
+            </li>
+            <li>
+              Once confirmed, you'll have instant access to ORBIX Browser!
+            </li>
+          </ol>
+        </div>
+        <div class="upgrade-actions">
+          <a
+            href="https://xorbit.org/support"
+            class="support-btn"
+            target="_blank"
+          >
+            <i class="fas fa-external-link-alt"></i>
+            <span>Go to Support</span>
+          </a>
+          <button class="cancel-btn" onclick="closeUpgradeModal()">
+            Cancel
+          </button>
         </div>
       </div>
-      <div class="error-message" id="errorMessage"></div>
     </div>
-  </div>
 
-  <!-- Fullscreen iframe -->
-  <div class="iframe-container">
-    <div class="loading" id="loadingText">Loading...</div>
-    <iframe id="browserFrame" style="display: none;"></iframe>
-  </div>
+    <!-- Fullscreen iframe -->
+    <div class="iframe-container" style="display: none">
+      <div class="loading" id="loadingText">Loading...</div>
+      <iframe id="browserFrame" style="display: none"></iframe>
+    </div>
 
-  <script>
-    // Initialize Supabase client - RENAMED to avoid conflicts
-    const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
-    
-    // Use a different variable name to avoid conflicts
-    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    <script>
+      // Initialize Supabase client
+      const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
+      const SUPABASE_ANON_KEY =
+        "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
 
-    // Browser URLs - CORRECTED
-    const BROWSER_URLS = {
-      rammerhead: 'https://browser.xorbit.org',  // Rammerhead (Standard - Free)
-      orbix: 'https://browse.xorbit.org'         // ORBIX Browser (Premium - $2/m)
-    };
+      // Use a different variable name to avoid conflicts
+      let supabaseClient;
 
-    // Function to get user email from auth session or remembered user
-    function getUserEmail() {
-      try {
-        // Try to get from auth session first
-        const authSession = localStorage.getItem('xorbit_auth_session') || 
-                          sessionStorage.getItem('xorbit_auth_session');
-        
-        if (authSession) {
-          const session = JSON.parse(authSession);
-          console.log('Found auth session email:', session.email);
-          return session.email;
-        }
-        
-        // Fallback to remembered user
-        const rememberedUser = localStorage.getItem('xorbit_remembered_user');
-        if (rememberedUser) {
-          const user = JSON.parse(rememberedUser);
-          console.log('Found remembered user email:', user.email);
-          return user.email;
-        }
-        
-        console.log('No user email found');
-        return null;
-      } catch (error) {
-        console.error('Error getting user email:', error);
-        return null;
+      // Try to initialize Supabase, check if it's already loaded
+      if (window.supabase && !supabaseClient) {
+        supabaseClient = window.supabase.createClient(
+          SUPABASE_URL,
+          SUPABASE_ANON_KEY
+        );
       }
-    }
 
-    async function checkUserRole() {
-      try {
-        // Get user email from localStorage
-        const userEmail = getUserEmail();
-        
-        if (!userEmail) {
-          console.log('No user email found, loading standard browser');
-          loadBrowser('rammerhead');
-          return;
+      // Browser URLs - CORRECTED
+      const BROWSER_URLS = {
+        rammerhead: "https://browser.xorbit.org", // Rammerhead (Standard - Free)
+        orbix: "https://browse.xorbit.org", // ORBIX Browser (Premium - $2/m)
+      };
+
+      // Global variable to store user role
+      let userRole = "standard";
+
+      // Function to get user email from auth session or remembered user
+      function getUserEmail() {
+        try {
+          // Try to get from auth session first
+          const authSession =
+            localStorage.getItem("xorbit_auth_session") ||
+            sessionStorage.getItem("xorbit_auth_session");
+
+          if (authSession) {
+            const session = JSON.parse(authSession);
+            console.log("Found auth session email:", session.email);
+            return session.email;
+          }
+
+          // Fallback to remembered user
+          const rememberedUser = localStorage.getItem("xorbit_remembered_user");
+          if (rememberedUser) {
+            const user = JSON.parse(rememberedUser);
+            console.log("Found remembered user email:", user.email);
+            return user.email;
+          }
+
+          console.log("No user email found");
+          return null;
+        } catch (error) {
+          console.error("Error getting user email:", error);
+          return null;
         }
+      }
 
-        console.log('Checking role for user:', userEmail);
+      async function checkUserRole() {
+        try {
+          // Get user email from localStorage
+          const userEmail = getUserEmail();
 
-        // Query the clients table to get role using the email
-        const { data: clientData, error: dbError } = await supabaseClient
-          .from('clients')
-          .select('role, blocked')
-          .eq('email', userEmail)
-          .single();
-
-        if (dbError) {
-          console.error('Database error:', dbError);
-          // If user not found in clients table, default to standard browser
-          if (dbError.code === 'PGRST116') {
-            console.log('User not found in clients table, loading standard browser');
-            loadBrowser('rammerhead');
+          if (!userEmail) {
+            console.log("No user email found, defaulting to standard");
+            userRole = "standard";
+            showPlanBadge("standard");
             return;
           }
-          // For other errors, still load standard browser
-          loadBrowser('rammerhead');
-          return;
-        }
 
-        // Check if user is blocked
-        if (clientData && clientData.blocked === true) {
-          showError('Your account has been blocked. Please contact support.');
-          return;
-        }
+          console.log("Checking role for user:", userEmail);
 
-        // Check if user has premium role
-        console.log('User role:', clientData?.role);
-        if (clientData && clientData.role === 'premium') {
-          // Show browser selection modal
-          showBrowserModal();
-        } else {
-          // Load standard Rammerhead browser
-          loadBrowser('rammerhead');
-        }
+          // Query the clients table to get role using the email
+          const { data: clientData, error: dbError } = await supabaseClient
+            .from("clients")
+            .select("role, blocked")
+            .eq("email", userEmail)
+            .single();
 
-      } catch (error) {
-        console.error('Error checking user role:', error);
-        // Default to standard browser on error
-        loadBrowser('rammerhead');
+          if (dbError) {
+            console.error("Database error:", dbError);
+            // If user not found in clients table, default to standard
+            if (dbError.code === "PGRST116") {
+              console.log(
+                "User not found in clients table, defaulting to standard"
+              );
+              userRole = "standard";
+              showPlanBadge("standard");
+              return;
+            }
+            // For other errors, still default to standard
+            userRole = "standard";
+            showPlanBadge("standard");
+            return;
+          }
+
+          // Check if user is blocked
+          if (clientData && clientData.blocked === true) {
+            showError("Your account has been blocked. Please contact support.");
+            return;
+          }
+
+          // Set user role
+          console.log("User role:", clientData?.role);
+          if (clientData && clientData.role === "premium") {
+            userRole = "premium";
+            showPlanBadge("premium");
+          } else {
+            userRole = "standard";
+            showPlanBadge("standard");
+          }
+        } catch (error) {
+          console.error("Error checking user role:", error);
+          // Default to standard on error
+          userRole = "standard";
+          showPlanBadge("standard");
+        }
       }
-    }
 
-    function showBrowserModal() {
-      document.getElementById('loadingText').style.display = 'none';
-      document.getElementById('browserModal').classList.add('active');
-    }
+      function showPlanBadge(plan) {
+        const standardBadge = document.getElementById("standardPlanBadge");
+        const premiumBadge = document.getElementById("premiumPlanBadge");
 
-    function selectBrowser(browserType) {
-      document.getElementById('browserModal').classList.remove('active');
-      loadBrowser(browserType);
-    }
+        if (plan === "premium") {
+          standardBadge.style.display = "none";
+          premiumBadge.style.display = "block";
+        } else {
+          standardBadge.style.display = "block";
+          premiumBadge.style.display = "none";
+        }
+      }
 
-    function loadBrowser(browserType) {
-      const iframe = document.getElementById('browserFrame');
-      const loadingText = document.getElementById('loadingText');
-      
-      console.log('Loading browser:', browserType, 'URL:', BROWSER_URLS[browserType]);
-      iframe.src = BROWSER_URLS[browserType];
-      iframe.style.display = 'block';
-      loadingText.style.display = 'none';
-    }
+      function selectBrowser(browserType) {
+        console.log("Browser selected:", browserType, "User role:", userRole);
 
-    function showError(message) {
-      const errorDiv = document.getElementById('errorMessage');
-      const loadingText = document.getElementById('loadingText');
-      const modal = document.getElementById('browserModal');
-      
-      errorDiv.textContent = message;
-      errorDiv.style.display = 'block';
-      loadingText.style.display = 'none';
-      modal.classList.add('active');
-    }
+        // If user selects ORBIX but doesn't have premium, show upgrade modal
+        if (browserType === "orbix" && userRole !== "premium") {
+          showUpgradeModal();
+          return;
+        }
 
-    // Check user role on page load
-    window.addEventListener('DOMContentLoaded', checkUserRole);
-  </script>
-</body>
+        // Otherwise load the browser
+        loadBrowser(browserType);
+      }
+
+      function showUpgradeModal() {
+        document.getElementById("upgradeOverlay").classList.add("active");
+      }
+
+      function closeUpgradeModal() {
+        document.getElementById("upgradeOverlay").classList.remove("active");
+      }
+
+      function loadBrowser(browserType) {
+        const browserModal = document.getElementById("browserModal");
+        const iframeContainer = document.querySelector(".iframe-container");
+        const iframe = document.getElementById("browserFrame");
+        const loadingText = document.getElementById("loadingText");
+
+        console.log(
+          "Loading browser:",
+          browserType,
+          "URL:",
+          BROWSER_URLS[browserType]
+        );
+
+        // Hide browser selection modal
+        browserModal.classList.remove("active");
+
+        // Show iframe container
+        iframeContainer.style.display = "flex";
+
+        // Load the browser
+        iframe.src = BROWSER_URLS[browserType];
+        iframe.style.display = "block";
+        loadingText.style.display = "none";
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorMessage");
+
+        errorDiv.textContent = message;
+        errorDiv.style.display = "block";
+      }
+
+      // Check user role on page load
+      window.addEventListener("DOMContentLoaded", async () => {
+        // Wait for Supabase to load if not already loaded
+        if (!supabaseClient) {
+          let attempts = 0;
+          while (!window.supabase && attempts < 10) {
+            await new Promise((resolve) => setTimeout(resolve, 100));
+            attempts++;
+          }
+
+          if (window.supabase) {
+            supabaseClient = window.supabase.createClient(
+              SUPABASE_URL,
+              SUPABASE_ANON_KEY
+            );
+          }
+        }
+
+        await checkUserRole();
+      });
+    </script>
+  </body>
 </html>

@@ -154,6 +154,18 @@
       color: #fff;
       font-size: 18px;
     }
+    
+    /* Error message styling */
+    .error-message {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 10px;
+      padding: 15px;
+      margin-top: 20px;
+      color: #ef4444;
+      font-size: 14px;
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -178,6 +190,7 @@
           <span class="premium-badge">PREMIUM - $2/m</span>
         </div>
       </div>
+      <div class="error-message" id="errorMessage"></div>
     </div>
   </div>
 
@@ -189,16 +202,15 @@
 
   <script>
     // Initialize Supabase client
-    // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
     const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    // Browser URLs
+    // Browser URLs - CORRECTED
     const BROWSER_URLS = {
-      rammerhead: 'https://browser.xorbit.org',
-      orbix: 'https://browse.xorbit.org'
+      rammerhead: 'https://browser.xorbit.org',  // Rammerhead (Standard - Free)
+      orbix: 'https://browse.xorbit.org'         // ORBIX Browser (Premium - $2/m)
     };
 
     async function checkUserRole() {
@@ -215,22 +227,36 @@
 
         // Get user's email
         const userEmail = user.email;
+        console.log('Checking role for user:', userEmail);
 
         // Query the clients table to get role
         const { data: clientData, error: dbError } = await supabase
           .from('clients')
-          .select('role')
+          .select('role, blocked')
           .eq('email', userEmail)
           .single();
 
         if (dbError) {
           console.error('Database error:', dbError);
-          // Default to standard browser if error
+          // If user not found in clients table, default to standard browser
+          if (dbError.code === 'PGRST116') {
+            console.log('User not found in clients table, loading standard browser');
+            loadBrowser('rammerhead');
+            return;
+          }
+          // For other errors, still load standard browser
           loadBrowser('rammerhead');
           return;
         }
 
+        // Check if user is blocked
+        if (clientData && clientData.blocked === true) {
+          showError('Your account has been blocked. Please contact support.');
+          return;
+        }
+
         // Check if user has premium role
+        console.log('User role:', clientData?.role);
         if (clientData && clientData.role === 'premium') {
           // Show browser selection modal
           showBrowserModal();
@@ -260,9 +286,21 @@
       const iframe = document.getElementById('browserFrame');
       const loadingText = document.getElementById('loadingText');
       
+      console.log('Loading browser:', browserType, 'URL:', BROWSER_URLS[browserType]);
       iframe.src = BROWSER_URLS[browserType];
       iframe.style.display = 'block';
       loadingText.style.display = 'none';
+    }
+
+    function showError(message) {
+      const errorDiv = document.getElementById('errorMessage');
+      const loadingText = document.getElementById('loadingText');
+      const modal = document.getElementById('browserModal');
+      
+      errorDiv.textContent = message;
+      errorDiv.style.display = 'block';
+      loadingText.style.display = 'none';
+      modal.classList.add('active');
     }
 
     // Check user role on page load

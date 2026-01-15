@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>X-ORBIT Browser</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     /* Fullscreen page setup */
     html, body {
@@ -18,7 +19,6 @@
       display: flex;
       flex-direction: column;
     }
-
     /* Background glow layer */
     .background {
       position: fixed;
@@ -30,7 +30,6 @@
       filter: brightness(0.25) blur(8px);
       z-index: -2;
     }
-
     /* Overlay tint */
     .overlay {
       position: fixed;
@@ -41,7 +40,6 @@
       background: rgba(0, 0, 0, 0.25);
       z-index: -1;
     }
-
     /* Fullscreen iframe container */
     .iframe-container {
       flex-grow: 1;
@@ -53,25 +51,222 @@
       justify-content: center;
       align-items: center;
     }
-
     iframe {
       width: 100%;
       height: 100%;
       border: none;
-      background: transparent !important; /* if the inside page allows it */
+      background: transparent !important;
       color-scheme: light;
+    }
+
+    /* Browser Selection Modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(10px);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .modal-overlay.active {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .modal {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 600px;
+      width: 90%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .modal h2 {
+      margin: 0 0 10px 0;
+      color: #fff;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .modal p {
+      margin: 0 0 30px 0;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 14px;
+    }
+    .browser-options {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+    .browser-card {
+      flex: 1;
+      min-width: 200px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid rgba(255, 255, 255, 0.1);
+      border-radius: 15px;
+      padding: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+    .browser-card:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(74, 144, 226, 0.6);
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(74, 144, 226, 0.3);
+    }
+    .browser-card h3 {
+      margin: 0 0 10px 0;
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+    }
+    .browser-card .subtitle {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 12px;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+    .browser-card .description {
+      color: rgba(255, 255, 255, 0.5);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .premium-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      color: #fff;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-top: 10px;
+    }
+    .loading {
+      text-align: center;
+      color: #fff;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
-
   <div class="background"></div>
   <div class="overlay"></div>
 
-  <!-- Fullscreen iframe -->
-  <div class="iframe-container">
-    <iframe src="https://browse.xorbit.org"></iframe>
+  <!-- Browser Selection Modal (for premium users) -->
+  <div class="modal-overlay" id="browserModal">
+    <div class="modal">
+      <h2>Choose Your Browser</h2>
+      <p>Select which proxy browser you'd like to use</p>
+      <div class="browser-options">
+        <div class="browser-card" onclick="selectBrowser('rammerhead')">
+          <h3>Rammerhead</h3>
+          <div class="subtitle">Truncated & Basic</div>
+          <div class="description">Fast and reliable proxy browser with basic features. Perfect for everyday browsing.</div>
+        </div>
+        <div class="browser-card" onclick="selectBrowser('orbix')">
+          <h3>ORBIX Browser</h3>
+          <div class="subtitle">Based on Ultraviolet</div>
+          <div class="description">Advanced proxy browser with enhanced features and performance.</div>
+          <span class="premium-badge">PREMIUM - $2/m</span>
+        </div>
+      </div>
+    </div>
   </div>
 
+  <!-- Fullscreen iframe -->
+  <div class="iframe-container">
+    <div class="loading" id="loadingText">Loading...</div>
+    <iframe id="browserFrame" style="display: none;"></iframe>
+  </div>
+
+  <script>
+    // Initialize Supabase client
+    // REPLACE THESE WITH YOUR ACTUAL SUPABASE CREDENTIALS
+    const SUPABASE_URL = 'https://rujvmtvozorylfzsqppc.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY';
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Browser URLs
+    const BROWSER_URLS = {
+      rammerhead: 'https://browser.xorbit.org',
+      orbix: 'https://browse.xorbit.org'
+    };
+
+    async function checkUserRole() {
+      try {
+        // Get current user
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        
+        if (authError || !user) {
+          console.error('Auth error:', authError);
+          // Default to standard browser if not authenticated
+          loadBrowser('rammerhead');
+          return;
+        }
+
+        // Get user's email
+        const userEmail = user.email;
+
+        // Query the clients table to get role
+        const { data: clientData, error: dbError } = await supabase
+          .from('clients')
+          .select('role')
+          .eq('email', userEmail)
+          .single();
+
+        if (dbError) {
+          console.error('Database error:', dbError);
+          // Default to standard browser if error
+          loadBrowser('rammerhead');
+          return;
+        }
+
+        // Check if user has premium role
+        if (clientData && clientData.role === 'premium') {
+          // Show browser selection modal
+          showBrowserModal();
+        } else {
+          // Load standard Rammerhead browser
+          loadBrowser('rammerhead');
+        }
+
+      } catch (error) {
+        console.error('Error checking user role:', error);
+        // Default to standard browser on error
+        loadBrowser('rammerhead');
+      }
+    }
+
+    function showBrowserModal() {
+      document.getElementById('loadingText').style.display = 'none';
+      document.getElementById('browserModal').classList.add('active');
+    }
+
+    function selectBrowser(browserType) {
+      document.getElementById('browserModal').classList.remove('active');
+      loadBrowser(browserType);
+    }
+
+    function loadBrowser(browserType) {
+      const iframe = document.getElementById('browserFrame');
+      const loadingText = document.getElementById('loadingText');
+      
+      iframe.src = BROWSER_URLS[browserType];
+      iframe.style.display = 'block';
+      loadingText.style.display = 'none';
+    }
+
+    // Check user role on page load
+    window.addEventListener('DOMContentLoaded', checkUserRole);
+  </script>
 </body>
 </html>

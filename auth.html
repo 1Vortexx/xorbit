@@ -1941,7 +1941,7 @@ function clearRememberedUser() {
 async function initSupabase() {
     console.log('📡 Loading Supabase client...');
     try {
-        // Give the script time to load
+        
         let attempts = 0;
         while (!window.supabase && attempts < 10) {
             await new Promise(resolve => setTimeout(resolve, 100));
@@ -1956,7 +1956,7 @@ async function initSupabase() {
         const SUPABASE_URL = "https://rujvmtvozorylfzsqppc.supabase.co";
         const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
         
-        // FIXED: Changed from 'supabase' to 'supabaseClient'
+        
         supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         
         console.log('✅ Supabase client initialized successfully');

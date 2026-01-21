@@ -6767,10 +6767,8 @@ function logout() {
 function enhanceSettingsWithUpdateChecker(settingsContent) {
   if (!settingsContent) return;
   
-  // Add update handlers
   setupUpdateHandlers(settingsContent);
   
-  // Start update check when System section is activated
   const systemNavItem = settingsContent.querySelector('[data-section="system"]');
   if (systemNavItem) {
     systemNavItem.addEventListener('click', function() {
@@ -6780,13 +6778,13 @@ function enhanceSettingsWithUpdateChecker(settingsContent) {
     });
   }
   
-  // Check for updates on settings open if System section is active
   const systemSection = settingsContent.querySelector('#system-section');
   if (systemSection && systemSection.classList.contains('active')) {
     setTimeout(() => {
       checkForSystemUpdates();
     }, 500);
   }
+} // ADD THIS CLOSING BRACE
 </script>
 </body>
 </html>

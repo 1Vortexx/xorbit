@@ -5,6 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>X-ORBIT Music Player</title>
     <style>
+        /* Font Awesome Icons - Minimal */
+        @font-face {
+            font-family: 'Font Awesome 6 Free';
+            font-style: normal;
+            font-weight: 900;
+            font-display: block;
+            src: url(https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/webfonts/fa-solid-900.woff2) format('woff2');
+        }
+
+        .fas {
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            font-style: normal;
+            font-variant: normal;
+            text-rendering: auto;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .fa-search:before { content: "\f002"; }
+        .fa-heart:before { content: "\f004"; }
+        .fa-list:before { content: "\f03a"; }
+        .fa-step-backward:before { content: "\f048"; }
+        .fa-play:before { content: "\f04b"; }
+        .fa-pause:before { content: "\f04c"; }
+        .fa-step-forward:before { content: "\f051"; }
+        .fa-volume-up:before { content: "\f028"; }
+        .fa-repeat:before { content: "\f01e"; }
+        .fa-repeat-1:before { content: "\f366"; }
+        .fa-shuffle:before { content: "\f074"; }
+    </style>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -406,22 +437,6 @@
             transform: scale(1.1);
         }
 
-        .control-btn i {
-            font-style: normal;
-        }
-
-        .fa-shuffle::before { content: "🔀"; }
-        .fa-step-backward::before { content: "⏮"; }
-        .fa-play::before { content: "▶"; }
-        .fa-pause::before { content: "⏸"; }
-        .fa-step-forward::before { content: "⏭"; }
-        .fa-repeat::before { content: "🔁"; }
-        .fa-repeat-1::before { content: "🔂"; }
-        .fa-volume-up::before { content: "🔊"; }
-        .fa-search::before { content: "🔍"; }
-        .fa-heart::before { content: "❤"; }
-        .fa-list::before { content: "📋"; }
-
         .control-btn.active {
             color: #1db954;
         }
@@ -672,6 +687,7 @@
         let shuffleState = false;
         let repeatState = 0; // 0 = off, 1 = context, 2 = track
         let pollInterval = null;
+        let currentContext = null; // Store current playlist/album context
 
         // Login function with QR code
         async function login() {
@@ -821,6 +837,15 @@
             // Player state changed
             player.addListener('player_state_changed', state => {
                 if (!state) return;
+
+                console.log('Player state:', {
+                    paused: state.paused,
+                    position: state.position,
+                    duration: state.duration,
+                    context: state.context,
+                    shuffle: state.shuffle,
+                    repeat_mode: state.repeat_mode
+                });
 
                 currentTrack = state.track_window.current_track;
                 updateNowPlaying(currentTrack);
@@ -1290,21 +1315,35 @@
         }
 
         // Play track in context (for playlists)
-        function playTrackInContext(uri, contextUri) {
-            fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${accessToken}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    context_uri: contextUri,
-                    offset: { uri: uri }
-                })
-            })
-            .catch(error => {
+        async function playTrackInContext(uri, contextUri) {
+            console.log('Playing in context:', contextUri, 'starting at:', uri);
+            currentContext = contextUri;
+            
+            try {
+                const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        context_uri: contextUri,
+                        offset: { uri: uri }
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    console.error('Playback error response:', error);
+                    
+                    // If context playback fails, try just the track URI
+                    if (error.error && error.error.reason === 'NO_ACTIVE_DEVICE') {
+                        alert('Please make sure the player is ready and try again.');
+                    }
+                }
+            } catch (error) {
                 console.error('Playback error:', error);
-            });
+            }
         }
     </script>
 </body>

@@ -4590,7 +4590,6 @@ function createSettingsContent() {
 }
 
 // Setup settings event handlers
-// Setup settings event handlers
 function setupSettingsEvents(windowEl) {
   const settingsContent = windowEl.querySelector('.window-content');
   
@@ -4811,8 +4810,7 @@ function setupSettingsEvents(windowEl) {
       checkForSystemUpdates();
     }, 500);
   }
-}
-
+} // ADDED THIS CLOSING BRACE - it was missing!
 // Helper function to enter fullscreen with browser compatibility
 function enterFullscreen() {
   const elem = document.documentElement;

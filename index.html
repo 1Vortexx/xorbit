@@ -1836,6 +1836,11 @@ body.light-mode .desktop-update-badge {
   background: linear-gradient(135deg, rgba(255, 87, 87, 0.98) 0%, rgba(255, 107, 107, 0.98) 100%);
   border: 1px solid rgba(255, 87, 87, 0.6);
 }
+  .window.minimized {
+  visibility: hidden;
+  pointer-events: none;
+  /* Keep window in DOM but invisible */
+}
   </style>
 </head>
 <body>
@@ -2076,10 +2081,10 @@ body.light-mode .desktop-update-badge {
       <i class="fas fa-terminal"></i>
       <span>Terminal</span>
     </div>
-    <div class="desktop-icon" data-app="Solaris Browser" data-src="solaris.html" data-icon="fas fa-rocket">
-      <i class="fas fa-rocket"></i>
-      <span>Solaris</span>
-    </div>
+    <div class="desktop-icon" data-app="X-MUSIC" data-src="spotify-player.html" data-icon="fas fa-music">
+  <i class="fas fa-music"></i>
+  <span>X-MUSIC</span>
+</div>
   </div>
 </div>
 <!-- Update Notification Badge - Desktop Corner -->
@@ -3427,10 +3432,13 @@ function setupWindowEvents(windowEl, windowId, title) {
   }
   
   if (minBtn) {
-    minBtn.onclick = function() {
-      windowEl.style.display = 'none';
-    };
-  }
+  minBtn.onclick = function() {
+    // Hide window but keep it in DOM for background playback
+    windowEl.classList.add('minimized');
+    windowEl.style.visibility = 'hidden';
+    windowEl.style.pointerEvents = 'none';
+  };
+}
   
   if (maxBtn) {
     maxBtn.onclick = function() {
@@ -3523,7 +3531,6 @@ function focusWindow(windowId) {
   }
 }
 
-// Click event handlers
 document.addEventListener('click', function(e) {
   const dockItem = e.target.closest('.dock-item');
   const desktopIcon = e.target.closest('.desktop-icon');
@@ -3536,6 +3543,19 @@ document.addEventListener('click', function(e) {
     if (title === 'Settings') {
       openSettingsWindow();
     } else {
+      // Check if window exists and is minimized
+      const existingWindowId = activeWindows.get(title);
+      if (existingWindowId) {
+        const existingWindow = document.getElementById(existingWindowId);
+        if (existingWindow && existingWindow.classList.contains('minimized')) {
+          // Restore minimized window
+          existingWindow.classList.remove('minimized');
+          existingWindow.style.visibility = 'visible';
+          existingWindow.style.pointerEvents = 'auto';
+          focusWindow(existingWindowId);
+          return;
+        }
+      }
       openWindow(title, src, icon);
     }
   }
@@ -3548,9 +3568,23 @@ document.addEventListener('click', function(e) {
     if (title === 'Settings') {
       openSettingsWindow();
     } else {
+      // Check if window exists and is minimized
+      const existingWindowId = activeWindows.get(title);
+      if (existingWindowId) {
+        const existingWindow = document.getElementById(existingWindowId);
+        if (existingWindow && existingWindow.classList.contains('minimized')) {
+          // Restore minimized window
+          existingWindow.classList.remove('minimized');
+          existingWindow.style.visibility = 'visible';
+          existingWindow.style.pointerEvents = 'auto';
+          focusWindow(existingWindowId);
+          return;
+        }
+      }
       openWindow(title, src, icon);
     }
   }
+});
 });
 function openSettingsWindow() {
   if (!isAuthenticated) return;

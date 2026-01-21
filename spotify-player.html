@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>X-ORBIT Music Player</title>
+    <title>X-MUSIC</title>
     <style>
         /* Font Awesome Icons - Minimal */
         @font-face {
@@ -536,8 +536,8 @@
     <!-- Login Screen -->
     <div class="login-screen" id="loginScreen">
         <div class="login-container">
-            <h1>🎵 X-ORBIT Music</h1>
-            <p>Powered by Spotify • Premium Required</p>
+            <h1>X-MUSIC</h1>
+            <p>Powered By Spotify SDK.</p>
             
             <div id="qrSection" style="display: none;">
                 <div class="qr-container">
@@ -552,7 +552,7 @@
                         <li>Log in and authorize</li>
                     </ol>
                 </div>
-                <div class="loading-text">⏳ Waiting for authorization...</div>
+                <div class="loading-text">Waiting for authorization...</div>
             </div>
             
             <button class="login-btn" id="loginBtn" onclick="login()">Show QR Code</button>
@@ -563,7 +563,7 @@
     <div class="player-container" id="playerContainer">
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="sidebar-logo">🎵 X-ORBIT Music</div>
+            <div class="sidebar-logo">X-MUSIC</div>
             
             <div class="nav-menu">
                 <div class="nav-item active" onclick="showView('search')">
@@ -800,7 +800,7 @@
 
             // Initialize player
             player = new Spotify.Player({
-                name: 'X-ORBIT Music Player',
+                name: 'X-MUSIC',
                 getOAuthToken: cb => { cb(accessToken); },
                 volume: 0.5
             });

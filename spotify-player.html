@@ -844,12 +844,22 @@
                     duration: state.duration,
                     context: state.context,
                     shuffle: state.shuffle,
-                    repeat_mode: state.repeat_mode
+                    repeat_mode: state.repeat_mode,
+                    track_window: {
+                        current_track: state.track_window.current_track.name,
+                        previous_tracks: state.track_window.previous_tracks.length,
+                        next_tracks: state.track_window.next_tracks.length
+                    }
                 });
 
                 currentTrack = state.track_window.current_track;
                 updateNowPlaying(currentTrack);
                 updatePlayerControls(state);
+
+                // Check if track ended and there are no next tracks (means queue ended)
+                if (state.paused && state.position === 0 && state.track_window.next_tracks.length === 0) {
+                    console.warn('Track ended, no next tracks in queue');
+                }
             });
 
             // Connect to player
@@ -955,19 +965,29 @@
             }
         }
 
-        // Previous track
+        // Previous track - use Web API instead of SDK
         async function previousTrack() {
             try {
-                await player.previousTrack();
+                await fetch(`https://api.spotify.com/v1/me/player/previous?device_id=${deviceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
             } catch (error) {
                 console.error('Previous track error:', error);
             }
         }
 
-        // Next track
+        // Next track - use Web API instead of SDK
         async function nextTrack() {
             try {
-                await player.nextTrack();
+                await fetch(`https://api.spotify.com/v1/me/player/next?device_id=${deviceId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
             } catch (error) {
                 console.error('Next track error:', error);
             }
@@ -1030,17 +1050,31 @@
             }
         }
 
-        // Seek track
-        function seekTrack(event) {
-            player.getCurrentState().then(state => {
-                if (!state) return;
+        // Seek track - use Web API instead of SDK
+        async function seekTrack(event) {
+            try {
+                const state = await player.getCurrentState();
+                if (!state) {
+                    console.error('No active playback');
+                    return;
+                }
 
                 const rect = event.currentTarget.getBoundingClientRect();
                 const percent = (event.clientX - rect.left) / rect.width;
                 const position = Math.floor(percent * state.duration);
                 
-                player.seek(position);
-            });
+                console.log('Seeking to position:', position, 'ms');
+                
+                // Use Web API for seeking
+                await fetch(`https://api.spotify.com/v1/me/player/seek?position_ms=${position}&device_id=${deviceId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${accessToken}`
+                    }
+                });
+            } catch (error) {
+                console.error('Seek error:', error);
+            }
         }
 
         // Volume control
@@ -1089,10 +1123,13 @@
             document.getElementById('nowPlayingSection').style.display = 'none';
             document.getElementById('searchResults').style.display = 'block';
 
+            // Extract all track URIs for queuing
+            const allTrackUris = tracks.map(track => track.uri);
+
             tracks.forEach(track => {
                 const trackItem = document.createElement('div');
                 trackItem.className = 'track-item';
-                trackItem.onclick = () => playTrack(track.uri);
+                trackItem.onclick = () => playTrack(track.uri, allTrackUris);
 
                 trackItem.innerHTML = `
                     <img src="${track.album.images[2]?.url || track.album.images[0]?.url}" class="track-album-art">
@@ -1108,17 +1145,31 @@
         }
 
         // Play track
-        async function playTrack(uri) {
+        async function playTrack(uri, allTrackUris = null) {
             try {
+                const playbackOptions = {
+                    device_id: deviceId
+                };
+
+                // If we have multiple tracks, queue them all
+                if (allTrackUris && allTrackUris.length > 1) {
+                    const trackIndex = allTrackUris.indexOf(uri);
+                    // Play from this track onwards
+                    playbackOptions.uris = allTrackUris.slice(trackIndex);
+                    console.log('Playing queue of', playbackOptions.uris.length, 'tracks starting from index', trackIndex);
+                } else {
+                    // Single track
+                    playbackOptions.uris = [uri];
+                    console.log('Playing single track:', uri);
+                }
+
                 await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
                     method: 'PUT',
                     headers: {
                         'Authorization': `Bearer ${accessToken}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        uris: [uri]
-                    })
+                    body: JSON.stringify(playbackOptions)
                 });
                 
                 // Show now playing after a brief delay (only for search view)
@@ -1192,11 +1243,14 @@
                     return;
                 }
 
-                data.items.forEach(item => {
+                // Extract all track URIs for queuing
+                const allTrackUris = data.items.map(item => item.track.uri);
+
+                data.items.forEach((item, index) => {
                     const track = item.track;
                     const trackItem = document.createElement('div');
                     trackItem.className = 'track-item';
-                    trackItem.onclick = () => playTrack(track.uri);
+                    trackItem.onclick = () => playTrack(track.uri, allTrackUris);
 
                     trackItem.innerHTML = `
                         <img src="${track.album.images[2]?.url || track.album.images[0]?.url}" class="track-album-art">

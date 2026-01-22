@@ -688,6 +688,7 @@
         let repeatState = 0; // 0 = off, 1 = context, 2 = track
         let pollInterval = null;
         let currentContext = null; // Store current playlist/album context
+        let sdkReady = false; // Track if SDK is loaded
 
         // Login function with QR code
         async function login() {
@@ -756,9 +757,15 @@
                             localStorage.setItem('spotify_refresh_token', data.refreshToken);
                         }
 
-                        // Initialize player
+                        // Set the global accessToken
                         accessToken = data.accessToken;
-                        initializePlayer();
+                        
+                        // Only initialize if SDK is ready
+                        if (sdkReady) {
+                            initializePlayer();
+                        } else {
+                            console.log('Token received, waiting for Spotify SDK to load...');
+                        }
                     }
                 } catch (error) {
                     console.error('Polling error:', error);
@@ -781,8 +788,35 @@
             return localStorage.getItem('spotify_access_token');
         }
 
+        // SDK Ready callback
+        window.onSpotifyWebPlaybackSDKReady = () => {
+            console.log('Spotify SDK Ready');
+            sdkReady = true;
+            
+            // Check if we already have a token (from polling or localStorage)
+            accessToken = getAccessToken();
+            
+            if (accessToken) {
+                // SDK is ready AND we have a token - initialize now
+                initializePlayer();
+            }
+            // If no token yet, initializePlayer() will be called from polling success
+        };
+
         // Initialize player
         function initializePlayer() {
+            console.log('Initializing player with token:', accessToken ? 'present' : 'missing');
+            
+            if (!accessToken) {
+                console.error('Cannot initialize player: no access token');
+                return;
+            }
+
+            if (!sdkReady) {
+                console.error('Cannot initialize player: SDK not ready');
+                return;
+            }
+
             // Show player
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('playerContainer').style.display = 'flex';
@@ -796,6 +830,9 @@
             .then(response => response.json())
             .then(data => {
                 document.getElementById('userName').textContent = data.display_name;
+            })
+            .catch(error => {
+                console.error('Error fetching user info:', error);
             });
 
             // Initialize player
@@ -868,18 +905,6 @@
             // Add progress bar click listener
             document.getElementById('progressBar').addEventListener('click', seekTrack);
         }
-
-        // Check for existing token on page load
-        window.onSpotifyWebPlaybackSDKReady = () => {
-            accessToken = getAccessToken();
-
-            if (!accessToken) {
-                document.getElementById('loginScreen').style.display = 'flex';
-                return;
-            }
-
-            initializePlayer();
-        };
 
         // Update now playing display
         function updateNowPlaying(track) {

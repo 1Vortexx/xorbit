@@ -293,21 +293,63 @@ body {
         <p>Nearly two years of continuous development and innovation</p>
     </div>
 
-    <!-- Version 4.5.0 - NEW CURRENT -->
-    <div class="version-section">
+
+     <div class="version-section">
         <div class="version-header">
             <div class="version-info">
-                <div class="version-number">Version 4.5.0 <span class="version-badge badge-current">Current</span></div>
-                <div class="version-name">"Nexus"</div>
-                <div class="version-date">October 29, 2025</div>
+                <div class="version-number">Version v4.6.1 <span class="version-badge badge-current">Current</span></div>
+                <div class="version-name">"Astra"</div>
+                <div class="version-date">Janurary 21, 2026</div>
             </div>
         </div>
         
         <div class="changes-section">
             <h3 class="changes-title added">Added</h3>
             <ul class="changes-list">
-                <li class="feature-highlight"><strong>Dynamic Loading & Visuals:</strong> Added a responsive loading screen to the launch of X-ORBIT to render components in the background without slowing down the desktop environment</li>
-                <li class="feature-highlight"><strong>Advanced Theme System:</strong> Added a limited Halloween 2025 Theme to X-ORBIT for 2025 Halloween, along with custom backgrounds for Dark & Light Mode Themes</li>
+                <li class="feature-highlight"><strong>X-MUSIC:</strong> Added a music player powered by the Spotify SDK API for direct streaming of spotify directly on X-ORBIT</li>
+                <li>Added support for newest Supabase Service & Pushable API Keys to prepare to depricate anon & service role keys</li>
+                <li>Added PM2 backend support for Ultraviolet & Spotify SDK on X-ORBIT backend</li>
+                <li>Added VPN tunneling via Wireguard for Ultraviolet Proxy sessions</li>
+                <li>Added support for QRServer to generate QR login for X-MUSIC</li>
+                <li>Added WireGuard VPN tunneling for entire X-ORBIT environment for paid users</li>
+            </ul>
+        </div>
+
+        <div class="changes-section">
+            <h3 class="changes-title changed">Changed</h3>
+            <ul class="changes-list">
+                <li>Changed to service & pushable keys via Supabase depricating anon & service role keys</li>
+                <li>Improved authentication flow with better error handling</li>
+                <li>Removed depricated Ultraviolet dependencies</li>
+                <li>UI Improvements</li>
+            </ul>
+        </div>
+
+        <div class="changes-section">
+            <h3 class="changes-title fixed">Fixed</h3>
+            <ul class="changes-list">
+                <li>UI refusing to hide</li>
+                <li>Form validation not triggering for Ultraviolet search querys</li>
+                <li>Auto-fill causing styling inconsistencies</li>
+                <li>Login state not persisting across tabs</li>
+                <li>loacalstorage causing memory leaks across browser tabs</li>
+            </ul>
+        </div>
+    </div>
+    
+    <div class="version-section">
+        <div class="version-header">
+            <div class="version-info">
+                <div class="version-number">Version 4.5.0 <span class="version-badge badge-major">Major Update</span></div>
+                <div class="version-date">Janurary 6, 2026</div>
+            </div>
+        </div>
+        
+        <div class="changes-section">
+            <h3 class="changes-title added">Added</h3>
+            <ul class="changes-list">
+                <li class="feature-highlight"><strong>UltraViolet Web Proxy:</strong> Added a premium paid proxy called UltraViolet to replace Rammerhead. This proxy is based via Docker & Git to deliver a seamless experience.</li>
+                <li class="feature-highlight"><strong>Premium Subscriptions:</strong> Added a premium tier for X-ORBIT (Removes login limit, adds a new paid browser, and uses newer websockets)</li>
                 <li class="feature-highlight"><strong>Dynamic Grid System:</strong> Revolutionary CSS Grid-based layout with fluid 12-column responsive design, intelligent breakpoints, and automatic gap management</li>
                 <li class="feature-highlight"><strong>Real-time Theme Customization:</strong> Complete design token system with 50+ customizable properties including colors, spacing, typography, shadows, and border radius controls with instant preview</li>
                 <li class="feature-highlight"><strong>Real-time Collaboration:</strong> Multi-user editing with live cursors, presence indicators, conflict resolution, and synchronized state management using WebSocket connections</li>

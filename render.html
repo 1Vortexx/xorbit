@@ -3,17 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Welcome - X-ORBIT</title>
+  <title>Welcome - X-ORBIT Desktop</title>
   <script src="audioStop.js"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
-
-
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    
     *, *::before, *::after {
       box-sizing: border-box;
     }
-
+    
     html, body {
       height: 100%;
       margin: 0;
@@ -22,16 +21,16 @@
       background-size: cover;
       overflow: hidden;
     }
-
+    
     body::before {
       content: "";
       position: fixed;
       inset: 0;
-      background: rgba(28, 53, 205, 0.6);
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.8));
       backdrop-filter: blur(12px);
       z-index: 0;
     }
-
+    
     .container {
       position: relative;
       z-index: 1;
@@ -42,94 +41,214 @@
       align-items: center;
       padding: 30px;
     }
-
+    
     .glass-panel {
       background: rgba(255, 255, 255, 0.08);
-      border-radius: 18px;
-      padding: 40px 30px;
-      max-width: 600px;
+      border-radius: 20px;
+      padding: 45px 35px;
+      max-width: 650px;
       width: 100%;
       backdrop-filter: blur(20px) saturate(160%);
-      box-shadow: 0 0 24px rgba(156, 38, 217, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 
+        0 0 30px rgba(59, 130, 246, 0.3),
+        0 8px 32px rgba(0, 0, 0, 0.12);
       text-align: center;
-      color: #c3bdf9;
+      color: #e2e8f0;
       animation: fadeIn 1.5s ease;
       display: flex;
       flex-direction: column;
-      gap: 20px; 
+      gap: 25px; 
     }
-
+    
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 20px;
-      text-shadow: 0 0 12px rgba(156, 38, 217, 0.8);
+    
+    .orbit-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 10px;
     }
-
+    
+    .orbit-icon {
+      font-size: 2.5rem;
+      color: #3b82f6;
+      animation: rotate 8s linear infinite;
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    h1 {
+      font-size: 2.2rem;
+      margin: 0;
+      font-weight: 700;
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    }
+    
     .instructions {
       font-size: 1.1rem;
-      line-height: 1.6;
-      color: #a0a0ff;
-      text-shadow: 0 0 4px rgba(0,0,0,0.4);
+      line-height: 1.7;
+      color: #cbd5e1;
       text-align: left;
     }
-
-    .instructions i {
-      color: #d4bfff;
-      margin-right: 8px;
+    
+    .instruction-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 15px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      border-left: 3px solid #3b82f6;
     }
-
+    
+    .instruction-item:last-child {
+      margin-bottom: 0;
+    }
+    
+    .instruction-item i {
+      color: #3b82f6;
+      font-size: 1.2rem;
+      margin-top: 2px;
+      min-width: 20px;
+    }
+    
     .alert-modal {
-      background: rgba(255, 0, 0, 0.15);
-      border-left: 6px solid #ff1a1a;
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-left: 4px solid #ef4444;
       border-radius: 12px;
-      padding: 15px 15px;
+      padding: 18px 20px;
       width: 100%;
-      color: #ff4d4d;
-      font-weight: 700;
+      color: #fca5a5;
+      font-weight: 600;
       font-size: 1rem;
       text-align: center;
-      box-shadow: 0 0 15px rgba(255,50,50,0.6), 0 0 30px rgba(255,80,80,0.4);
+      box-shadow: 
+        0 0 20px rgba(239, 68, 68, 0.3),
+        0 4px 16px rgba(0, 0, 0, 0.1);
       backdrop-filter: blur(10px);
-      animation: pulseAlert 1.2s infinite alternate;
+      animation: pulseAlert 2s ease-in-out infinite alternate;
     }
-
+    
     .alert-modal i {
-      margin-right: 8px;
+      margin-right: 10px;
+      color: #f87171;
+      font-size: 1.1rem;
     }
-
+    
     @keyframes pulseAlert {
-      0% { box-shadow: 0 0 15px rgba(255,50,50,0.6), 0 0 30px rgba(255,80,80,0.4); }
-      50% { box-shadow: 0 0 25px rgba(255,50,50,0.8), 0 0 50px rgba(255,80,80,0.6); }
-      100% { box-shadow: 0 0 15px rgba(255,50,50,0.6), 0 0 30px rgba(255,80,80,0.4); }
+      0% { 
+        box-shadow: 0 0 20px rgba(239, 68, 68, 0.3), 0 4px 16px rgba(0, 0, 0, 0.1);
+        transform: scale(1);
+      }
+      100% { 
+        box-shadow: 0 0 30px rgba(239, 68, 68, 0.5), 0 6px 24px rgba(0, 0, 0, 0.15);
+        transform: scale(1.02);
+      }
     }
-
+    
+    .version-info {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      color: #94a3b8;
+      backdrop-filter: blur(10px);
+    }
+    
     @media (max-width: 600px) {
-      .glass-panel { padding: 30px 20px; }
-      h1 { font-size: 1.6rem; }
-      .instructions { font-size: 1rem; }
-      .alert-modal { font-size: 0.9rem; padding: 12px 10px; }
+      .glass-panel { 
+        padding: 30px 20px; 
+        margin: 20px;
+      }
+      .orbit-logo {
+        flex-direction: column;
+        gap: 8px;
+      }
+      .orbit-icon {
+        font-size: 2rem;
+      }
+      h1 { 
+        font-size: 1.8rem; 
+      }
+      .instructions { 
+        font-size: 1rem; 
+      }
+      .alert-modal { 
+        font-size: 0.9rem; 
+        padding: 15px 18px; 
+      }
+      .version-info {
+        position: static;
+        margin-top: 20px;
+        text-align: center;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="glass-panel">
-      <h1>Welcome to the X-ORBIT Browser!</h1>
-      <div class="instructions">
-        <p><i class="fas fa-bars"></i> Use the <strong>sidebar</strong> on the left to navigate between pages.</p>
-        <p><i class="fas fa-bell"></i> View notifications by clicking the <strong>bell icon</strong>.</p>
-        <p><i class="fas fa-cog"></i> <strong>Activate your plan</strong> or view details about <strong>LumiCore Neo</strong> in <em>Build Info</em>.</p>
+      <div class="orbit-logo">
+        <i class="fas fa-globe orbit-icon"></i>
+        <div>
+          <h1>Welcome to X-ORBIT Desktop</h1>
+          <div style="font-size: 1rem; font-weight: 400; color: #94a3b8; margin-top: 5px;">Version v4.6.1 Astra</div>
+        </div>
       </div>
+      
+      <div class="instructions">
+        <div class="instruction-item">
+          <i class="fas fa-th"></i>
+          <div>Click the <strong>App Launcher</strong> in the dock to access all installed applications and tools.</div>
+        </div>
+        
+        <div class="instruction-item">
+          <i class="fas fa-circle"></i>
+          <div>Control windows using the <strong>traffic light buttons</strong> - red to close, yellow to minimize, and green to maximize.</div>
+        </div>
+        
+        <div class="instruction-item">
+          <i class="fas fa-mouse-pointer"></i>
+          <div><strong>Drag window title bars</strong> to move windows around your desktop workspace.</div>
+        </div>
+        
+        <div class="instruction-item">
+          <i class="fas fa-cog"></i>
+          <div>Open <strong>Settings</strong> to customize themes, dock position, wallpapers, and all desktop preferences.</div>
+        </div>
+        
+        <div class="instruction-item">
+          <i class="fas fa-bell"></i>
+          <div>View system notifications and alerts in the <strong>notification area</strong>.</div>
+        </div>
+      </div>
+      
       <div class="alert-modal">
         <i class="fas fa-exclamation-triangle"></i>
-        X-ORBIT is actively switching domains and some pages may & will have issues.  
-        If you receive a <strong>503</strong> or <strong>404</strong> error, do NOT panic — this is expected until further notice.
+        X-ORBIT Desktop is undergoing platform updates and some applications may experience temporary issues.  
+        If applications fail to load or display errors, please try refreshing the desktop or restarting the affected app.
       </div>
+    </div>
+    
+    <div class="version-info">
+      X-ORBIT Desktop v4.6.1 Astra Build
     </div>
   </div>
 </body>

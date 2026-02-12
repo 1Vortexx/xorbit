@@ -154,7 +154,7 @@
         background: rgba(120, 80, 255, 0.2);
       }
 
-      . {
+      .desktop {
         flex: 1;
         position: relative;
         overflow: hidden;
@@ -163,7 +163,7 @@
         height: 100vh;
       }
 
-      .-icons {
+      .desktop-icons {
         position: absolute;
         top: 20px;
         right: 20px;
@@ -173,7 +173,7 @@
         z-index: 10;
       }
 
-      .-icon {
+      .desktop-icon {
         display: flex;
         flex-direction: column;
         align-items: center;
@@ -186,24 +186,24 @@
         text-align: center;
       }
 
-      .-icon:hover {
+      .desktop-icon:hover {
         background: rgba(120, 80, 255, 0.2);
         transform: scale(1.05);
         box-shadow: 0 8px 32px rgba(120, 80, 255, 0.3);
       }
 
-      .-icon:active {
+      .desktop-icon:active {
         transform: scale(0.95);
       }
 
-      .-icon i {
+      .desktop-icon i {
         font-size: 2rem;
         color: #d0d8ff;
         filter: drop-shadow(0 2px 8px rgba(120, 80, 255, 0.3));
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       }
 
-      .-icon:hover i {
+      .desktop-icon:hover i {
         color: #ffffff;
         filter: drop-shadow(0 4px 12px rgba(120, 80, 255, 0.5));
       }

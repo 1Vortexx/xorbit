@@ -8,7 +8,6 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <!-- ADD THIS LINE: -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <style>
       @import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
@@ -1986,8 +1985,42 @@
 
       // Global state
       let rememberedUser = null;
-      let supabaseClient = null; // RENAMED FROM supabase TO supabaseClient
+      let supabaseClient = null;
       let pendingUserData = null;
+
+      // ============================================================
+      // DEVICE UUID — persists in localStorage across sessions.
+      // Generates a random 6-character alphanumeric ID on first visit.
+      // ============================================================
+      function getOrCreateDeviceUUID() {
+        const STORAGE_KEY = "xorbit_device_uuid";
+        const CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+        try {
+          let uuid = localStorage.getItem(STORAGE_KEY);
+
+          if (!uuid || uuid.length !== 6) {
+            // Generate a new 6-character alphanumeric UUID
+            uuid = Array.from({ length: 6 }, () =>
+              CHARS.charAt(Math.floor(Math.random() * CHARS.length))
+            ).join("");
+            localStorage.setItem(STORAGE_KEY, uuid);
+            console.log("🆕 Generated new device UUID:", uuid);
+          } else {
+            console.log("📱 Existing device UUID:", uuid);
+          }
+
+          return uuid;
+        } catch (error) {
+          // If localStorage is blocked (e.g. private browsing edge cases),
+          // generate an ephemeral UUID just for this session
+          console.warn("⚠️ localStorage unavailable for device UUID:", error);
+          return Array.from({ length: 6 }, () =>
+            CHARS.charAt(Math.floor(Math.random() * CHARS.length))
+          ).join("");
+        }
+      }
+      // ============================================================
 
       // Help Menu Toggle
       function toggleHelpMenu() {
@@ -2023,7 +2056,7 @@
         window.open("https://xorbit.org/support", "_blank");
       }
 
-      // Downtime Alert functions (replaces survey functions)
+      // Downtime Alert functions
       function dismissDowntimeAlert() {
         console.log("👋 Dismissing downtime notification");
         const alert = document.getElementById("solarisAlert");
@@ -2033,7 +2066,6 @@
       }
 
       function checkDowntimeAlertState() {
-        // Always show the alert (removed localStorage check)
         console.log("🔔 Showing downtime notification");
         const alert = document.getElementById("solarisAlert");
         if (alert) {
@@ -2118,7 +2150,6 @@
       async function initSupabase() {
         console.log("📡 Loading Supabase client...");
         try {
-          // Give the script time to load
           let attempts = 0;
           while (!window.supabase && attempts < 10) {
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -2134,7 +2165,6 @@
           const SUPABASE_ANON_KEY =
             "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJ1anZtdHZvem9yeWxmenNxcHBjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTc0NjQxNDEsImV4cCI6MjA3MzA0MDE0MX0.b7jJz3Se_oXXDwwd0dWQ8-rEvhY0aU4JDHQVioE39iY";
 
-          // FIXED: Changed from 'supabase' to 'supabaseClient'
           supabaseClient = window.supabase.createClient(
             SUPABASE_URL,
             SUPABASE_ANON_KEY
@@ -2367,7 +2397,6 @@
         console.log("🚀 Login function called");
 
         if (!supabaseClient) {
-          // FIXED: Changed from 'supabase' to 'supabaseClient'
           console.error("❌ Supabase not initialized");
           document.getElementById("loginStatus").innerHTML =
             "❌ System error. Please refresh the page.";
@@ -2407,8 +2436,10 @@
           '<span class="loading"></span> Authenticating...';
         loginButton.disabled = true;
 
+        // Get (or create) the device UUID for this browser
+        const deviceUUID = getOrCreateDeviceUUID();
+
         try {
-          // FIXED: Changed from 'supabase' to 'supabaseClient'
           const { data, error } = await supabaseClient
             .from("clients")
             .select("id, name, email, blocked, ban_reason, warnings")
@@ -2422,6 +2453,7 @@
             success: !!(data && !error && !data.blocked),
             attempt_timestamp: new Date().toISOString(),
             user_agent: navigator.userAgent,
+            device_uuid: deviceUUID,  // ← NEW
           };
 
           if (data && !error) {
@@ -2438,7 +2470,6 @@
           }
 
           try {
-            // FIXED: Changed from 'supabase' to 'supabaseClient'
             await supabaseClient.from("login_attempts").insert(attemptLog);
           } catch (logErr) {
             console.warn("⚠️ Error logging login attempt:", logErr);
@@ -2508,7 +2539,6 @@
         console.log("🖥️ OS login function called");
 
         if (!supabaseClient || !rememberedUser) {
-          // FIXED: Changed from 'supabase' to 'supabaseClient'
           console.error("❌ Supabase or remembered user not available");
           document.getElementById("osLoginStatus").innerHTML =
             "❌ Session expired. Please sign in again.";
@@ -2542,8 +2572,10 @@
         loginButton.innerHTML = '<span class="loading"></span> Signing in...';
         loginButton.disabled = true;
 
+        // Get (or create) the device UUID for this browser
+        const deviceUUID = getOrCreateDeviceUUID();
+
         try {
-          // FIXED: Changed from 'supabase' to 'supabaseClient'
           const { data, error } = await supabaseClient
             .from("clients")
             .select("id, name, email, blocked, ban_reason, warnings")
@@ -2559,6 +2591,7 @@
             success: !!(data && !error && !data.blocked),
             attempt_timestamp: new Date().toISOString(),
             user_agent: navigator.userAgent,
+            device_uuid: deviceUUID,  // ← NEW
           };
 
           if (data && !error) {
@@ -2575,7 +2608,6 @@
           }
 
           try {
-            // FIXED: Changed from 'supabase' to 'supabaseClient'
             await supabaseClient.from("login_attempts").insert(attemptLog);
           } catch (logErr) {
             console.warn("⚠️ Error logging OS mode login attempt:", logErr);
@@ -2663,6 +2695,9 @@
         createParticles();
         startSessionTimer();
         setupActivityListeners();
+
+        // Pre-generate device UUID on page load so it's ready when login fires
+        getOrCreateDeviceUUID();
 
         const supabaseReady = await initSupabase();
         if (!supabaseReady) {
